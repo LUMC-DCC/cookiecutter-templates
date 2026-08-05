@@ -1,0 +1,13 @@
+{
+  "language": ["python", "r"],
+  "project_name": "My Awesome Project",
+  "project_slug": "awesome_project",
+
+  "include_docs": ["yes", "no"],
+  "include_tests": ["yes", "no"],
+  "using_ci": ["yes", "no"],
+  "using_api": ["yes", "no"],
+  "using_cli": ["yes", "no"],
+
+  "license": ["none","MIT", "Apache-2.0"]
+}
