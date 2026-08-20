@@ -1,0 +1,143 @@
+"""Audit field usage statuses against Cookiecutter template references.
+
+This script does not decide whether a field is fully implemented. It only
+checks that fields referenced by templates are represented in the contract and
+are not still marked as purely planned for that template.
+"""
+
+import argparse
+import json
+import re
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_CONTRACT_PATH = ROOT / "_contracts" / "template_context.json"
+DEFAULT_USAGE_PATH = ROOT / "_contracts" / "field_usage.json"
+
+CONTENT_PATTERN = re.compile(r"cookiecutter\.([A-Za-z_][A-Za-z0-9_]*)")
+PATH_PATTERN = re.compile(r"\{\{\s*cookiecutter\.([A-Za-z_][A-Za-z0-9_]*)")
+
+REFERENCE_STATUSES = {
+    "control",
+    "implemented",
+    "partial",
+}
+
+
+def load_json(path):
+    """Load a JSON document from disk.
+
+    Parameters
+    ----------
+    path : pathlib.Path
+        Path to the JSON document.
+
+    Returns
+    -------
+    dict
+        Parsed JSON content.
+    """
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def find_template_references(template_dir):
+    """Find Cookiecutter field references in one template directory.
+
+    Parameters
+    ----------
+    template_dir : pathlib.Path
+        Root directory of a language template.
+
+    Returns
+    -------
+    dict[str, set[str]]
+        Referenced field names mapped to relative template paths.
+    """
+    references = {}
+
+    for path in template_dir.rglob("*"):
+        for field_name in PATH_PATTERN.findall(str(path.relative_to(template_dir))):
+            references.setdefault(field_name, set()).add(str(path.relative_to(template_dir)))
+
+        if not path.is_file() or path.name == "cookiecutter.json":
+            continue
+
+        try:
+            content = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+
+        for field_name in CONTENT_PATTERN.findall(content):
+            references.setdefault(field_name, set()).add(str(path.relative_to(template_dir)))
+
+    return references
+
+
+def audit_usage(contract, usage, root):
+    """Validate status declarations against template references.
+
+    Parameters
+    ----------
+    contract : dict
+        Parsed template context contract.
+    usage : dict
+        Parsed field usage map.
+    root : pathlib.Path
+        Repository root.
+
+    Returns
+    -------
+    list[str]
+        Human-readable audit errors. An empty list means the audit passed.
+    """
+    contract_fields = {field["name"] for field in contract["fields"]}
+    field_usage = {field["name"]: field for field in usage["fields"]}
+    errors = []
+
+    for template_name in usage["templates"]:
+        template_dir = root / template_name
+        if not template_dir.exists():
+            errors.append(f"Template directory does not exist: {template_name}")
+            continue
+
+        references = find_template_references(template_dir)
+        unknown_references = {
+            field_name for field_name in set(references) - contract_fields
+            if not field_name.startswith("_")
+        }
+        for field_name in sorted(unknown_references):
+            errors.append(
+                f"{template_name}: field `{field_name}` is referenced but not in the context contract"
+            )
+
+        for field_name in sorted(set(references) & contract_fields):
+            status = field_usage[field_name]["statuses"][template_name]
+            if status not in REFERENCE_STATUSES:
+                locations = ", ".join(sorted(references[field_name])[:5])
+                errors.append(
+                    f"{template_name}: field `{field_name}` is referenced in {locations} "
+                    f"but status is `{status}`"
+                )
+
+    return errors
+
+
+def main():
+    """Run the command-line interface."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT_PATH)
+    parser.add_argument("--usage", type=Path, default=DEFAULT_USAGE_PATH)
+    args = parser.parse_args()
+
+    errors = audit_usage(load_json(args.contract), load_json(args.usage), ROOT)
+    if errors:
+        for error in errors:
+            print(error)
+        raise SystemExit(1)
+
+    print("Field usage statuses match template references.")
+
+
+if __name__ == "__main__":
+    main()

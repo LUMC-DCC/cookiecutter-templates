@@ -1,0 +1,923 @@
+{
+  "version": "0.5.0",
+  "description": "Implementation map for applying every template context field to generated repository artifacts.",
+  "templates": {
+    "python": "Python template",
+    "r": "R template"
+  },
+  "statuses": {
+    "external": "Consumed by callers or Cookiecutter routing rather than rendered into files.",
+    "control": "Controls whether files or directories are included.",
+    "implemented": "Currently rendered into generated project artifacts.",
+    "partial": "Currently rendered, but additional relevant artifacts are planned.",
+    "planned": "Represented in the contract and reserved for future artifacts."
+  },
+  "fields": [
+    {
+      "name": "language",
+      "targets": [
+        "template directory choice",
+        "doc builder compatibility check"
+      ],
+      "notes": "Used by APIs and other callers to choose the template directory; also used by post-generation compatibility checks.",
+      "statuses": {
+        "python": "control",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "project_name",
+      "targets": [
+        "README title",
+        "docs landing title",
+        "package docstring",
+        "sample command output",
+        "citation title",
+        "CodeMeta name"
+      ],
+      "notes": "Rendered into public project titles, citation metadata, and CodeMeta metadata.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "project_slug",
+      "targets": [
+        "repository folder name",
+        "Python package import path",
+        "Python distribution name",
+        "README command examples",
+        "docs command examples",
+        "generated smoke test imports",
+        "module entry point imports"
+      ],
+      "notes": "Used wherever the machine-readable project name is required. The contract and generation hook apply language-specific package-name constraints.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "project_short_description",
+      "targets": [
+        "README short summary",
+        "docs landing summary",
+        "package description",
+        "citation abstract fallback",
+        "CodeMeta description fallback"
+      ],
+      "notes": "Short public package description and fallback text for richer metadata.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "project_long_description",
+      "targets": [
+        "docs overview page",
+        "citation abstract",
+        "CodeMeta description"
+      ],
+      "notes": "Rendered as optional public motivation and scope prose, with the short description used as a fallback.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "version",
+      "targets": [
+        "package version metadata",
+        "package __version__",
+        "generated version smoke test",
+        "citation version",
+        "CodeMeta version",
+        "Sphinx release metadata",
+        "rs-metadata validation",
+        "CHANGELOG.md comparison link"
+      ],
+      "notes": "Initial package version. Sphinx derives its displayed release from installed package metadata. The Python template checks generated metadata surfaces for consistency.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "development_status",
+      "targets": [
+        "CodeMeta developmentStatus",
+        "rs-metadata validation"
+      ],
+      "notes": "Controlled repostatus.org lifecycle status for machine-readable metadata.",
+      "statuses": {
+        "python": "implemented",
+        "r": "implemented"
+      }
+    },
+    {
+      "name": "keywords",
+      "targets": [
+        "package keyword metadata",
+        "citation keywords",
+        "CodeMeta keywords",
+        "rs-metadata validation"
+      ],
+      "notes": "Useful for machine-readable discovery metadata.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "authors",
+      "targets": [
+        "package author metadata",
+        "citation authors",
+        "CodeMeta authors",
+        "rs-metadata validation"
+      ],
+      "notes": "Multiple authors are supported in pyproject.toml, CITATION.cff, and CodeMeta. CodeMeta entries use stable identifiers when ORCID or URL values are provided.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "maintainers",
+      "targets": [
+        "package maintainer metadata",
+        "citation contact",
+        "CodeMeta maintainers",
+        "rs-metadata validation",
+        "GOVERNANCE.md maintainer roles"
+      ],
+      "notes": "Rendered as package maintainer metadata, CITATION.cff contact metadata, and CodeMeta maintainer metadata. CodeMeta entries use stable identifiers when ORCID or URL values are provided.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "principal_investigators",
+      "targets": [
+        "CodeMeta contributors",
+        "GOVERNANCE.md oversight roles"
+      ],
+      "notes": "Public project leadership metadata. CodeMeta entries use stable identifiers when ORCID or URL values are provided.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "organization_name",
+      "targets": [
+        "citation fallback author",
+        "CodeMeta provider organization",
+        "CodeMeta fallback author",
+        "Sphinx author setting",
+        "Sphinx copyright statement"
+      ],
+      "notes": "Rendered in Python Sphinx configuration, CodeMeta provider metadata, and citation/CodeMeta fallback authors when no authors are provided.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "funding",
+      "targets": [
+        "CodeMeta funder metadata",
+        "CodeMeta funding metadata",
+        "docs overview funding section"
+      ],
+      "notes": "Multiple public funding records are rendered as CodeMeta funder/funding metadata and a readable docs overview section.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "purpose",
+      "targets": [
+        "README purpose statement",
+        "docs overview purpose section"
+      ],
+      "notes": "Public purpose statement rendered in human-facing project context.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "purpose_categories",
+      "targets": [
+        "README purpose categories",
+        "docs overview purpose categories"
+      ],
+      "notes": "Public purpose categories rendered in human-facing project context.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "audiences",
+      "targets": [
+        "README audience section",
+        "docs overview audience section"
+      ],
+      "notes": "Intended audiences rendered in human-facing project context.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "related_software",
+      "targets": [
+        "README related software",
+        "docs overview related software section",
+        "CodeMeta related links"
+      ],
+      "notes": "Related software is rendered as public context and machine-readable CodeMeta relatedLink values when names or links are provided.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "repository_url",
+      "targets": [
+        "package repository URL",
+        "citation repository-code",
+        "CodeMeta codeRepository",
+        "MkDocs repository link",
+        "Sphinx repository button",
+        "rs-metadata validation",
+        "CHANGELOG.md comparison link"
+      ],
+      "notes": "Rendered into package metadata, source citation metadata, CodeMeta metadata, generated docs configuration, and metadata validation.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "homepage_url",
+      "targets": [
+        "README homepage link",
+        "package homepage URL",
+        "citation landing URL",
+        "CodeMeta landing URL",
+        "rs-metadata validation"
+      ],
+      "notes": "Rendered as the preferred public landing page when provided.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "documentation_url",
+      "targets": [
+        "README docs link",
+        "package docs URL",
+        "citation landing URL",
+        "CodeMeta landing fallback URL",
+        "CodeMeta softwareHelp URL",
+        "rs-metadata validation"
+      ],
+      "notes": "Rendered as documentation metadata and a README link when distinct from the repository and homepage URLs.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "registries",
+      "targets": [
+        "citation registry identifiers",
+        "CodeMeta registry identifiers",
+        "CodeMeta registry sameAs links",
+        "rs-metadata validation"
+      ],
+      "notes": "Registry entries render as machine-readable identifiers. Represented in CFF identifiers as type other with the registry name as the description.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "persistent_identifiers",
+      "targets": [
+        "citation identifiers",
+        "CodeMeta identifiers",
+        "rs-metadata validation"
+      ],
+      "notes": "Supports DOI, URL, SWH, RRID, accession numbers, and similar IDs. CFF uses specific identifier types when supported and type other otherwise.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "publications",
+      "targets": [
+        "README primary publication note",
+        "docs overview primary publication note",
+        "citation references",
+        "citation preferred-citation",
+        "CodeMeta referencePublication",
+        "rs-metadata validation"
+      ],
+      "notes": "Associated publications render into concise public notes plus CFF references and CodeMeta referencePublication. A publication marked preferred becomes the CFF preferred-citation and public note.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "license",
+      "targets": [
+        "SPDX license file generation",
+        "custom license file generation",
+        "README legal and licensing section",
+        "docs legal and licensing page",
+        "package license metadata",
+        "citation license",
+        "CodeMeta license",
+        "rs-metadata validation"
+      ],
+      "notes": "SPDX identifiers are fetched for the generated license file and rendered into machine metadata. Empty values omit the license file. Unrecognized values are written as custom license text.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "license_compatibility_notes",
+      "targets": [
+        "docs legal and licensing page"
+      ],
+      "notes": "Public compatibility notes only.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "license_compatibility_check",
+      "targets": [
+        "Python license checker dependency group",
+        "Python licensecheck configuration",
+        "Python dependency license compatibility CI workflow"
+      ],
+      "notes": "Binary switch for generated dependency license compatibility checking. Python uses licensecheck through a dedicated CI workflow when CI and a recognized SPDX license are present.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "include_citation_cff",
+      "targets": [
+        "CITATION.cff inclusion",
+        "rs-metadata CI workflow inclusion"
+      ],
+      "notes": "Controls CFF citation metadata. The LUMC profile workflow is included when its required CFF file is present.",
+      "statuses": {
+        "python": "control",
+        "r": "control"
+      }
+    },
+    {
+      "name": "documentation_builder",
+      "targets": [
+        "docs scaffold selection",
+        "docs dependency extras",
+        "docs CI workflow command"
+      ],
+      "notes": "Language-specific defaults are defined in the context contract. Python selects Sphinx or MkDocs scaffolds, docs extras, and docs CI build commands, and uses the Python default when an incompatible builder is requested. R consumes the field but still needs the pkgdown scaffold.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "documentation_types",
+      "targets": [
+        "docs page selection",
+        "docs directory inclusion",
+        "docs CI workflow inclusion",
+        "README docs overview"
+      ],
+      "notes": "Selected canonical values drive docs inclusion and page selection. Empty entries remove the docs scaffold.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "include_contributing",
+      "targets": [
+        "CONTRIBUTING.md inclusion",
+        "pull request template inclusion"
+      ],
+      "notes": "Binary switch for including the standard contributing guide scaffold and pull request template.",
+      "statuses": {
+        "python": "control",
+        "r": "control"
+      }
+    },
+    {
+      "name": "include_code_of_conduct",
+      "targets": [
+        "CODE_OF_CONDUCT.md inclusion"
+      ],
+      "notes": "Binary switch for including the standard code of conduct scaffold.",
+      "statuses": {
+        "python": "control",
+        "r": "control"
+      }
+    },
+    {
+      "name": "include_governance",
+      "targets": [
+        "GOVERNANCE.md inclusion"
+      ],
+      "notes": "Binary switch for including the standard governance scaffold.",
+      "statuses": {
+        "python": "control",
+        "r": "control"
+      }
+    },
+    {
+      "name": "include_security",
+      "targets": [
+        "SECURITY.md inclusion"
+      ],
+      "notes": "Binary switch for including the standard security policy scaffold.",
+      "statuses": {
+        "python": "control",
+        "r": "control"
+      }
+    },
+    {
+      "name": "include_support",
+      "targets": [
+        "SUPPORT.md inclusion",
+        "GitHub issue template inclusion"
+      ],
+      "notes": "Binary switch for including the standard support scaffold and structured GitHub issue forms.",
+      "statuses": {
+        "python": "control",
+        "r": "control"
+      }
+    },
+    {
+      "name": "include_changelog",
+      "targets": [
+        "CHANGELOG.md inclusion",
+        "changelog validator inclusion",
+        "shared CI changelog check"
+      ],
+      "notes": "Binary switch for including the standard changelog scaffold and deterministic Keep a Changelog format check.",
+      "statuses": {
+        "python": "control",
+        "r": "control"
+      }
+    },
+    {
+      "name": "support_routes",
+      "targets": [
+        "SUPPORT.md support routes",
+        "package issue URL",
+        "package support URL",
+        "GitHub contact links",
+        "bug report route",
+        "feature request route"
+      ],
+      "notes": "Multiple public bug-reporting, feature-request, helpdesk, email, form, documentation, or support routes. Use type issue_tracker for the main public issue tracker.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "code_of_conduct_contact",
+      "targets": [
+        "CODE_OF_CONDUCT.md reporting route"
+      ],
+      "notes": "Public private-contact route for code-of-conduct reports.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "governance_notes",
+      "targets": [
+        "governance policy notes",
+        "GOVERNANCE.md notes"
+      ],
+      "notes": "Public governance and decision-making notes.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "programming_languages",
+      "targets": [
+        "package Python runtime requirement",
+        "CodeMeta programmingLanguage",
+        "docs programming language summary"
+      ],
+      "notes": "Should include language, version constraint, and role.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "software_functions",
+      "targets": [
+        "README bio.tools function blocks",
+        "docs functions and operations summary",
+        "CodeMeta schema:featureList"
+      ],
+      "notes": "Links public EDAM operations to inputs, outputs, command examples, and notes. Function inputs and outputs are the canonical source for data and format metadata.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "interfaces",
+      "targets": [
+        "README tool type badge",
+        "docs overview interface summary",
+        "docs usage interface summary",
+        "docs developer interface contracts",
+        "docs selected-interface architecture",
+        "docs selected-interface run commands",
+        "docs selected-interface deployment notes",
+        "docs API interface summary",
+        "CodeMeta applicationCategory",
+        "Python CLI adapter scaffold",
+        "Python API adapter scaffold",
+        "Python SOAP adapter scaffold",
+        "Python HTTP application compositor",
+        "Python desktop adapter scaffold",
+        "Python ontology module scaffold",
+        "Python plug-in adapter scaffold",
+        "Python portal adapter scaffold",
+        "Python script scaffold",
+        "Python suite adapter scaffold",
+        "Python web application scaffold",
+        "Python workflow scaffold",
+        "Python package entry point",
+        "Python optional interface dependencies",
+        "Python RDF dependency selection",
+        "Python console script metadata"
+      ],
+      "notes": "Controlled public tool types describe how users access the software and select minimal Python scaffolds for common interface families.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "operating_systems",
+      "targets": [
+        "README platform support",
+        "docs overview platform support",
+        "docs usage platform support",
+        "CodeMeta operatingSystem",
+        "Python package OS classifiers",
+        "Python tests CI OS matrix"
+      ],
+      "notes": "Documents all declared platform support. Supported Python platforms also render into package classifiers, CodeMeta operatingSystem, and the tests CI matrix when they map to GitHub-hosted runners.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "external_dependencies",
+      "targets": [
+        "docs overview external dependencies",
+        "docs usage external dependencies",
+        "docs deployment external dependencies",
+        "CodeMeta dependency metadata"
+      ],
+      "notes": "Public external requirements beyond normal language package metadata. Entries render into human-readable docs and CodeMeta softwareRequirements.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "external_services",
+      "targets": [
+        "docs overview external services",
+        "docs deployment services"
+      ],
+      "notes": "Public external services, partners, or roles needed by the project. Entries render into generated documentation only.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "include_tests",
+      "targets": [
+        "test suite inclusion",
+        "tests CI workflow inclusion"
+      ],
+      "notes": "Post-generation hook removes tests and tests CI when disabled.",
+      "statuses": {
+        "python": "control",
+        "r": "control"
+      }
+    },
+    {
+      "name": "test_types",
+      "targets": [
+        "test suite file selection",
+        "Python sample tests",
+        "Python test dependency metadata"
+      ],
+      "notes": "SMP checklist labels control which generated sample tests are kept. Python currently renders pytest-compatible sample tests.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "test_frameworks",
+      "targets": [
+        "Python test framework default",
+        "Python test dependency metadata",
+        "Python test command",
+        "Python tests CI runner"
+      ],
+      "notes": "Controlled framework names with template-specific supported choices. Python currently supports pytest and keeps pytest commands and dependencies.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "formatter_tool",
+      "targets": [
+        "Python ruff configuration",
+        "Python quality dependency metadata",
+        "Python local pre-commit format hook",
+        "Python quality CI workflow",
+        "generated contributing format command"
+      ],
+      "notes": "One controlled formatter choice. Python currently supports ruff.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "linter_tool",
+      "targets": [
+        "Python ruff configuration",
+        "Python quality dependency metadata",
+        "Python local pre-commit lint hook",
+        "Python quality CI workflow",
+        "generated contributing lint command"
+      ],
+      "notes": "One controlled linter choice. Python currently supports ruff.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "type_checker",
+      "targets": [
+        "Python mypy configuration",
+        "Python quality dependency metadata",
+        "Python local pre-commit type-check hook",
+        "Python quality CI workflow",
+        "generated contributing type-check command"
+      ],
+      "notes": "Controlled tool names with template-specific supported choices. Python currently supports mypy as an opt-in type checker.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "project_manager",
+      "targets": [
+        "Python development setup commands",
+        "Python command execution",
+        "Python project-manager configuration",
+        "Python CI environment setup",
+        "generated developer and contributing guidance",
+        "lockfile creation and CI handling"
+      ],
+      "notes": "One controlled primary manager with template-specific choices and defaults. Python supports uv, Poetry, PDM, Hatch, Pixi, and pip; uv is the default. Hatchling remains the independent Python build backend.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "versioning_scheme",
+      "targets": [
+        "generated release policy",
+        "changelog release notes",
+        "Python release validation"
+      ],
+      "notes": "Documents the project policy and drives Python release validation when a recognized scheme is selected.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "versioning_scheme_details",
+      "targets": [
+        "generated release policy",
+        "changelog release notes"
+      ],
+      "notes": "Preserves an exact CalVer pattern or a public custom versioning policy.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "release_frequency",
+      "targets": [
+        "generated release policy",
+        "changelog release cadence"
+      ],
+      "notes": "Public release cadence expectation.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "distribution_channels",
+      "targets": [
+        "generated release destinations",
+        "Python distribution dependencies",
+        "Python distribution workflow",
+        "Python container publication workflow",
+        "changelog release channels"
+      ],
+      "notes": "Python automates PyPI, GitHub Releases, GitHub Container Registry, and Docker Hub paths; other destinations are documented for their external setup.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "containerization",
+      "targets": [
+        "Docker recipe",
+        "OCI Containerfile",
+        "Apptainer recipe",
+        "Python container build workflow",
+        "generated deployment guidance"
+      ],
+      "notes": "Python generates Docker, OCI/Podman, and Apptainer/Singularity recipes. Whole-environment and lock-file selections are documented without inventing tool-specific configuration.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "resource_requirements",
+      "targets": [
+        "generated resource requirements page",
+        "README fallback when docs are omitted"
+      ],
+      "notes": "Public typical and worst-case memory, storage, compute, GPU, wall-clock, and scaling expectations.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "maintenance_level",
+      "targets": [
+        "generated sustainability page",
+        "SUPPORT.md maintenance level"
+      ],
+      "notes": "Controlled public support and maintenance commitment after active development.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "continuity_plan",
+      "targets": [
+        "generated sustainability page",
+        "GOVERNANCE.md continuity section"
+      ],
+      "notes": "Public handover or continuity notes.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "retirement_criteria",
+      "targets": [
+        "generated sustainability page",
+        "GOVERNANCE.md retirement section"
+      ],
+      "notes": "Public criteria for archival or retirement.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "public_risk_notes",
+      "targets": [
+        "generated security and data page",
+        "SECURITY.md public risk notes"
+      ],
+      "notes": "Public risk notes only; sensitive detail belongs elsewhere.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "security_contact",
+      "targets": [
+        "generated security and data page",
+        "SECURITY.md vulnerability reporting route"
+      ],
+      "notes": "Public private-contact route for vulnerability reports.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "security_measures",
+      "targets": [
+        "generated security and data page",
+        "SECURITY.md security measures"
+      ],
+      "notes": "Public security measures such as access control, patch management, vulnerability scanning, network controls, or institutional policies.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "additional_security_measures",
+      "targets": [
+        "generated security and data page",
+        "SECURITY.md additional security measures"
+      ],
+      "notes": "Public free-text complement to the controlled security measures list.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "sensitive_data_statement",
+      "targets": [
+        "generated security and data page",
+        "SECURITY.md data statement"
+      ],
+      "notes": "Public data-handling statement without restricted details.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "dmp_reference",
+      "targets": [
+        "generated security and data page",
+        "SECURITY.md DMP reference"
+      ],
+      "notes": "Public DMP reference or contact route when appropriate.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    }
+  ]
+}

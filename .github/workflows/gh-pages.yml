@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - '_docs/**'
+      - '_contracts/field_usage.json'
+      - '_scripts/build_field_usage_docs.py'
       - 'mkdocs.yml'
       - 'poetry.lock'
       - 'pyproject.toml'
@@ -19,16 +21,15 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.12'
 
       - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
+        run: pipx install "poetry>=2,<3"
 
       - name: Install dependencies
         run: |

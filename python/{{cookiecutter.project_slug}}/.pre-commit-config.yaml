@@ -1,0 +1,31 @@
+repos:
+  - repo: local
+    hooks:
+{% set effective_formatter_tool = cookiecutter.formatter_tool if cookiecutter.formatter_tool in cookiecutter._template_supported_choices.formatter_tool else cookiecutter._template_defaults.formatter_tool -%}
+{% set effective_linter_tool = cookiecutter.linter_tool if cookiecutter.linter_tool in cookiecutter._template_supported_choices.linter_tool else cookiecutter._template_defaults.linter_tool -%}
+{% set effective_type_checker = cookiecutter.type_checker if cookiecutter.type_checker in cookiecutter._template_supported_choices.type_checker else cookiecutter._template_defaults.type_checker -%}
+{% if effective_linter_tool == "ruff" -%}
+      - id: ruff-check
+        name: Ruff lint
+        entry: ruff check
+        language: system
+        types_or:
+          - python
+          - pyi
+{% endif -%}
+{% if effective_formatter_tool == "ruff" -%}
+      - id: ruff-format
+        name: Ruff format
+        entry: ruff format --check
+        language: system
+        types_or:
+          - python
+          - pyi
+{% endif -%}
+{% if effective_type_checker == "mypy" %}
+      - id: mypy
+        name: Mypy
+        entry: mypy src
+        language: system
+        pass_filenames: false
+{% endif %}

@@ -1,0 +1,25 @@
+title: Documentation
+nav:
+  - index.md
+  - overview.md
+{% if "user" in cookiecutter.documentation_types.entries %}
+  - usage.md
+{% endif %}
+{% if "deployment" in cookiecutter.documentation_types.entries %}
+  - deployment.md
+{% endif %}
+{% if "developer" in cookiecutter.documentation_types.entries %}
+  - developer.md
+{% endif %}
+{% if "api" in cookiecutter.documentation_types.entries %}
+  - api.md
+{% endif %}
+{% if "tutorial" in cookiecutter.documentation_types.entries %}
+  - tutorials
+{% endif %}
+{% if "reference" in cookiecutter.documentation_types.entries %}
+  - reference
+{% endif %}
+  - documentation.md
+  - legal.md
+  - ...

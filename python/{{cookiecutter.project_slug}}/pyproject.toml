@@ -1,0 +1,308 @@
+{% set python_runtime = namespace(version_constraint=">=3.10") -%}
+{% macro toml_string(value) -%}
+"{{ value | string | replace("\\", "\\\\") | replace("\"", "\\\"") }}"
+{%- endmacro -%}
+{% macro person_name(person) -%}
+{%- if person.name is defined and person.name -%}
+{{ person.name }}
+{%- else -%}
+{%- set given_names = person.given_names if person.given_names is defined else "" -%}
+{%- set family_names = person.family_names if person.family_names is defined else "" -%}
+{{ (given_names ~ " " ~ family_names) | trim or "Project member" }}
+{%- endif -%}
+{%- endmacro -%}
+{% for programming_language in cookiecutter.programming_languages.entries -%}
+{% if programming_language.name is defined and programming_language.name | lower == "python" and programming_language.version_constraint is defined and programming_language.version_constraint -%}
+{% set python_runtime.version_constraint = programming_language.version_constraint -%}
+{% endif -%}
+{% endfor -%}
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = {{ toml_string(cookiecutter.project_slug | replace('_', '-')) }}
+version = {{ toml_string(cookiecutter.version) }}
+description = {{ toml_string(cookiecutter.project_short_description) }}
+readme = "README.md"
+requires-python = {{ toml_string(python_runtime.version_constraint) }}
+{% if cookiecutter.authors.entries -%}
+authors = [
+{% for author in cookiecutter.authors.entries %}  { name = {{ toml_string(person_name(author) | trim) }}{% if author.email is defined and author.email %}, email = {{ toml_string(author.email) }}{% endif %} }{% if not loop.last %},{% endif %}
+{% endfor %}]
+{% endif -%}
+{% if cookiecutter.maintainers.entries -%}
+maintainers = [
+{% for maintainer in cookiecutter.maintainers.entries %}  { name = {{ toml_string(person_name(maintainer) | trim) }}{% if maintainer.email is defined and maintainer.email %}, email = {{ toml_string(maintainer.email) }}{% endif %} }{% if not loop.last %},{% endif %}
+{% endfor %}]
+{% endif -%}
+{% set interface_types = namespace(values=[]) -%}
+{% for interface in cookiecutter.interfaces.entries -%}
+{% if interface.type is defined and interface.type -%}
+{% set _ = interface_types.values.append(interface.type) -%}
+{% endif -%}
+{% endfor -%}
+{% set include_api_adapter = "SPARQL endpoint" in interface_types.values or "Web API" in interface_types.values -%}
+{% set include_soap_adapter = "Web service" in interface_types.values -%}
+{% set include_cli_adapter = "Command-line tool" in interface_types.values -%}
+{% set include_plugin_adapter = "Plug-in" in interface_types.values -%}
+{% set include_rdf_support = "Ontology" in interface_types.values or "SPARQL endpoint" in interface_types.values -%}
+{% set include_web_adapter = "Bioinformatics portal" in interface_types.values or "Database portal" in interface_types.values or "Web application" in interface_types.values or "Workbench" in interface_types.values -%}
+{% set effective_formatter_tool = cookiecutter.formatter_tool if cookiecutter.formatter_tool in cookiecutter._template_supported_choices.formatter_tool else cookiecutter._template_defaults.formatter_tool -%}
+{% set effective_linter_tool = cookiecutter.linter_tool if cookiecutter.linter_tool in cookiecutter._template_supported_choices.linter_tool else cookiecutter._template_defaults.linter_tool -%}
+{% set effective_type_checker = cookiecutter.type_checker if cookiecutter.type_checker in cookiecutter._template_supported_choices.type_checker else cookiecutter._template_defaults.type_checker -%}
+{% set effective_project_manager = cookiecutter.project_manager if cookiecutter.project_manager in cookiecutter._template_supported_choices.project_manager else cookiecutter._template_defaults.project_manager -%}
+{% set include_ruff_tooling = effective_formatter_tool == "ruff" or effective_linter_tool == "ruff" -%}
+{% set include_mypy_tooling = effective_type_checker == "mypy" -%}
+{% set has_quality_checks = include_ruff_tooling or include_mypy_tooling -%}
+{% set include_quality_extra = has_quality_checks -%}
+{% set release_channels = namespace(values=[]) -%}
+{% for channel in cookiecutter.distribution_channels.entries -%}
+{% set _ = release_channels.values.append(channel | lower) -%}
+{% endfor -%}
+{% set include_release_tooling = "pypi" in release_channels.values or "github release" in release_channels.values or "github releases" in release_channels.values or "conda-forge" in release_channels.values -%}
+{% set runtime_dependencies = [] -%}
+{% if include_cli_adapter -%}
+{% set _ = runtime_dependencies.append("typer") -%}
+{% endif -%}
+{% if include_rdf_support -%}
+{% set _ = runtime_dependencies.append("rdflib") -%}
+{% endif -%}
+dependencies = [{% if runtime_dependencies %}
+{% for dependency in runtime_dependencies %}  {{ toml_string(dependency) }}{% if not loop.last %},{% endif %}
+{% endfor %}{% endif %}]
+{% if cookiecutter.keywords.entries -%}
+keywords = [{% if cookiecutter.keywords.entries %}
+{% for keyword in cookiecutter.keywords.entries %}  {{ toml_string(keyword) }}{% if not loop.last %},{% endif %}
+{% endfor %}{% endif %}]
+{% endif %}
+{% set os_classifiers = [] -%}
+{% for operating_system in cookiecutter.operating_systems.entries -%}
+{% set operating_system_name = operating_system.name if operating_system.name is defined else "" -%}
+{% set support_status = operating_system.support_status if operating_system.support_status is defined else "" -%}
+{% set normalized_os = operating_system_name | lower -%}
+{% if operating_system_name and support_status in ["", "supported"] -%}
+{% if ("linux" in normalized_os or "ubuntu" in normalized_os) and "Operating System :: POSIX :: Linux" not in os_classifiers -%}
+{% set _ = os_classifiers.append("Operating System :: POSIX :: Linux") -%}
+{% endif -%}
+{% if ("macos" in normalized_os or "mac os" in normalized_os or "darwin" in normalized_os) and "Operating System :: MacOS" not in os_classifiers -%}
+{% set _ = os_classifiers.append("Operating System :: MacOS") -%}
+{% endif -%}
+{% if "windows" in normalized_os and "Operating System :: Microsoft :: Windows" not in os_classifiers -%}
+{% set _ = os_classifiers.append("Operating System :: Microsoft :: Windows") -%}
+{% endif -%}
+{% if ("os independent" in normalized_os or "any" == normalized_os) and "Operating System :: OS Independent" not in os_classifiers -%}
+{% set _ = os_classifiers.append("Operating System :: OS Independent") -%}
+{% endif -%}
+{% endif -%}
+{% endfor -%}
+{% if os_classifiers %}
+classifiers = [
+{% for classifier in os_classifiers %}  {{ toml_string(classifier) }}{% if not loop.last %},{% endif %}
+{% endfor %}]
+{% endif %}
+{% set effective_documentation_builder = cookiecutter.documentation_builder if cookiecutter.documentation_builder in cookiecutter._template_supported_choices.documentation_builder else cookiecutter._template_defaults.documentation_builder -%}
+[project.optional-dependencies]
+{% if cookiecutter.license_compatibility_check == "yes" and cookiecutter.license | trim -%}
+license = [
+  "licensecheck",
+]
+{% endif -%}
+{% if include_api_adapter -%}
+api = [
+  "fastapi",
+  "uvicorn[standard]",
+]
+{% endif -%}
+{% if include_web_adapter -%}
+web = [
+  "fastapi",
+  "uvicorn[standard]",
+]
+{% endif -%}
+{% if include_soap_adapter -%}
+soap = [
+  "a2wsgi",
+  "fastapi",
+  "lxml",
+  "spyne @ https://github.com/arskom/spyne/archive/af96bf95feb7950617640671f8aba9654f31acd3.tar.gz",
+  "uvicorn[standard]",
+]
+{% endif -%}
+{% if cookiecutter.include_tests == "yes" -%}
+{% set test_dependencies = ["pytest"] -%}
+{% if include_api_adapter or include_web_adapter or include_soap_adapter -%}
+{% set _ = test_dependencies.append("fastapi") -%}
+{% endif -%}
+{% if "Property-based / fuzz" in cookiecutter.test_types.entries -%}
+{% set _ = test_dependencies.append("hypothesis") -%}
+{% endif -%}
+test = [
+{% for dependency in test_dependencies %}  {{ toml_string(dependency) }}{% if not loop.last %},{% endif %}
+{% endfor %}
+]
+{% endif -%}
+{% if include_quality_extra -%}
+{% set quality_dependencies = ["pre-commit"] -%}
+{% if include_ruff_tooling -%}
+{% set _ = quality_dependencies.append("ruff") -%}
+{% endif -%}
+{% if include_mypy_tooling -%}
+{% set _ = quality_dependencies.append("mypy") -%}
+{% endif -%}
+quality = [{% if quality_dependencies %}
+{% for dependency in quality_dependencies %}  {{ toml_string(dependency) }}{% if not loop.last %},{% endif %}
+{% endfor %}{% endif %}]
+{% endif -%}
+{% if include_release_tooling -%}
+release = [
+  "build",
+  "packaging",
+  "twine",
+]
+{% endif -%}
+{% if cookiecutter.documentation_types.entries and effective_documentation_builder in ["mkdocs", "sphinx"] -%}
+{% set docs_dependencies = [] -%}
+{% if effective_documentation_builder == "mkdocs" -%}
+{% set _ = docs_dependencies.append("mkdocs") -%}
+{% set _ = docs_dependencies.append("mkdocs-awesome-pages-plugin") -%}
+{% set _ = docs_dependencies.append("mkdocs-material") -%}
+{% set _ = docs_dependencies.append("pymdown-extensions") -%}
+{% elif effective_documentation_builder == "sphinx" -%}
+{% set _ = docs_dependencies.append("myst-parser") -%}
+{% set _ = docs_dependencies.append("sphinx") -%}
+{% set _ = docs_dependencies.append("sphinx-book-theme") -%}
+{% endif -%}
+docs = [{% if docs_dependencies %}
+{% for dependency in docs_dependencies %}  {{ toml_string(dependency) }}{% if not loop.last %},{% endif %}
+{% endfor %}{% endif %}]
+{% endif -%}
+{% if include_cli_adapter %}
+[project.scripts]
+{{ toml_string(cookiecutter.project_slug | replace('_', '-')) }} = {{ toml_string(cookiecutter.project_slug ~ ".adapters.cli.app:main") }}
+{% endif -%}
+{% if include_plugin_adapter %}
+[project.entry-points.{{ toml_string(cookiecutter.project_slug ~ ".plugins") }}]
+example = {{ toml_string(cookiecutter.project_slug ~ ".adapters.plugin.registry:get_plugin") }}
+{% endif -%}
+{% set issue_tracker_urls = [] -%}
+{% set support_urls = [] -%}
+{% for route in cookiecutter.support_routes.entries -%}
+{% if route.url is defined and route.url -%}
+{% if route.type is defined and route.type == "issue_tracker" -%}
+{% set _ = issue_tracker_urls.append(route.url) -%}
+{% else -%}
+{% set _ = support_urls.append(route.url) -%}
+{% endif -%}
+{% endif -%}
+{% endfor -%}
+{% if cookiecutter.repository_url or cookiecutter.homepage_url or cookiecutter.documentation_url or issue_tracker_urls or support_urls %}
+[project.urls]
+{% if cookiecutter.repository_url -%}
+Repository = {{ toml_string(cookiecutter.repository_url) }}
+{% endif -%}
+{% if cookiecutter.homepage_url -%}
+Homepage = {{ toml_string(cookiecutter.homepage_url) }}
+{% endif -%}
+{% if cookiecutter.documentation_url -%}
+Documentation = {{ toml_string(cookiecutter.documentation_url) }}
+{% endif -%}
+{% if issue_tracker_urls -%}
+Issues = {{ toml_string(issue_tracker_urls[0]) }}
+{% endif -%}
+{% if support_urls -%}
+Support = {{ toml_string(support_urls[0]) }}
+{% endif -%}
+{% endif %}
+{% if include_soap_adapter %}
+
+[tool.hatch.metadata]
+allow-direct-references = true
+{% endif -%}
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+{% if cookiecutter.license_compatibility_check == "yes" and cookiecutter.license | trim %}
+
+[tool.licensecheck]
+license = {{ toml_string(cookiecutter.license) }}
+format = "simple"
+zero = true
+{% endif %}
+{% if include_ruff_tooling %}
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+  "B",
+  "E",
+  "F",
+  "I",
+  "SIM",
+  "UP",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+{% endif -%}
+{% if include_mypy_tooling %}
+
+[tool.mypy]
+strict = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = [
+  "fastapi.*",
+  "typer.*",
+]
+ignore_missing_imports = true
+{% endif -%}
+{% set project_manager_extras = ["metadata"] -%}
+{% if cookiecutter.license_compatibility_check == "yes" and cookiecutter.license | trim -%}
+{% set _ = project_manager_extras.append("license") -%}
+{% endif -%}
+{% if include_api_adapter -%}
+{% set _ = project_manager_extras.append("api") -%}
+{% endif -%}
+{% if include_web_adapter -%}
+{% set _ = project_manager_extras.append("web") -%}
+{% endif -%}
+{% if include_soap_adapter -%}
+{% set _ = project_manager_extras.append("soap") -%}
+{% endif -%}
+{% if cookiecutter.include_tests == "yes" -%}
+{% set _ = project_manager_extras.append("test") -%}
+{% endif -%}
+{% if include_quality_extra -%}
+{% set _ = project_manager_extras.append("quality") -%}
+{% endif -%}
+{% if include_release_tooling -%}
+{% set _ = project_manager_extras.append("release") -%}
+{% endif -%}
+{% if cookiecutter.documentation_types.entries and effective_documentation_builder in ["mkdocs", "sphinx"] -%}
+{% set _ = project_manager_extras.append("docs") -%}
+{% endif -%}
+{% if effective_project_manager == "pdm" %}
+
+[tool.pdm]
+distribution = true
+{% elif effective_project_manager == "hatch" %}
+
+[tool.hatch.envs.default]
+features = [
+{% for extra in project_manager_extras %}  {{ toml_string(extra) }}{% if not loop.last %},{% endif %}
+{% endfor %}]
+locked = true
+{% elif effective_project_manager == "pixi" %}
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
+
+[tool.pixi.pypi-dependencies]
+{{ toml_string(cookiecutter.project_slug | replace('_', '-')) }} = { path = ".", editable = true, extras = [{% for extra in project_manager_extras %}{{ toml_string(extra) }}{% if not loop.last %}, {% endif %}{% endfor %}] }
+{% endif -%}

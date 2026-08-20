@@ -1,0 +1,1436 @@
+{
+  "version": "0.7.0",
+  "description": "Service-agnostic context accepted by the LUMC cookiecutter templates. Service-specific converters should map their own inputs to this contract before calling Cookiecutter.",
+  "fields": [
+    {
+      "name": "language",
+      "category": "routing",
+      "type": "choice",
+      "choices": [
+        "python",
+        "r"
+      ],
+      "template_defaults": {
+        "python": "python",
+        "r": "r"
+      },
+      "prompt": "Project language",
+      "description": "Template directory to render. Use this to select Cookiecutter's directory argument.",
+      "visibility": "public",
+      "required": true
+    },
+    {
+      "name": "project_name",
+      "category": "identity",
+      "type": "string",
+      "default": "My Awesome Project",
+      "prompt": "Project name",
+      "description": "Human-readable project title.",
+      "visibility": "public"
+    },
+    {
+      "name": "project_slug",
+      "category": "identity",
+      "type": "string",
+      "default": "awesome_project",
+      "template_defaults": {
+        "python": "awesome_project",
+        "r": "awesome.project"
+      },
+      "prompt": "Project slug",
+      "description": "Machine-readable package and repository name. Constraints depend on the selected language template.",
+      "template_schemas": {
+        "python": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "not": {
+            "enum": [
+              "and",
+              "as",
+              "assert",
+              "async",
+              "await",
+              "break",
+              "class",
+              "continue",
+              "def",
+              "del",
+              "elif",
+              "else",
+              "except",
+              "finally",
+              "for",
+              "from",
+              "global",
+              "if",
+              "import",
+              "in",
+              "is",
+              "lambda",
+              "nonlocal",
+              "not",
+              "or",
+              "pass",
+              "raise",
+              "return",
+              "try",
+              "while",
+              "with",
+              "yield"
+            ]
+          },
+          "description": "Use a lowercase Python identifier: start with a letter, then use lowercase letters, digits, or underscores; Python keywords are not allowed."
+        },
+        "r": {
+          "minLength": 2,
+          "pattern": "^[A-Za-z](?:[A-Za-z0-9.]*[A-Za-z0-9])$",
+          "description": "Use an R package name of at least two ASCII letters, digits, or dots; start with a letter and do not end with a dot."
+        }
+      },
+      "visibility": "public"
+    },
+    {
+      "name": "project_short_description",
+      "category": "identity",
+      "type": "string",
+      "default": "Research software project.",
+      "prompt": "Short description",
+      "description": "One-sentence description used in README and package metadata.",
+      "visibility": "public"
+    },
+    {
+      "name": "project_long_description",
+      "category": "identity",
+      "type": "string",
+      "default": "",
+      "prompt": "Long description",
+      "description": "Longer public description of the project motivation and scope.",
+      "visibility": "public"
+    },
+    {
+      "name": "version",
+      "category": "identity",
+      "type": "string",
+      "default": "0.1.0",
+      "prompt": "Initial version",
+      "description": "Initial project version.",
+      "visibility": "public"
+    },
+    {
+      "name": "development_status",
+      "category": "identity",
+      "type": "choice",
+      "choices": [
+        "concept",
+        "wip",
+        "active",
+        "inactive",
+        "suspended",
+        "abandoned",
+        "unsupported",
+        "moved"
+      ],
+      "default": "concept",
+      "prompt": "Development status",
+      "description": "Current repostatus.org lifecycle status for the software.",
+      "visibility": "public"
+    },
+    {
+      "name": "keywords",
+      "category": "identity",
+      "type": "string_array",
+      "description": "Public keywords used in package metadata, citation metadata, registries, and archives.",
+      "visibility": "public",
+      "item_schema": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "authors",
+      "category": "people",
+      "type": "object_array",
+      "description": "People or organizations that created the software. Entries may include type, name, given_names, family_names, email, affiliation, orcid, roles, and url.",
+      "visibility": "public",
+      "entry_schema": "person"
+    },
+    {
+      "name": "maintainers",
+      "category": "people",
+      "type": "object_array",
+      "description": "People or teams responsible for maintenance. Entries may include type, name, given_names, family_names, email, affiliation, orcid, roles, and url.",
+      "visibility": "public",
+      "entry_schema": "person"
+    },
+    {
+      "name": "principal_investigators",
+      "category": "people",
+      "type": "object_array",
+      "description": "Principal investigators associated with the project. Entries may include name, given_names, family_names, email, affiliation, orcid, and role.",
+      "visibility": "public",
+      "entry_schema": "person"
+    },
+    {
+      "name": "organization_name",
+      "category": "people",
+      "type": "string",
+      "default": "LUMC",
+      "prompt": "Organization",
+      "description": "Primary organization responsible for the project.",
+      "visibility": "public"
+    },
+    {
+      "name": "funding",
+      "category": "funding",
+      "type": "object_array",
+      "description": "Public funding records. Entries may include funder, award_number, award_title, grant_url, and project_code.",
+      "visibility": "public",
+      "entry_schema": "funding"
+    },
+    {
+      "name": "purpose",
+      "category": "motivation",
+      "type": "string",
+      "default": "",
+      "prompt": "Purpose",
+      "description": "Public statement of why the software exists.",
+      "visibility": "public"
+    },
+    {
+      "name": "purpose_categories",
+      "category": "motivation",
+      "type": "string_array",
+      "description": "Public purpose categories such as data collection, analysis, simulation, visualization, reuse, or integration.",
+      "visibility": "public",
+      "item_schema": {
+        "type": "string",
+        "enum": [
+          "Data collection & instrumentation",
+          "Data analysis",
+          "Simulation",
+          "Visualization & dissemination",
+          "Software reuse",
+          "Integration & interfacing"
+        ]
+      }
+    },
+    {
+      "name": "audiences",
+      "category": "motivation",
+      "type": "string_array",
+      "description": "Intended users or stakeholder groups.",
+      "visibility": "public",
+      "item_schema": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "related_software",
+      "category": "motivation",
+      "type": "object_array",
+      "description": "Related or upstream tools. Entries may include name, url_or_doi, and relationship.",
+      "visibility": "public",
+      "entry_schema": "related_software"
+    },
+    {
+      "name": "repository_url",
+      "category": "accessibility",
+      "type": "string",
+      "default": "",
+      "prompt": "Repository URL",
+      "description": "Canonical source repository URL.",
+      "visibility": "public"
+    },
+    {
+      "name": "homepage_url",
+      "category": "accessibility",
+      "type": "string",
+      "default": "",
+      "prompt": "Homepage URL",
+      "description": "Project homepage URL, if different from the repository.",
+      "visibility": "public"
+    },
+    {
+      "name": "documentation_url",
+      "category": "accessibility",
+      "type": "string",
+      "default": "",
+      "prompt": "Documentation URL",
+      "description": "Published documentation URL.",
+      "visibility": "public"
+    },
+    {
+      "name": "registries",
+      "category": "accessibility",
+      "type": "object_array",
+      "description": "Registry entries such as PyPI, CRAN, bio.tools, WorkflowHub, or institutional catalogues. Entries may include name, url_or_id, and notes.",
+      "visibility": "public",
+      "entry_schema": "registry"
+    },
+    {
+      "name": "persistent_identifiers",
+      "category": "accessibility",
+      "type": "object_array",
+      "description": "Persistent identifiers. Entries may include type, identifier, associated_version, and relation.",
+      "visibility": "public",
+      "entry_schema": "persistent_identifier"
+    },
+    {
+      "name": "publications",
+      "category": "accessibility",
+      "type": "object_array",
+      "description": "Associated publications. Entries may include title, type, authors, doi, pmid, pmcid, url, citation, note, and preferred.",
+      "visibility": "public",
+      "entry_schema": "publication"
+    },
+    {
+      "name": "license",
+      "category": "licensing",
+      "type": "string",
+      "default": "",
+      "prompt": "License",
+      "description": "SPDX license identifier, custom license text, or empty to omit the license file.",
+      "visibility": "public",
+      "schema": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "license_compatibility_notes",
+      "category": "licensing",
+      "type": "string",
+      "default": "",
+      "description": "Public notes about compatibility with dependencies, upstream code, data, or documentation licenses.",
+      "visibility": "public"
+    },
+    {
+      "name": "license_compatibility_check",
+      "category": "licensing",
+      "type": "choice",
+      "choices": [
+        "yes",
+        "no"
+      ],
+      "default": "no",
+      "prompt": "Check dependency license compatibility",
+      "description": "Whether generated CI should check Python dependency license compatibility.",
+      "visibility": "public"
+    },
+    {
+      "name": "include_citation_cff",
+      "category": "accessibility",
+      "type": "choice",
+      "choices": [
+        "yes",
+        "no"
+      ],
+      "default": "yes",
+      "prompt": "Include citation file",
+      "description": "Whether to include CITATION.cff citation metadata.",
+      "visibility": "public"
+    },
+    {
+      "name": "documentation_builder",
+      "category": "documentation",
+      "type": "choice",
+      "choices": [
+        "none",
+        "mkdocs",
+        "sphinx",
+        "pkgdown"
+      ],
+      "default": "none",
+      "template_supported_choices": {
+        "python": [
+          "none",
+          "mkdocs",
+          "sphinx"
+        ],
+        "r": [
+          "none",
+          "pkgdown"
+        ]
+      },
+      "template_defaults": {
+        "python": "sphinx",
+        "r": "pkgdown"
+      },
+      "prompt": "Documentation builder",
+      "description": "Documentation build system to scaffold or configure. Services may provide this directly; otherwise templates use language-specific defaults.",
+      "visibility": "public"
+    },
+    {
+      "name": "documentation_types",
+      "category": "documentation",
+      "type": "string_array",
+      "description": "Documentation types to scaffold or reference. Supported canonical values are user, deployment, developer, api, tutorial, and reference.",
+      "visibility": "public",
+      "item_schema": {
+        "type": "string",
+        "enum": [
+          "user",
+          "deployment",
+          "developer",
+          "api",
+          "tutorial",
+          "reference"
+        ]
+      }
+    },
+    {
+      "name": "include_contributing",
+      "category": "documentation",
+      "type": "choice",
+      "choices": [
+        "no",
+        "yes"
+      ],
+      "default": "no",
+      "prompt": "Include contributing guide",
+      "description": "Whether to include CONTRIBUTING.md.",
+      "visibility": "public"
+    },
+    {
+      "name": "include_code_of_conduct",
+      "category": "documentation",
+      "type": "choice",
+      "choices": [
+        "no",
+        "yes"
+      ],
+      "default": "no",
+      "prompt": "Include code of conduct",
+      "description": "Whether to include CODE_OF_CONDUCT.md.",
+      "visibility": "public"
+    },
+    {
+      "name": "include_governance",
+      "category": "governance",
+      "type": "choice",
+      "choices": [
+        "no",
+        "yes"
+      ],
+      "default": "no",
+      "prompt": "Include governance file",
+      "description": "Whether to include GOVERNANCE.md.",
+      "visibility": "public"
+    },
+    {
+      "name": "include_security",
+      "category": "risk",
+      "type": "choice",
+      "choices": [
+        "no",
+        "yes"
+      ],
+      "default": "no",
+      "prompt": "Include security policy",
+      "description": "Whether to include SECURITY.md.",
+      "visibility": "public"
+    },
+    {
+      "name": "include_support",
+      "category": "documentation",
+      "type": "choice",
+      "choices": [
+        "no",
+        "yes"
+      ],
+      "default": "no",
+      "prompt": "Include support file",
+      "description": "Whether to include SUPPORT.md.",
+      "visibility": "public"
+    },
+    {
+      "name": "include_changelog",
+      "category": "release",
+      "type": "choice",
+      "choices": [
+        "no",
+        "yes"
+      ],
+      "default": "no",
+      "prompt": "Include changelog",
+      "description": "Whether to include CHANGELOG.md.",
+      "visibility": "public"
+    },
+    {
+      "name": "support_routes",
+      "category": "documentation",
+      "type": "object_array",
+      "description": "Public support, bug-reporting, or feature-request routes. Entries may include name, type, url, contact, and purpose.",
+      "visibility": "public",
+      "entry_schema": "support_route"
+    },
+    {
+      "name": "code_of_conduct_contact",
+      "category": "governance",
+      "type": "string",
+      "default": "",
+      "description": "Public private-contact route for code-of-conduct reports.",
+      "visibility": "public"
+    },
+    {
+      "name": "governance_notes",
+      "category": "governance",
+      "type": "string",
+      "default": "",
+      "description": "Public governance and decision-making notes.",
+      "visibility": "public"
+    },
+    {
+      "name": "programming_languages",
+      "category": "interoperability",
+      "type": "object_array",
+      "description": "Programming languages used by the project. Entries may include name, version_constraint, and role.",
+      "visibility": "public",
+      "entry_schema": "programming_language"
+    },
+    {
+      "name": "software_functions",
+      "category": "interoperability",
+      "type": "object_array",
+      "description": "Functions or operations performed by the software. Entries may include summary, operation, input, output, cmd, and note.",
+      "visibility": "public",
+      "entry_schema": "software_function"
+    },
+    {
+      "name": "interfaces",
+      "category": "interoperability",
+      "type": "object_array",
+      "description": "Interfaces exposed by the software, such as library, script, CLI, web API, GUI, workflow, plugin, or database interfaces. Entries may include type, specification, url, and status.",
+      "default": [
+        {
+          "type": "Library"
+        }
+      ],
+      "visibility": "public",
+      "entry_schema": "interface"
+    },
+    {
+      "name": "operating_systems",
+      "category": "interoperability",
+      "type": "object_array",
+      "description": "Supported operating systems or platforms. Entries may include name, version_constraint, and support_status.",
+      "visibility": "public",
+      "entry_schema": "operating_system"
+    },
+    {
+      "name": "external_dependencies",
+      "category": "interoperability",
+      "type": "object_array",
+      "description": "External software dependencies or standards. Entries may include name, version_constraint, url, license, and purpose.",
+      "visibility": "public",
+      "entry_schema": "external_dependency"
+    },
+    {
+      "name": "external_services",
+      "category": "interoperability",
+      "type": "object_array",
+      "description": "External public services, partners, or roles needed by the project. Entries may include name, provider, service_types, quantity, and cost_coverage.",
+      "visibility": "public",
+      "entry_schema": "external_service"
+    },
+    {
+      "name": "include_tests",
+      "category": "quality",
+      "type": "choice",
+      "choices": [
+        "yes",
+        "no"
+      ],
+      "prompt": "Include test scaffold",
+      "description": "Whether to include tests.",
+      "visibility": "public"
+    },
+    {
+      "name": "test_types",
+      "category": "quality",
+      "type": "string_array",
+      "description": "Types of tests used or desired. Supported values match the SMP testing checklist.",
+      "visibility": "public",
+      "template_defaults": {
+        "python": [
+          "Smoke tests",
+          "Unit tests"
+        ],
+        "r": [
+          "Smoke tests"
+        ]
+      },
+      "item_schema": {
+        "type": "string",
+        "enum": [
+          "Smoke tests",
+          "Doctests",
+          "Unit tests",
+          "Integration tests",
+          "System / end-to-end tests",
+          "Regression tests",
+          "Property-based / fuzz"
+        ]
+      }
+    },
+    {
+      "name": "test_frameworks",
+      "category": "quality",
+      "type": "string_array",
+      "description": "Testing frameworks used by the project.",
+      "visibility": "public",
+      "template_defaults": {
+        "python": [
+          "pytest"
+        ],
+        "r": [
+          "testthat"
+        ]
+      },
+      "template_supported_choices": {
+        "python": [
+          "pytest"
+        ],
+        "r": [
+          "testthat"
+        ]
+      },
+      "item_schema": {
+        "type": "string",
+        "enum": [
+          "pytest",
+          "unittest",
+          "doctest",
+          "testthat",
+          "Catch2",
+          "GoogleTest",
+          "cargo test",
+          "JUnit 5",
+          "Vitest",
+          "Jest",
+          "bats-core"
+        ]
+      }
+    },
+    {
+      "name": "formatter_tool",
+      "category": "quality",
+      "type": "choice",
+      "choices": [
+        "none",
+        "ruff",
+        "black",
+        "styler",
+        "prettier",
+        "rustfmt",
+        "clang-format"
+      ],
+      "prompt": "Formatter",
+      "description": "Primary code formatter.",
+      "visibility": "public",
+      "template_defaults": {
+        "python": "ruff",
+        "r": "none"
+      },
+      "template_supported_choices": {
+        "python": [
+          "none",
+          "ruff"
+        ],
+        "r": [
+          "none"
+        ]
+      }
+    },
+    {
+      "name": "linter_tool",
+      "category": "quality",
+      "type": "choice",
+      "choices": [
+        "none",
+        "ruff",
+        "flake8",
+        "pylint",
+        "lintr",
+        "eslint",
+        "clippy",
+        "clang-tidy"
+      ],
+      "prompt": "Linter",
+      "description": "Primary static analysis tool.",
+      "visibility": "public",
+      "template_defaults": {
+        "python": "ruff",
+        "r": "none"
+      },
+      "template_supported_choices": {
+        "python": [
+          "none",
+          "ruff"
+        ],
+        "r": [
+          "none"
+        ]
+      }
+    },
+    {
+      "name": "type_checker",
+      "category": "quality",
+      "type": "choice",
+      "choices": [
+        "none",
+        "mypy",
+        "pyright",
+        "basedpyright",
+        "pyre",
+        "tsc",
+        "rustc",
+        "Flow"
+      ],
+      "prompt": "Type checker",
+      "description": "Primary static type checker.",
+      "visibility": "public",
+      "template_defaults": {
+        "python": "none",
+        "r": "none"
+      },
+      "template_supported_choices": {
+        "python": [
+          "none",
+          "mypy"
+        ],
+        "r": [
+          "none"
+        ]
+      }
+    },
+    {
+      "name": "project_manager",
+      "category": "quality",
+      "type": "choice",
+      "choices": [
+        "uv",
+        "poetry",
+        "pdm",
+        "hatch",
+        "pixi",
+        "pip",
+        "renv",
+        "rix",
+        "cargo",
+        "npm",
+        "pnpm",
+        "yarn",
+        "maven",
+        "gradle",
+        "cmake"
+      ],
+      "prompt": "Project manager",
+      "description": "Primary project and dependency manager. Template-specific choices control setup, command execution, lockfile handling, and CI.",
+      "visibility": "public",
+      "template_defaults": {
+        "python": "uv",
+        "r": "renv"
+      },
+      "template_supported_choices": {
+        "python": [
+          "uv",
+          "poetry",
+          "pdm",
+          "hatch",
+          "pixi",
+          "pip"
+        ],
+        "r": [
+          "renv",
+          "rix"
+        ]
+      }
+    },
+    {
+      "name": "versioning_scheme",
+      "category": "release",
+      "type": "choice",
+      "choices": [
+        "SemVer",
+        "CalVer",
+        "Custom"
+      ],
+      "default": "SemVer",
+      "prompt": "Versioning scheme",
+      "description": "Controlled versioning policy. Use versioning_scheme_details for the exact CalVer pattern or a custom policy.",
+      "visibility": "public"
+    },
+    {
+      "name": "versioning_scheme_details",
+      "category": "release",
+      "type": "string",
+      "default": "",
+      "description": "Exact CalVer pattern or public explanation of a custom versioning policy.",
+      "visibility": "public"
+    },
+    {
+      "name": "release_frequency",
+      "category": "release",
+      "type": "string",
+      "default": "",
+      "description": "Expected or actual release frequency.",
+      "visibility": "public"
+    },
+    {
+      "name": "distribution_channels",
+      "category": "release",
+      "type": "string_array",
+      "description": "Controlled, repeatable public destinations for packages, containers, releases, archives, installers, source, or hosted services.",
+      "visibility": "public",
+      "item_schema": {
+        "type": "string",
+        "enum": [
+          "PyPI",
+          "conda-forge",
+          "CRAN",
+          "Bioconductor",
+          "npm",
+          "crates.io",
+          "Docker Hub",
+          "GitHub Container Registry",
+          "Quay",
+          "Apptainer Library",
+          "BioContainers",
+          "GitHub Releases",
+          "Zenodo",
+          "Institutional archive",
+          "Source repository",
+          "Self-hosted installer",
+          "Hosted service",
+          "Other"
+        ]
+      }
+    },
+    {
+      "name": "containerization",
+      "category": "reproducibility",
+      "type": "object_array",
+      "description": "Repeatable container or complete-environment specifications. Canonical types control generated recipes; file_url, standard, and details preserve public source information.",
+      "visibility": "public",
+      "entry_schema": "containerization"
+    },
+    {
+      "name": "resource_requirements",
+      "category": "reproducibility",
+      "type": "string",
+      "default": "",
+      "description": "Public typical and worst-case memory, storage, compute, GPU, wall-clock, or scaling requirements.",
+      "visibility": "public"
+    },
+    {
+      "name": "maintenance_level",
+      "category": "sustainability",
+      "type": "choice",
+      "choices": [
+        "",
+        "Active/routine maintenance",
+        "Security maintenance only",
+        "Best-effort maintenance / no timeline commitment"
+      ],
+      "default": "",
+      "prompt": "Maintenance commitment",
+      "description": "Public maintenance commitment after active development winds down; leave empty when no commitment is declared.",
+      "visibility": "public"
+    },
+    {
+      "name": "continuity_plan",
+      "category": "sustainability",
+      "type": "string",
+      "default": "",
+      "description": "Public continuity or handover plan.",
+      "visibility": "public"
+    },
+    {
+      "name": "retirement_criteria",
+      "category": "sustainability",
+      "type": "string_array",
+      "description": "Public conditions under which the software may be retired.",
+      "visibility": "public",
+      "item_schema": {
+        "type": "string",
+        "enum": [
+          "Project completed",
+          "Replaced by successor software",
+          "Obsolete technology / architecture",
+          "Incompatible with current systems",
+          "Loss or end of funding",
+          "Lack of maintainers",
+          "Institutional shift in priorities",
+          "Retirement of critical dependencies",
+          "Discontinuation of hosting / infrastructure",
+          "Change in legal or regulatory requirements",
+          "Security / privacy risks",
+          "Lack of user demand or adoption",
+          "Declining utility or relevance"
+        ]
+      }
+    },
+    {
+      "name": "public_risk_notes",
+      "category": "risk",
+      "type": "string",
+      "default": "",
+      "description": "Public risk or mitigation notes. Sensitive security, privacy, or compliance details should not be included.",
+      "visibility": "public"
+    },
+    {
+      "name": "security_contact",
+      "category": "risk",
+      "type": "string",
+      "default": "",
+      "description": "Public private-contact route for vulnerability reports.",
+      "visibility": "public"
+    },
+    {
+      "name": "security_measures",
+      "category": "risk",
+      "type": "string_array",
+      "description": "Controlled public security measures protecting the software and its data.",
+      "visibility": "public",
+      "item_schema": {
+        "type": "string",
+        "enum": [
+          "User authentication (e.g., password, OAuth, SSO)",
+          "Role-based access control (RBAC) or permissions system",
+          "Data encryption at rest",
+          "Data encryption in transit (e.g., HTTPS/TLS)",
+          "Regular dependency / library updates",
+          "Security patch management process",
+          "Vulnerability scanning (e.g., Snyk, Dependabot)",
+          "Secrets management (e.g., environment variables, vault)",
+          "Network security (e.g., firewalls, VPN, isolated subnets)",
+          "Secure configuration management (e.g., Infrastructure-as-Code, hardening)",
+          "Audit logging / intrusion detection",
+          "Penetration testing or security review",
+          "Follows institutional or regulatory security policies (e.g., ISO 27001, NEN 7510)"
+        ]
+      }
+    },
+    {
+      "name": "additional_security_measures",
+      "category": "risk",
+      "type": "string",
+      "default": "",
+      "description": "Public security measures not represented by the controlled security_measures choices.",
+      "visibility": "public"
+    },
+    {
+      "name": "sensitive_data_statement",
+      "category": "risk",
+      "type": "string",
+      "default": "",
+      "description": "Public statement about whether the software handles personal or sensitive data, without exposing restricted details.",
+      "visibility": "public"
+    },
+    {
+      "name": "dmp_reference",
+      "category": "risk",
+      "type": "string",
+      "default": "",
+      "description": "Public DMP reference or contact route when appropriate.",
+      "visibility": "public"
+    }
+  ],
+  "features": [
+    {
+      "name": "tests",
+      "flag": "include_tests",
+      "enabled_value": "yes",
+      "template_paths": [
+        "tests"
+      ]
+    }
+  ],
+  "coverage_sources": [
+    "LUMC-DCC Software Management Plan knowledge model 1.0.2",
+    "LUMC Research Software Guidelines best-practices pages"
+  ],
+  "excluded_information": [
+    "non-public security implementation details",
+    "non-public personal or sensitive data categories",
+    "non-public compliance records",
+    "internal cost details unless explicitly marked public by the upstream service"
+  ],
+  "entry_schemas": {
+    "person": {
+      "type": "object",
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "name"
+          ]
+        },
+        {
+          "required": [
+            "given_names"
+          ]
+        },
+        {
+          "required": [
+            "family_names"
+          ]
+        }
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "given_names": {
+          "type": "string"
+        },
+        "family_names": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "affiliation": {
+          "type": "string"
+        },
+        "orcid": {
+          "type": "string"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "role": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "person",
+            "organization"
+          ]
+        }
+      }
+    },
+    "funding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "funder": {
+          "type": "string"
+        },
+        "award_number": {
+          "type": "string"
+        },
+        "award_title": {
+          "type": "string"
+        },
+        "grant_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "project_code": {
+          "type": "string"
+        }
+      }
+    },
+    "related_software": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url_or_doi": {
+          "type": "string"
+        },
+        "relationship": {
+          "type": "string"
+        }
+      }
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url_or_id": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "persistent_identifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "associated_version": {
+          "type": "string"
+        },
+        "relation": {
+          "type": "string"
+        }
+      }
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "doi": {
+          "type": "string"
+        },
+        "pmid": {
+          "type": "string"
+        },
+        "pmcid": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "preferred": {
+          "type": "boolean"
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/person"
+          }
+        }
+      }
+    },
+    "support_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "issue_tracker",
+            "helpdesk",
+            "email",
+            "form",
+            "documentation",
+            "other"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "contact": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        }
+      }
+    },
+    "programming_language": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri"
+        },
+        "version_constraint": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        }
+      }
+    },
+    "data_format": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri"
+        },
+        "version_constraint": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "sample_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "software_function": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+        "operation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/edam_term"
+          }
+        },
+        "input": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/function_io"
+          }
+        },
+        "output": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/function_io"
+          }
+        },
+        "cmd": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "function_io": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/edam_term"
+        },
+        "format": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/edam_term"
+          }
+        }
+      }
+    },
+    "edam_term": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "term": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "interface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "Bioinformatics portal",
+            "Command-line tool",
+            "Database portal",
+            "Desktop application",
+            "Library",
+            "Ontology",
+            "Plug-in",
+            "Script",
+            "SPARQL endpoint",
+            "Suite",
+            "Web application",
+            "Web API",
+            "Web service",
+            "Workbench",
+            "Workflow"
+          ]
+        },
+        "specification": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Stable",
+            "Experimental",
+            "Internal"
+          ]
+        }
+      }
+    },
+    "operating_system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version_constraint": {
+          "type": "string"
+        },
+        "support_status": {
+          "type": "string",
+          "enum": [
+            "supported",
+            "expected-to-work",
+            "untested",
+            "unsupported"
+          ]
+        }
+      }
+    },
+    "external_dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version_constraint": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "license": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        }
+      }
+    },
+    "external_service": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "service_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "Institutional support (DCC, IT, library)",
+              "Hosted compute / storage",
+              "CI / CD minutes",
+              "SaaS subscription",
+              "Legal / contractual",
+              "External review or audit",
+              "Domain expertise",
+              "Other"
+            ]
+          }
+        },
+        "quantity": {
+          "type": "string"
+        },
+        "cost_coverage": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "Project budget",
+              "Departmental overhead",
+              "External grant",
+              "Free tier",
+              "In-kind / unfunded"
+            ]
+          }
+        }
+      }
+    },
+    "containerization": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "Docker",
+            "OCI / Podman",
+            "Apptainer / Singularity",
+            "Nix",
+            "Pixi",
+            "conda-lock",
+            "Lock file",
+            "Other"
+          ]
+        },
+        "file_url": {
+          "type": "string"
+        },
+        "standard": {
+          "type": "string"
+        },
+        "details": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    }
+  }
+}

@@ -1,5 +1,0 @@
-{% if cookiecutter.license == "MIT" %}
-{% include "licenses/mit.txt" %}
-{% elif cookiecutter.license == "Apache-2.0" %}
-{% include "licenses/apache-2.0.txt" %}
-{% endif %}

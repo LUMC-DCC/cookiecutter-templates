@@ -1,15 +1,19 @@
 [project]
 name = "cookiecutter-templates"
 version = "0.1.0"
-description = ""
+description = "Service-agnostic Cookiecutter templates for FAIR research software"
 authors = [
-    {name = "Your Name",email = "you@example.com"}
+    {name = "LUMC Digital Competence Center"}
 ]
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
 ]
+
+[project.urls]
+Repository = "https://github.com/LUMC-DCC/cookiecutter-templates"
+Documentation = "https://lumc-dcc.github.io/cookiecutter-templates"
 
 
 [build-system]
@@ -26,8 +30,16 @@ mkdocs-material-extensions = "^1.3.1"
 mkdocs-get-deps = "^0.2.0"
 pyyaml = "^6.0.2"
 mkdocs = "^1.6.1"
+sphinx = ">=8,<9"
+myst-parser = ">=4,<5"
+sphinx-book-theme = ">=1,<2"
 
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.2.0"
+pytest = "^9.1.1"
+cookiecutter = "^2.7.1"
+rs-metadata = {git = "https://github.com/LUMC-DCC/rs-metadata.git", rev = "27f3da06c4bae5f735c492608b5ffea6c2715c21"}
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]

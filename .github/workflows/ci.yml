@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: pipx install "poetry>=2,<3"
+
+      - name: Install dependencies
+        run: |
+          poetry install --with docs,dev --no-root
+
+      - name: Regenerate derived files
+        run: |
+          poetry run python _scripts/build_context_schema.py
+          poetry run python _scripts/sync_shared.py
+          poetry run python _scripts/build_field_usage_docs.py
+
+      - name: Verify the pre-commit integration
+        run: poetry run pre-commit run --all-files
+
+      - name: Check generated files and hooks are current
+        run: |
+          git diff --exit-code
+
+      - name: Audit field usage statuses
+        run: |
+          poetry run python _scripts/audit_field_usage_status.py
+
+      - name: Audit GitHub Action pins
+        run: |
+          poetry run python _scripts/audit_action_pins.py
+
+      - name: Run tests
+        run: |
+          poetry run pytest
+
+      - name: Build generated project documentation
+        run: |
+          poetry run python _scripts/check_generated_docs.py
+
+      - name: Build documentation
+        run: |
+          poetry run mkdocs build --strict

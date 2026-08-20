@@ -1,98 +1,51 @@
+"""Finalize generated project files after Cookiecutter rendering.
+
+The entry point keeps orchestration small and delegates domain-specific cleanup
+to helper modules in the temporary ``.template_hooks`` directory.
+"""
+
 import os
-import shutil
-import json
+from pathlib import Path
+import sys
 
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(os.getcwd()) / ".template_hooks"))
 
-def is_yes(ctx, value):
-    """Check if the value is a 'yes' equivalent."""
-    return ctx.get(value, "").strip().lower() in (
-        "yes", "y", "true", "1", "on", "enabled", "include"
-    )
-
-def is_no(ctx, value):
-    """Check if the value is a 'no' equivalent."""
-    return ctx.get(value, "").strip().lower() in (
-        "no", "n", "false", "0", "none", ""
-    )
-
-
-OPTIONAL_PATHS = [
-    {
-        "path": "docs",
-        "should_remove": lambda ctx: is_no(ctx, "include_docs")
-    },
-    {
-        "path": "tests",
-        "should_remove": lambda ctx: is_no(ctx, "include_tests")
-    },
-    {
-        "path": "github",
-        "should_remove": lambda ctx: is_no(ctx, "using_ci")
-    },
-    {
-        "path": "LICENSE.txt",
-        "should_remove": lambda ctx: is_no(ctx, "license")
-    },
-    {
-        "path": "src/{project_slug}/adapters/api",
-        "should_remove": lambda ctx: is_no(ctx, "api")
-    },
-    {
-        "path": "src/{project_slug}/adapters/cli",
-        "should_remove": lambda ctx: is_no(ctx, "cli")
-    },
-    {
-        "path": "src/{project_slug}/adapters",
-        "should_remove": lambda ctx: is_no(ctx, "api") and is_no(ctx, "cli")
-    },
-    {
-        "path": "src/{project_slug}/services",
-        "should_remove": lambda ctx: is_no(ctx, "api") and is_no(ctx, "cli")
-    },
-]
-
-def load_context():
-    return {
-        "include_docs": "{{ cookiecutter.include_docs }}",
-        "include_tests": "{{ cookiecutter.include_tests }}",
-        "using_ci": "{{ cookiecutter.using_ci }}",
-        "license": "{{ cookiecutter.license }}",
-        "project_slug": "{{ cookiecutter.project_slug }}",
-        "api": "{{ cookiecutter.using_api }}",
-        "cli": "{{ cookiecutter.using_cli }}",
-    }
-
-ALWAYS_REMOVE_PATHS = [
-    "licenses",
-]
-
-def remove_path(path):
-    if os.path.exists(path):
-        if os.path.isdir(path):
-            shutil.rmtree(path)
-        else:
-            os.remove(path)
-        print(f"[INFO] Removed {path}")
-    else:
-        print(f"[SKIP] {path} does not exist")
+from context import load_context
+from post_generation.community_files import select_community_files
+from post_generation.containerization import select_container_recipes
+from post_generation.documentation import select_documentation_builder
+from post_generation.license import update_license_file
+from post_generation.metadata import select_metadata_files
+from post_generation.optional_files import (
+    remove_optional_paths,
+    remove_template_only_paths,
+)
+from post_generation.public_files import update_public_context
+from post_generation.project_management import configure_project_manager
+from post_generation.quality import select_quality_tools
+from post_generation.testing import select_test_framework
+from post_generation.validation import validate_context
 
 
 def cleanup():
+    """Run all post-generation actions."""
     ctx = load_context()
-    cwd = os.getcwd()
+    cwd = Path(os.getcwd())
 
-    for entry in OPTIONAL_PATHS:
-        if entry["should_remove"](ctx):
-            rendered_path = entry["path"].format(**ctx)
-            target = os.path.join(cwd, rendered_path)
-            print(f"[INFO] Removing {rendered_path}")
-            remove_path(target)
+    validate_context(ctx)
+    select_documentation_builder(ctx, cwd)
+    select_container_recipes(ctx, cwd)
+    select_community_files(ctx, cwd)
+    select_metadata_files(ctx, cwd)
+    update_public_context(ctx, cwd)
+    update_license_file(ctx, cwd)
+    configure_project_manager(ctx, cwd)
+    select_quality_tools(ctx, cwd)
+    select_test_framework(ctx, cwd)
+    remove_optional_paths(ctx, cwd)
+    remove_template_only_paths(cwd)
 
-    for rel_path in ALWAYS_REMOVE_PATHS:
-        target = os.path.join(cwd, rel_path)
-        print(f"[INFO] Removing always-remove path: {rel_path}")
-        remove_path(target)
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     cleanup()

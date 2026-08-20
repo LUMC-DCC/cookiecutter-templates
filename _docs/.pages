@@ -1,2 +1,7 @@
 nav:
-  - index.md
+  - Home: index.md
+  - users
+  - integrators
+  - contract
+  - developers
+  - Architecture: architecture.md

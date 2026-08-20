@@ -1,13 +1,251 @@
 {
-  "language": ["python", "r"],
+  "language": [
+    "python",
+    "r"
+  ],
   "project_name": "My Awesome Project",
   "project_slug": "awesome_project",
-
-  "include_docs": ["yes", "no"],
-  "include_tests": ["yes", "no"],
-  "using_ci": ["yes", "no"],
-  "using_api": ["yes", "no"],
-  "using_cli": ["yes", "no"],
-
-  "license": ["none","MIT", "Apache-2.0"]
+  "project_short_description": "Research software project.",
+  "project_long_description": "",
+  "version": "0.1.0",
+  "development_status": [
+    "concept",
+    "wip",
+    "active",
+    "inactive",
+    "suspended",
+    "abandoned",
+    "unsupported",
+    "moved"
+  ],
+  "keywords": {
+    "entries": []
+  },
+  "authors": {
+    "entries": []
+  },
+  "maintainers": {
+    "entries": []
+  },
+  "principal_investigators": {
+    "entries": []
+  },
+  "organization_name": "LUMC",
+  "funding": {
+    "entries": []
+  },
+  "purpose": "",
+  "purpose_categories": {
+    "entries": []
+  },
+  "audiences": {
+    "entries": []
+  },
+  "related_software": {
+    "entries": []
+  },
+  "repository_url": "",
+  "homepage_url": "",
+  "documentation_url": "",
+  "registries": {
+    "entries": []
+  },
+  "persistent_identifiers": {
+    "entries": []
+  },
+  "publications": {
+    "entries": []
+  },
+  "license": "",
+  "license_compatibility_notes": "",
+  "license_compatibility_check": [
+    "no",
+    "yes"
+  ],
+  "include_citation_cff": [
+    "yes",
+    "no"
+  ],
+  "documentation_builder": [
+    "none",
+    "mkdocs",
+    "sphinx",
+    "pkgdown"
+  ],
+  "documentation_types": {
+    "entries": []
+  },
+  "include_contributing": [
+    "no",
+    "yes"
+  ],
+  "include_code_of_conduct": [
+    "no",
+    "yes"
+  ],
+  "include_governance": [
+    "no",
+    "yes"
+  ],
+  "include_security": [
+    "no",
+    "yes"
+  ],
+  "include_support": [
+    "no",
+    "yes"
+  ],
+  "include_changelog": [
+    "no",
+    "yes"
+  ],
+  "support_routes": {
+    "entries": []
+  },
+  "code_of_conduct_contact": "",
+  "governance_notes": "",
+  "programming_languages": {
+    "entries": []
+  },
+  "software_functions": {
+    "entries": []
+  },
+  "interfaces": {
+    "entries": [
+      {
+        "type": "Library"
+      }
+    ]
+  },
+  "operating_systems": {
+    "entries": []
+  },
+  "external_dependencies": {
+    "entries": []
+  },
+  "external_services": {
+    "entries": []
+  },
+  "include_tests": [
+    "yes",
+    "no"
+  ],
+  "test_types": {
+    "entries": []
+  },
+  "test_frameworks": {
+    "entries": []
+  },
+  "formatter_tool": [
+    "none",
+    "ruff",
+    "black",
+    "styler",
+    "prettier",
+    "rustfmt",
+    "clang-format"
+  ],
+  "linter_tool": [
+    "none",
+    "ruff",
+    "flake8",
+    "pylint",
+    "lintr",
+    "eslint",
+    "clippy",
+    "clang-tidy"
+  ],
+  "type_checker": [
+    "none",
+    "mypy",
+    "pyright",
+    "basedpyright",
+    "pyre",
+    "tsc",
+    "rustc",
+    "Flow"
+  ],
+  "project_manager": [
+    "uv",
+    "poetry",
+    "pdm",
+    "hatch",
+    "pixi",
+    "pip",
+    "renv",
+    "rix",
+    "cargo",
+    "npm",
+    "pnpm",
+    "yarn",
+    "maven",
+    "gradle",
+    "cmake"
+  ],
+  "versioning_scheme": [
+    "SemVer",
+    "CalVer",
+    "Custom"
+  ],
+  "versioning_scheme_details": "",
+  "release_frequency": "",
+  "distribution_channels": {
+    "entries": []
+  },
+  "containerization": {
+    "entries": []
+  },
+  "resource_requirements": "",
+  "maintenance_level": [
+    "",
+    "Active/routine maintenance",
+    "Security maintenance only",
+    "Best-effort maintenance / no timeline commitment"
+  ],
+  "continuity_plan": "",
+  "retirement_criteria": {
+    "entries": []
+  },
+  "public_risk_notes": "",
+  "security_contact": "",
+  "security_measures": {
+    "entries": []
+  },
+  "additional_security_measures": "",
+  "sensitive_data_statement": "",
+  "dmp_reference": "",
+  "__prompts__": {
+    "language": "Project language",
+    "project_name": "Project name",
+    "project_slug": "Project slug",
+    "project_short_description": "Short description",
+    "project_long_description": "Long description",
+    "version": "Initial version",
+    "development_status": "Development status",
+    "organization_name": "Organization",
+    "purpose": "Purpose",
+    "repository_url": "Repository URL",
+    "homepage_url": "Homepage URL",
+    "documentation_url": "Documentation URL",
+    "license": "License",
+    "license_compatibility_check": "Check dependency license compatibility",
+    "include_citation_cff": "Include citation file",
+    "documentation_builder": "Documentation builder",
+    "include_contributing": "Include contributing guide",
+    "include_code_of_conduct": "Include code of conduct",
+    "include_governance": "Include governance file",
+    "include_security": "Include security policy",
+    "include_support": "Include support file",
+    "include_changelog": "Include changelog",
+    "include_tests": "Include test scaffold",
+    "formatter_tool": "Formatter",
+    "linter_tool": "Linter",
+    "type_checker": "Type checker",
+    "project_manager": "Project manager",
+    "versioning_scheme": "Versioning scheme",
+    "maintenance_level": "Maintenance commitment"
+  },
+  "_template_defaults": {},
+  "_template_schemas": {},
+  "_template_supported_choices": {}
 }

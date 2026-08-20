@@ -1,0 +1,47 @@
+name: Quality
+{% set interface_types = namespace(values=[]) -%}
+{% for interface in cookiecutter.interfaces.entries -%}
+{% if interface.type is defined and interface.type -%}
+{% set _ = interface_types.values.append(interface.type) -%}
+{% endif -%}
+{% endfor -%}
+{% set include_api_adapter = "SPARQL endpoint" in interface_types.values or "Web API" in interface_types.values or "Web service" in interface_types.values -%}
+{% set include_web_adapter = "Bioinformatics portal" in interface_types.values or "Database portal" in interface_types.values or "Web application" in interface_types.values or "Workbench" in interface_types.values -%}
+{% set effective_formatter_tool = cookiecutter.formatter_tool if cookiecutter.formatter_tool in cookiecutter._template_supported_choices.formatter_tool else cookiecutter._template_defaults.formatter_tool -%}
+{% set effective_linter_tool = cookiecutter.linter_tool if cookiecutter.linter_tool in cookiecutter._template_supported_choices.linter_tool else cookiecutter._template_defaults.linter_tool -%}
+{% set effective_type_checker = cookiecutter.type_checker if cookiecutter.type_checker in cookiecutter._template_supported_choices.type_checker else cookiecutter._template_defaults.type_checker -%}
+{% set include_mypy_tooling = effective_type_checker == "mypy" -%}
+{% set include_quality_extras = ["quality"] -%}
+{% if include_api_adapter -%}
+{% set _ = include_quality_extras.append("api") -%}
+{% endif -%}
+{% if include_web_adapter -%}
+{% set _ = include_quality_extras.append("web") -%}
+{% endif -%}
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Run quality checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup-python-project
+{% if effective_linter_tool == "ruff" -%}
+      - name: Run Ruff lint
+        run: @@PROJECT_RUN@@ruff check .
+{% endif -%}
+{% if effective_formatter_tool == "ruff" -%}
+      - name: Check Ruff formatting
+        run: @@PROJECT_RUN@@ruff format --check .
+{% endif -%}
+{% if include_mypy_tooling -%}
+      - name: Run Mypy
+        run: @@PROJECT_RUN@@mypy src
+{% endif -%}

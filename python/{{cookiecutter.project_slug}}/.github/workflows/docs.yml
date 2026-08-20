@@ -1,0 +1,23 @@
+name: Documentation
+{% set effective_documentation_builder = cookiecutter.documentation_builder if cookiecutter.documentation_builder in cookiecutter._template_supported_choices.documentation_builder else cookiecutter._template_defaults.documentation_builder -%}
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    name: Build documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup-python-project
+      - name: Build documentation
+{% if effective_documentation_builder == "mkdocs" %}
+        run: @@PROJECT_RUN@@mkdocs build --strict
+{% elif effective_documentation_builder == "sphinx" %}
+        run: @@PROJECT_RUN@@sphinx-build -W -b html docs/source docs/build/html
+{% endif %}
