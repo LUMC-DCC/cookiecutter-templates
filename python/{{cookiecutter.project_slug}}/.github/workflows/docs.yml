@@ -1,5 +1,5 @@
 name: Documentation
-{% set effective_documentation_builder = cookiecutter.documentation_builder if cookiecutter.documentation_builder in cookiecutter._template_supported_choices.documentation_builder else cookiecutter._template_defaults.documentation_builder -%}
+{% set effective_documentation_builder = cookiecutter.documentation_builder if cookiecutter.documentation_builder in cookiecutter._template_supported_choices.documentation_builder else cookiecutter._template_defaults.documentation_builder %}
 
 on:
   push:

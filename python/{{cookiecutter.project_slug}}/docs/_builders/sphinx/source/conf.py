@@ -6,7 +6,6 @@ from datetime import date
 from importlib import metadata
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 CODEMETA = json.loads((ROOT / "codemeta.json").read_text(encoding="utf-8"))
 
@@ -45,7 +44,7 @@ html_theme_options = {
     "use_fullscreen_button": False,
 }
 repository_url = CODEMETA.get("codeRepository", "")
-if repository_url:
+if repository_url and "REPLACE_WITH" not in repository_url:
     # Add a repository button when a public repository URL is available.
     html_theme_options["repository_url"] = repository_url
     html_theme_options["use_repository_button"] = True

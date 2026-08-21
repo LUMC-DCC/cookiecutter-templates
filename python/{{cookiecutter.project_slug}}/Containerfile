@@ -1,26 +1,26 @@
-{% macro container_string(value) -%}
+{% macro container_string(value) %}
 "{{ value | string | replace("\\", "\\\\") | replace("\"", "\\\"") | replace("\n", " ") }}"
-{%- endmacro -%}
-{% set interface_types = namespace(values=[]) -%}
-{% for interface in cookiecutter.interfaces.entries -%}
-{% if interface.type is defined and interface.type -%}
-{% set _ = interface_types.values.append(interface.type) -%}
-{% endif -%}
-{% endfor -%}
-{% set has_api = "SPARQL endpoint" in interface_types.values or "Web API" in interface_types.values -%}
-{% set has_soap = "Web service" in interface_types.values -%}
-{% set has_web = "Web application" in interface_types.values or "Workbench" in interface_types.values -%}
-{% set has_portal = "Bioinformatics portal" in interface_types.values or "Database portal" in interface_types.values -%}
-{% set install_extras = [] -%}
-{% if has_api -%}
-{% set _ = install_extras.append("api") -%}
-{% endif -%}
-{% if has_soap -%}
-{% set _ = install_extras.append("soap") -%}
-{% endif -%}
-{% if has_web or has_portal -%}
-{% set _ = install_extras.append("web") -%}
-{% endif -%}
+{% endmacro %}
+{% set interface_types = namespace(values=[]) %}
+{% for interface in cookiecutter.interfaces.entries %}
+{% if interface.type is defined and interface.type %}
+{% set _ = interface_types.values.append(interface.type) %}
+{% endif %}
+{% endfor %}
+{% set has_api = "SPARQL endpoint" in interface_types.values or "Web API" in interface_types.values %}
+{% set has_soap = "Web service" in interface_types.values %}
+{% set has_web = "Web application" in interface_types.values or "Workbench" in interface_types.values %}
+{% set has_portal = "Bioinformatics portal" in interface_types.values or "Database portal" in interface_types.values %}
+{% set install_extras = [] %}
+{% if has_api %}
+{% set _ = install_extras.append("api") %}
+{% endif %}
+{% if has_soap %}
+{% set _ = install_extras.append("soap") %}
+{% endif %}
+{% if has_web or has_portal %}
+{% set _ = install_extras.append("web") %}
+{% endif %}
 # syntax=docker/dockerfile:1
 
 # Build wheels separately so compilers and build tools do not enter the runtime image.
@@ -53,9 +53,9 @@ COPY --from=builder /wheels /wheels
 RUN python -m pip install --no-cache-dir /wheels/*.whl && rm -rf /wheels
 
 USER appuser
-{% if has_api or has_soap or has_web or has_portal -%}
+{% if has_api or has_soap or has_web or has_portal %}
 EXPOSE 8000
 CMD ["uvicorn", "{{ cookiecutter.project_slug }}.adapters.server:app", "--host", "0.0.0.0", "--port", "8000"]
-{% else -%}
+{% else %}
 CMD ["python", "-m", "{{ cookiecutter.project_slug }}"]
-{% endif -%}
+{% endif %}

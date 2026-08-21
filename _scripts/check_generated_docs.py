@@ -64,12 +64,9 @@ def render_project(builder: str, workspace: Path) -> Path:
                         "user",
                         "deployment",
                         "developer",
-                        "api",
-                        "tutorial",
-                        "reference",
                     ]
                 },
-                "include_tests": "no",
+                "test_types": {"entries": []},
                 "formatter_tool": "none",
                 "linter_tool": "none",
                 "type_checker": "none",

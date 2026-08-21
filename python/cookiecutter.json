@@ -4,7 +4,7 @@
     "r"
   ],
   "project_name": "My Awesome Project",
-  "project_slug": "awesome_project",
+  "project_slug": "my_awesome_project",
   "project_short_description": "Research software project.",
   "project_long_description": "",
   "version": "0.1.0",
@@ -73,31 +73,35 @@
     "pkgdown"
   ],
   "documentation_types": {
-    "entries": []
+    "entries": [
+      "user",
+      "deployment",
+      "developer"
+    ]
   },
   "include_contributing": [
-    "no",
-    "yes"
+    "yes",
+    "no"
   ],
   "include_code_of_conduct": [
-    "no",
-    "yes"
+    "yes",
+    "no"
   ],
   "include_governance": [
-    "no",
-    "yes"
+    "yes",
+    "no"
   ],
   "include_security": [
-    "no",
-    "yes"
+    "yes",
+    "no"
   ],
   "include_support": [
-    "no",
-    "yes"
+    "yes",
+    "no"
   ],
   "include_changelog": [
-    "no",
-    "yes"
+    "yes",
+    "no"
   ],
   "support_routes": {
     "entries": []
@@ -105,7 +109,13 @@
   "code_of_conduct_contact": "",
   "governance_notes": "",
   "programming_languages": {
-    "entries": []
+    "entries": [
+      {
+        "name": "Python",
+        "version_constraint": ">=3.12",
+        "role": "primary"
+      }
+    ]
   },
   "software_functions": {
     "entries": []
@@ -126,10 +136,6 @@
   "external_services": {
     "entries": []
   },
-  "include_tests": [
-    "yes",
-    "no"
-  ],
   "test_types": {
     "entries": [
       "Smoke tests",
@@ -242,7 +248,6 @@
     "include_security": "Include security policy",
     "include_support": "Include support file",
     "include_changelog": "Include changelog",
-    "include_tests": "Include test scaffold",
     "formatter_tool": "Formatter",
     "linter_tool": "Linter",
     "type_checker": "Type checker",
@@ -250,10 +255,26 @@
     "versioning_scheme": "Versioning scheme",
     "maintenance_level": "Maintenance commitment"
   },
+  "_jinja2_env_vars": {
+    "lstrip_blocks": true,
+    "trim_blocks": true
+  },
   "_template_defaults": {
     "language": "python",
-    "project_slug": "awesome_project",
+    "project_slug": "my_awesome_project",
     "documentation_builder": "sphinx",
+    "documentation_types": [
+      "user",
+      "deployment",
+      "developer"
+    ],
+    "programming_languages": [
+      {
+        "name": "Python",
+        "version_constraint": ">=3.12",
+        "role": "primary"
+      }
+    ],
     "test_types": [
       "Smoke tests",
       "Unit tests"

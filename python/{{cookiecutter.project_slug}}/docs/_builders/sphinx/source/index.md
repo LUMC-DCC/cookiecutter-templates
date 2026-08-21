@@ -9,22 +9,14 @@
 overview
 {% if "user" in cookiecutter.documentation_types.entries %}
 usage
-{% endif -%}
+{% endif %}
 {% if "deployment" in cookiecutter.documentation_types.entries %}
 deployment
-{% endif -%}
+{% endif %}
 {% if "developer" in cookiecutter.documentation_types.entries %}
 developer
-{% endif -%}
-{% if "api" in cookiecutter.documentation_types.entries %}
-api
-{% endif -%}
-{% if "tutorial" in cookiecutter.documentation_types.entries %}
-tutorials/index
-{% endif -%}
-{% if "reference" in cookiecutter.documentation_types.entries %}
-reference/index
-{% endif -%}
+reference
+{% endif %}
 documentation
 legal
 ```

@@ -1,8 +1,18 @@
-*.DS_Store
+# Operating system and editor files
+.DS_Store
+.idea/
+
+# Python bytecode, environments, and test caches
 __pycache__/
 *.py[cod]
-.idea/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Built repository documentation
 site/
+
+# Local knowledge-model working files
 misc/*
 !misc/extract_km_questions.py
 !misc/lumc_rsmp_1.0.2.km

@@ -4,7 +4,7 @@
     "python"
   ],
   "project_name": "My Awesome Project",
-  "project_slug": "awesome.project",
+  "project_slug": "my.awesome.project",
   "project_short_description": "Research software project.",
   "project_long_description": "",
   "version": "0.1.0",
@@ -73,31 +73,35 @@
     "sphinx"
   ],
   "documentation_types": {
-    "entries": []
+    "entries": [
+      "user",
+      "deployment",
+      "developer"
+    ]
   },
   "include_contributing": [
-    "no",
-    "yes"
+    "yes",
+    "no"
   ],
   "include_code_of_conduct": [
-    "no",
-    "yes"
+    "yes",
+    "no"
   ],
   "include_governance": [
-    "no",
-    "yes"
+    "yes",
+    "no"
   ],
   "include_security": [
-    "no",
-    "yes"
+    "yes",
+    "no"
   ],
   "include_support": [
-    "no",
-    "yes"
+    "yes",
+    "no"
   ],
   "include_changelog": [
-    "no",
-    "yes"
+    "yes",
+    "no"
   ],
   "support_routes": {
     "entries": []
@@ -105,7 +109,13 @@
   "code_of_conduct_contact": "",
   "governance_notes": "",
   "programming_languages": {
-    "entries": []
+    "entries": [
+      {
+        "name": "R",
+        "version_constraint": ">=4.3",
+        "role": "primary"
+      }
+    ]
   },
   "software_functions": {
     "entries": []
@@ -126,10 +136,6 @@
   "external_services": {
     "entries": []
   },
-  "include_tests": [
-    "yes",
-    "no"
-  ],
   "test_types": {
     "entries": [
       "Smoke tests"
@@ -241,7 +247,6 @@
     "include_security": "Include security policy",
     "include_support": "Include support file",
     "include_changelog": "Include changelog",
-    "include_tests": "Include test scaffold",
     "formatter_tool": "Formatter",
     "linter_tool": "Linter",
     "type_checker": "Type checker",
@@ -249,10 +254,26 @@
     "versioning_scheme": "Versioning scheme",
     "maintenance_level": "Maintenance commitment"
   },
+  "_jinja2_env_vars": {
+    "lstrip_blocks": true,
+    "trim_blocks": true
+  },
   "_template_defaults": {
     "language": "r",
-    "project_slug": "awesome.project",
+    "project_slug": "my.awesome.project",
     "documentation_builder": "pkgdown",
+    "documentation_types": [
+      "user",
+      "deployment",
+      "developer"
+    ],
+    "programming_languages": [
+      {
+        "name": "R",
+        "version_constraint": ">=4.3",
+        "role": "primary"
+      }
+    ],
     "test_types": [
       "Smoke tests"
     ],

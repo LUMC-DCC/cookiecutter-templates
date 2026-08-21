@@ -40,6 +40,7 @@ pre-commit = "^4.2.0"
 pytest = "^9.1.1"
 cookiecutter = "^2.7.1"
 rs-metadata = {git = "https://github.com/LUMC-DCC/rs-metadata.git", rev = "27f3da06c4bae5f735c492608b5ffea6c2715c21"}
+ruff = "^0.16.4"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -117,11 +117,12 @@ documentation, README content, and citation metadata.
 
 When `programming_languages` includes a Python entry with `version_constraint`,
 that value is used for `project.requires-python` in `pyproject.toml`.
+Without one, the Python template requires Python 3.12 or newer.
 
-When `operating_systems` includes supported Linux, macOS, or Windows entries,
+When `operating_systems` includes officially supported Linux, macOS, or Windows entries,
 the Python template maps them to package operating-system classifiers and to the
-tests workflow matrix when GitHub Actions tests are included. Untested and
-unsupported platforms stay visible in generated documentation only.
+tests workflow matrix when GitHub Actions tests are included. Platforms marked
+`Expected to work` stay visible in generated documentation and metadata.
 
 When `external_dependencies` is provided, those entries are documented as
 external requirements and added to CodeMeta `softwareRequirements`. They are not
@@ -199,8 +200,8 @@ The workflow validates the version and tag, builds and checks the wheel and
 source distribution, and publishes the channels it can configure directly.
 
 The project manager configures the language-level development environment.
-`containerization` separately records the SMP's container or complete-environment
-strategy, including Docker, Apptainer, Nix, Pixi, or a lock-file-only approach.
+`containerization` separately selects Docker, OCI/Podman, or
+Apptainer/Singularity recipes.
 
 `src/<project_slug>/` is for package code. `tools/` is for local project
 maintenance commands that may also be called from CI.

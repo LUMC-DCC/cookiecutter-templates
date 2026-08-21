@@ -317,7 +317,7 @@
         "CodeMeta identifiers",
         "rs-metadata validation"
       ],
-      "notes": "Supports DOI, URL, SWH, RRID, accession numbers, and similar IDs. CFF uses specific identifier types when supported and type other otherwise.",
+      "notes": "Supports the CFF identifier types DOI, URL, SWH, and other. CodeMeta contains an explicit replacement placeholder until a persistent identifier is supplied.",
       "statuses": {
         "python": "implemented",
         "r": "partial"
@@ -414,7 +414,7 @@
         "docs CI workflow inclusion",
         "README docs overview"
       ],
-      "notes": "Selected canonical values drive docs inclusion and page selection. Empty entries remove the docs scaffold.",
+      "notes": "The SMP-aligned user, deployment, and developer values drive docs inclusion and page selection. Developer documentation includes technical and API reference material. Empty entries remove the docs scaffold.",
       "statuses": {
         "python": "implemented",
         "r": "partial"
@@ -495,12 +495,11 @@
       "targets": [
         "SUPPORT.md support routes",
         "package issue URL",
-        "package support URL",
         "GitHub contact links",
         "bug report route",
         "feature request route"
       ],
-      "notes": "Multiple public bug-reporting, feature-request, helpdesk, email, form, documentation, or support routes. Use type issue_tracker for the main public issue tracker.",
+      "notes": "Multiple public support or issue-reporting systems and URLs, matching the SMP list shape. The first public URL is used as the package issue URL.",
       "statuses": {
         "python": "implemented",
         "r": "partial"
@@ -565,7 +564,7 @@
         "docs selected-interface architecture",
         "docs selected-interface run commands",
         "docs selected-interface deployment notes",
-        "docs API interface summary",
+        "docs technical reference interface summary",
         "CodeMeta applicationCategory",
         "Python CLI adapter scaffold",
         "Python API adapter scaffold",
@@ -584,7 +583,7 @@
         "Python RDF dependency selection",
         "Python console script metadata"
       ],
-      "notes": "Controlled public tool types describe how users access the software and select minimal Python scaffolds for common interface families.",
+      "notes": "Controlled public tool types describe how users access the software and select minimal Python scaffolds for common interface families. Specification and status are rendered in project documentation; status does not suppress a requested scaffold.",
       "statuses": {
         "python": "implemented",
         "r": "partial"
@@ -600,7 +599,7 @@
         "Python package OS classifiers",
         "Python tests CI OS matrix"
       ],
-      "notes": "Documents all declared platform support. Supported Python platforms also render into package classifiers, CodeMeta operatingSystem, and the tests CI matrix when they map to GitHub-hosted runners.",
+      "notes": "Documents all declared platform support. Officially supported Python platforms also render into package classifiers and the tests CI matrix when they map to GitHub-hosted runners; both SMP statuses are represented in CodeMeta.",
       "statuses": {
         "python": "implemented",
         "r": "partial"
@@ -633,25 +632,15 @@
       }
     },
     {
-      "name": "include_tests",
-      "targets": [
-        "test suite inclusion",
-        "tests CI workflow inclusion"
-      ],
-      "notes": "Post-generation hook removes tests and tests CI when disabled.",
-      "statuses": {
-        "python": "control",
-        "r": "control"
-      }
-    },
-    {
       "name": "test_types",
       "targets": [
         "test suite file selection",
+        "test suite inclusion",
+        "tests CI workflow inclusion",
         "Python sample tests",
         "Python test dependency metadata"
       ],
-      "notes": "SMP checklist labels control which generated sample tests are kept. Python currently renders pytest-compatible sample tests.",
+      "notes": "SMP checklist labels control test inclusion and which generated sample tests are kept. Empty entries omit the test suite and its CI workflow. Python currently renders pytest-compatible sample tests.",
       "statuses": {
         "python": "implemented",
         "r": "partial"
@@ -793,7 +782,7 @@
         "Python container build workflow",
         "generated deployment guidance"
       ],
-      "notes": "Python generates Docker, OCI/Podman, and Apptainer/Singularity recipes. Whole-environment and lock-file selections are documented without inventing tool-specific configuration.",
+      "notes": "Python generates Docker, OCI/Podman, and Apptainer/Singularity recipes. Project managers and their lockfiles are controlled independently.",
       "statuses": {
         "python": "implemented",
         "r": "partial"

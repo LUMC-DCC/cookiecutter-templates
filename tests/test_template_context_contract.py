@@ -180,8 +180,8 @@ def test_template_cookiecutter_contexts_use_template_defaults():
 
     assert python_context["language"][0] == "python"
     assert r_context["language"][0] == "r"
-    assert python_context["project_slug"] == "awesome_project"
-    assert r_context["project_slug"] == "awesome.project"
+    assert python_context["project_slug"] == "my_awesome_project"
+    assert r_context["project_slug"] == "my.awesome.project"
     assert python_context["documentation_builder"][0] == "sphinx"
     assert r_context["documentation_builder"][0] == "pkgdown"
     assert "pkgdown" in python_context["documentation_builder"]
@@ -354,8 +354,11 @@ def test_person_entries_accept_name_or_structured_parts():
 
     assert "required" not in person_schema
     assert {"required": ["name"]} in person_schema["anyOf"]
-    assert {"required": ["given_names"]} in person_schema["anyOf"]
-    assert {"required": ["family_names"]} in person_schema["anyOf"]
+    assert {"required": ["given_names", "family_names"]} in person_schema["anyOf"]
+    assert "role" not in person_schema["properties"]
+    assert person_schema["properties"]["affiliation"] == {
+        "$ref": "#/$defs/organization"
+    }
 
 
 def test_community_file_fields_are_binary_switches():
@@ -374,10 +377,10 @@ def test_community_file_fields_are_binary_switches():
         "include_changelog",
     ]:
         assert fields[name]["type"] == "choice"
-        assert fields[name]["choices"] == ["no", "yes"]
-        assert context[name] == ["no", "yes"]
+        assert fields[name]["choices"] == ["yes", "no"]
+        assert context[name] == ["yes", "no"]
         assert schema["properties"][name]["type"] == "string"
-        assert schema["properties"][name]["enum"] == ["no", "yes"]
+        assert schema["properties"][name]["enum"] == ["yes", "no"]
         assert "entries" not in schema["properties"][name].get("properties", {})
 
 
@@ -391,15 +394,8 @@ def test_containerization_types_are_controlled():
         "Docker",
         "OCI / Podman",
         "Apptainer / Singularity",
-        "Nix",
-        "Pixi",
-        "conda-lock",
-        "Lock file",
         "Other",
     ]
-    assert "packaging_notes" not in {
-        field["name"] for field in contract["fields"]
-    }
 
 
 def test_release_selectors_are_controlled():
@@ -444,6 +440,7 @@ def test_citation_file_field_is_default_on():
 
     assert fields["include_citation_cff"]["type"] == "choice"
     assert fields["include_citation_cff"]["choices"] == ["yes", "no"]
+    assert fields["include_citation_cff"]["default"] == "yes"
     assert context["include_citation_cff"] == ["yes", "no"]
 
 
@@ -452,18 +449,14 @@ def test_documentation_types_control_documentation_scaffold():
     contract = load_contract()
     fields = {field["name"]: field for field in contract["fields"]}
 
-    assert "include_docs" not in fields
     assert fields["documentation_types"]["type"] == "string_array"
 
 
 def test_interface_types_are_controlled():
     """Ensure public interface types are controlled for integrators."""
     contract = load_contract()
-    fields = {field["name"]: field for field in contract["fields"]}
     interface_schema = contract["entry_schemas"]["interface"]
 
-    assert "using_api" not in fields
-    assert "using_cli" not in fields
     assert interface_schema["required"] == ["type"]
     assert interface_schema["properties"]["type"]["enum"] == [
         "Bioinformatics portal",
@@ -484,16 +477,14 @@ def test_interface_types_are_controlled():
     ]
 
 
-def test_operating_system_support_statuses_are_controlled():
-    """Ensure operating-system support labels are predictable."""
+def test_operating_system_statuses_match_the_smp():
+    """Ensure operating-system support labels match the SMP choices."""
     operating_system_schema = load_contract()["entry_schemas"]["operating_system"]
 
     assert operating_system_schema["required"] == ["name"]
-    assert operating_system_schema["properties"]["support_status"]["enum"] == [
-        "supported",
-        "expected-to-work",
-        "untested",
-        "unsupported",
+    assert operating_system_schema["properties"]["status"]["enum"] == [
+        "Officially supported",
+        "Expected to work",
     ]
 
 
@@ -576,9 +567,6 @@ def test_integrator_schema_controls_entries_wrapper():
         "user",
         "deployment",
         "developer",
-        "api",
-        "tutorial",
-        "reference",
     ]
 
 

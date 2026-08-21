@@ -1,20 +1,20 @@
 blank_issues_enabled: false
-{% set contact_link_routes = [] -%}
-{% for route in cookiecutter.support_routes.entries -%}
-{% if route.url is defined and route.url and (route.type is not defined or route.type != "issue_tracker") and route.url != cookiecutter.documentation_url -%}
-{% set _ = contact_link_routes.append(route) -%}
-{% endif -%}
-{% endfor -%}
+{% set contact_link_routes = [] %}
+{% for route in cookiecutter.support_routes.entries %}
+{% if route.url is defined and route.url and route.url != cookiecutter.documentation_url %}
+{% set _ = contact_link_routes.append(route) %}
+{% endif %}
+{% endfor %}
 {% if cookiecutter.documentation_url or contact_link_routes %}
 contact_links:
 {% if cookiecutter.documentation_url %}
   - name: Documentation
     url: {{ cookiecutter.documentation_url | tojson }}
     about: Check the project documentation before opening an issue.
-{% endif -%}
+{% endif %}
 {% for route in contact_link_routes %}
-  - name: {{ (route.name if route.name is defined and route.name else route.type if route.type is defined and route.type else "Support") | tojson }}
+  - name: {{ route.system | tojson }}
     url: {{ route.url | tojson }}
-    about: {{ (route.purpose if route.purpose is defined and route.purpose else "Use this route for project support.") | tojson }}
+    about: Use this route for project support.
 {% endfor %}
 {% endif %}

@@ -6,6 +6,5 @@ logic lives in ``main.py`` so it can also be imported and tested directly.
 
 from {{ cookiecutter.project_slug }}.main import main
 
-
 if __name__ == "__main__":
     main()

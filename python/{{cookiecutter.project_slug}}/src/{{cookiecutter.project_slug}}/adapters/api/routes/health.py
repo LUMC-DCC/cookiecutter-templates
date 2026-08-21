@@ -6,7 +6,6 @@ to check whether the application process is responding.
 
 from fastapi import APIRouter
 
-
 router = APIRouter(tags=["health"])
 
 

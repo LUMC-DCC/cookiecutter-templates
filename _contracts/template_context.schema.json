@@ -22,7 +22,7 @@
     "project_slug": {
       "type": "string",
       "description": "Machine-readable package and repository name. Constraints depend on the selected language template.",
-      "default": "awesome_project"
+      "default": "my_awesome_project"
     },
     "project_short_description": {
       "type": "string",
@@ -90,7 +90,7 @@
       "default": {
         "entries": []
       },
-      "description": "People or organizations that created the software. Entries may include type, name, given_names, family_names, email, affiliation, orcid, roles, and url."
+      "description": "People who created the software. Use name, or both given_names and family_names; entries may also include email, affiliation, orcid, roles, and url."
     },
     "maintainers": {
       "type": "object",
@@ -109,7 +109,7 @@
       "default": {
         "entries": []
       },
-      "description": "People or teams responsible for maintenance. Entries may include type, name, given_names, family_names, email, affiliation, orcid, roles, and url."
+      "description": "People responsible for maintenance. Use name, or both given_names and family_names; entries may also include email, affiliation, orcid, roles, and url."
     },
     "principal_investigators": {
       "type": "object",
@@ -128,7 +128,7 @@
       "default": {
         "entries": []
       },
-      "description": "Principal investigators associated with the project. Entries may include name, given_names, family_names, email, affiliation, orcid, and role."
+      "description": "Principal investigators associated with the project. Use name, or both given_names and family_names; entries may also include email, affiliation, orcid, roles, and url."
     },
     "organization_name": {
       "type": "string",
@@ -275,7 +275,7 @@
       "default": {
         "entries": []
       },
-      "description": "Persistent identifiers. Entries may include type, identifier, associated_version, and relation."
+      "description": "Persistent identifiers. Each entry declares its CFF identifier type and value, with an optional associated version."
     },
     "publications": {
       "type": "object",
@@ -349,10 +349,7 @@
             "enum": [
               "user",
               "deployment",
-              "developer",
-              "api",
-              "tutorial",
-              "reference"
+              "developer"
             ]
           }
         }
@@ -360,61 +357,61 @@
       "default": {
         "entries": []
       },
-      "description": "Documentation types to scaffold or reference. Supported canonical values are user, deployment, developer, api, tutorial, and reference."
+      "description": "SMP documentation categories to scaffold. API and technical reference material are part of developer documentation."
     },
     "include_contributing": {
       "type": "string",
       "enum": [
-        "no",
-        "yes"
+        "yes",
+        "no"
       ],
       "description": "Whether to include CONTRIBUTING.md.",
-      "default": "no"
+      "default": "yes"
     },
     "include_code_of_conduct": {
       "type": "string",
       "enum": [
-        "no",
-        "yes"
+        "yes",
+        "no"
       ],
       "description": "Whether to include CODE_OF_CONDUCT.md.",
-      "default": "no"
+      "default": "yes"
     },
     "include_governance": {
       "type": "string",
       "enum": [
-        "no",
-        "yes"
+        "yes",
+        "no"
       ],
       "description": "Whether to include GOVERNANCE.md.",
-      "default": "no"
+      "default": "yes"
     },
     "include_security": {
       "type": "string",
       "enum": [
-        "no",
-        "yes"
+        "yes",
+        "no"
       ],
       "description": "Whether to include SECURITY.md.",
-      "default": "no"
+      "default": "yes"
     },
     "include_support": {
       "type": "string",
       "enum": [
-        "no",
-        "yes"
+        "yes",
+        "no"
       ],
       "description": "Whether to include SUPPORT.md.",
-      "default": "no"
+      "default": "yes"
     },
     "include_changelog": {
       "type": "string",
       "enum": [
-        "no",
-        "yes"
+        "yes",
+        "no"
       ],
       "description": "Whether to include CHANGELOG.md.",
-      "default": "no"
+      "default": "yes"
     },
     "support_routes": {
       "type": "object",
@@ -433,7 +430,7 @@
       "default": {
         "entries": []
       },
-      "description": "Public support, bug-reporting, or feature-request routes. Entries may include name, type, url, contact, and purpose."
+      "description": "Public support, bug-reporting, or feature-request systems and their public URLs."
     },
     "code_of_conduct_contact": {
       "type": "string",
@@ -462,7 +459,7 @@
       "default": {
         "entries": []
       },
-      "description": "Programming languages used by the project. Entries may include name, version_constraint, and role."
+      "description": "Programming languages used by the project. Entries include a name and may include version_constraint and role from the SMP."
     },
     "software_functions": {
       "type": "object",
@@ -502,7 +499,7 @@
           "type": "Library"
         }
       ],
-      "description": "Interfaces exposed by the software, such as library, script, CLI, web API, GUI, workflow, plugin, or database interfaces. Entries may include type, specification, url, and status."
+      "description": "Interfaces exposed by the software. Type controls the scaffold; specification and status describe the selected interface."
     },
     "operating_systems": {
       "type": "object",
@@ -521,7 +518,7 @@
       "default": {
         "entries": []
       },
-      "description": "Supported operating systems or platforms. Entries may include name, version_constraint, and support_status."
+      "description": "Supported operating systems or platforms. Entries may include name, specification, and status from the SMP."
     },
     "external_dependencies": {
       "type": "object",
@@ -560,14 +557,6 @@
         "entries": []
       },
       "description": "External public services, partners, or roles needed by the project. Entries may include name, provider, service_types, quantity, and cost_coverage."
-    },
-    "include_tests": {
-      "type": "string",
-      "enum": [
-        "yes",
-        "no"
-      ],
-      "description": "Whether to include tests."
     },
     "test_types": {
       "type": "object",
@@ -748,7 +737,7 @@
       "default": {
         "entries": []
       },
-      "description": "Controlled, repeatable public destinations for packages, containers, releases, archives, installers, source, or hosted services."
+      "description": "Controlled public distribution routes, including package registries, releases, archives, source installation, installers, and hosted services."
     },
     "containerization": {
       "type": "object",
@@ -767,7 +756,7 @@
       "default": {
         "entries": []
       },
-      "description": "Repeatable container or complete-environment specifications. Canonical types control generated recipes; file_url, standard, and details preserve public source information."
+      "description": "Container recipes to generate. Project managers and lockfiles are configured separately."
     },
     "resource_requirements": {
       "type": "string",
@@ -896,11 +885,7 @@
         },
         {
           "required": [
-            "given_names"
-          ]
-        },
-        {
-          "required": [
+            "given_names",
             "family_names"
           ]
         }
@@ -921,7 +906,7 @@
           "format": "email"
         },
         "affiliation": {
-          "type": "string"
+          "$ref": "#/$defs/organization"
         },
         "orcid": {
           "type": "string"
@@ -929,22 +914,47 @@
         "roles": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "Original author",
+              "Co-author",
+              "Maintainer",
+              "Successor",
+              "Principal investigator"
+            ]
           }
         },
-        "role": {
-          "type": "string"
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identifier": {
+          "type": "string",
+          "format": "uri"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
         },
         "url": {
           "type": "string",
           "format": "uri"
         },
-        "type": {
-          "type": "string",
-          "enum": [
-            "person",
-            "organization"
-          ]
+        "address": {
+          "type": "string"
         }
       }
     },
@@ -1003,17 +1013,24 @@
     "persistent_identifier": {
       "type": "object",
       "additionalProperties": false,
+      "required": [
+        "type",
+        "identifier"
+      ],
       "properties": {
         "type": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "doi",
+            "url",
+            "swh",
+            "other"
+          ]
         },
         "identifier": {
           "type": "string"
         },
         "associated_version": {
-          "type": "string"
-        },
-        "relation": {
           "type": "string"
         }
       }
@@ -1061,72 +1078,35 @@
     "support_route": {
       "type": "object",
       "additionalProperties": false,
+      "required": [
+        "system"
+      ],
       "properties": {
-        "name": {
-          "type": "string"
-        },
-        "type": {
+        "system": {
           "type": "string",
-          "enum": [
-            "issue_tracker",
-            "helpdesk",
-            "email",
-            "form",
-            "documentation",
-            "other"
-          ]
+          "minLength": 1
         },
         "url": {
           "type": "string",
           "format": "uri"
-        },
-        "contact": {
-          "type": "string"
-        },
-        "purpose": {
-          "type": "string"
         }
       }
     },
     "programming_language": {
       "type": "object",
       "additionalProperties": false,
+      "required": [
+        "name"
+      ],
       "properties": {
         "name": {
           "type": "string"
-        },
-        "uri": {
-          "type": "string",
-          "format": "uri"
         },
         "version_constraint": {
           "type": "string"
         },
         "role": {
           "type": "string"
-        }
-      }
-    },
-    "data_format": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "uri": {
-          "type": "string",
-          "format": "uri"
-        },
-        "version_constraint": {
-          "type": "string"
-        },
-        "schema": {
-          "type": "string"
-        },
-        "sample_url": {
-          "type": "string",
-          "format": "uri"
         }
       }
     },
@@ -1221,10 +1201,6 @@
         "specification": {
           "type": "string"
         },
-        "url": {
-          "type": "string",
-          "format": "uri"
-        },
         "status": {
           "type": "string",
           "enum": [
@@ -1245,16 +1221,14 @@
         "name": {
           "type": "string"
         },
-        "version_constraint": {
+        "specification": {
           "type": "string"
         },
-        "support_status": {
+        "status": {
           "type": "string",
           "enum": [
-            "supported",
-            "expected-to-work",
-            "untested",
-            "unsupported"
+            "Officially supported",
+            "Expected to work"
           ]
         }
       }
@@ -1341,18 +1315,8 @@
             "Docker",
             "OCI / Podman",
             "Apptainer / Singularity",
-            "Nix",
-            "Pixi",
-            "conda-lock",
-            "Lock file",
             "Other"
           ]
-        },
-        "file_url": {
-          "type": "string"
-        },
-        "standard": {
-          "type": "string"
         },
         "details": {
           "type": "string"

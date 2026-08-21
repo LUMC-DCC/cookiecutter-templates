@@ -32,7 +32,9 @@ Programming language entries appear in project documentation and in
 `codemeta.json`. Software function records describe operations, inputs, outputs,
 formats, and command examples in project documentation when provided.
 Interface entries describe how users access the software and appear in generated
-overview, usage, developer, and API documentation when those pages exist.
+overview, usage, developer, and technical reference documentation when those
+pages exist. Interface status describes maturity or intended visibility; it
+does not change the architecture selected by the interface type.
 Operating-system entries appear as platform support in the README and generated
 documentation, and supported platforms are included in `codemeta.json` when
 provided.
@@ -57,8 +59,8 @@ written as custom license text.
 selected. Longer motivation, scope, funding acknowledgements, and context should
 live in the documentation overview rather than making the README heavy.
 
-`tests/` contains the generated test suite when tests are included. Selected
-test types control which starter test files are kept.
+`tests/` contains the generated test suite when one or more test types are
+selected. The selected types control which starter test files are kept.
 
 `.github/workflows/` contains purpose-specific GitHub Actions configuration.
 Each workflow is included only when its corresponding generated capability is
@@ -83,9 +85,8 @@ Python workflows share `.github/actions/setup-python-project/action.yml`, which
 installs the selected project manager and prepares one consistent environment
 for tests, documentation, quality, licensing, and distribution jobs.
 
-`tools/` contains project-maintenance commands, such as local metadata,
-changelog, and release checks. These are not importable package modules or
-analysis scripts.
+`tools/` contains project-maintenance commands, such as changelog and release
+checks. These are not importable package modules or analysis scripts.
 
 Generated documentation includes a release page with the versioning scheme,
 expected cadence, distribution destinations, channel setup, and release steps.
@@ -114,7 +115,7 @@ release notes, governance, and security reporting.
 
 | File | Main context fields |
 | --- | --- |
-| `CONTRIBUTING.md` | `include_tests`, `documentation_types`, quality selectors, `include_contributing` |
+| `CONTRIBUTING.md` | `test_types`, `documentation_types`, quality selectors, `include_contributing` |
 | `CODE_OF_CONDUCT.md` | `code_of_conduct_contact`, `maintainers` |
 | `GOVERNANCE.md` | `maintainers`, `principal_investigators`, `governance_notes`, `continuity_plan`, `retirement_criteria` |
 | `SECURITY.md` | `security_contact`, `security_measures`, `additional_security_measures`, `sensitive_data_statement`, `public_risk_notes`, `dmp_reference` |

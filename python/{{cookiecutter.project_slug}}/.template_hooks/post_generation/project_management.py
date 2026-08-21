@@ -15,14 +15,6 @@ TEXT_SUFFIXES = {
     ".yml",
 }
 
-METADATA_VALIDATION_COMMAND = (
-    "uvx --python 3.11 --from 'rs-metadata @ "
-    "git+https://github.com/LUMC-DCC/rs-metadata.git@"
-    "27f3da06c4bae5f735c492608b5ffea6c2715c21' "
-    "rs-metadata validate ."
-)
-
-
 def project_manager_replacements(ctx):
     """Build replacements for manager-aware generated text.
 
@@ -102,20 +94,6 @@ def replace_text_tokens(cwd, replacements):
             path.write_text(rendered, encoding="utf-8")
 
 
-def replace_metadata_token(cwd):
-    """Render the isolated metadata-validation command.
-
-    Parameters
-    ----------
-    cwd : pathlib.Path
-        Generated project root.
-    """
-    replace_text_tokens(
-        cwd,
-        {"@@METADATA_VALIDATE@@": METADATA_VALIDATION_COMMAND},
-    )
-
-
 def configure_project_manager(ctx, cwd):
     """Apply manager commands and warn about unsupported selections.
 
@@ -126,8 +104,6 @@ def configure_project_manager(ctx, cwd):
     cwd : pathlib.Path
         Generated project root.
     """
-    replace_metadata_token(cwd)
-
     requested, effective = resolve_project_manager(ctx)
     if requested != effective:
         print(

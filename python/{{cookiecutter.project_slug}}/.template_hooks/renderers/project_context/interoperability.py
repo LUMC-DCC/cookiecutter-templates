@@ -132,17 +132,17 @@ def format_operating_system_label(operating_system):
         Human-readable operating-system support label.
     """
     name = operating_system.get("name", "")
-    version_constraint = operating_system.get("version_constraint", "")
-    support_status = operating_system.get("support_status", "")
+    specification = operating_system.get("specification", "")
+    status = operating_system.get("status", "")
 
     if not name:
         return ""
 
     label = name
-    if version_constraint:
-        label = f"{label} {version_constraint}"
-    if support_status:
-        label = f"{label} - {support_status.replace('-', ' ')}"
+    if specification:
+        label = f"{label} {specification}"
+    if status:
+        label = f"{label} - {status}"
 
     return label
 
@@ -472,10 +472,9 @@ def format_interface_label(interface):
     """
     interface_type = interface.get("type", "")
     specification = interface.get("specification", "")
-    url = interface.get("url", "")
     status = interface.get("status", "")
 
-    if not any((interface_type, specification, url, status)):
+    if not any((interface_type, specification, status)):
         return ""
 
     label = interface_type or "Interface"
@@ -485,8 +484,6 @@ def format_interface_label(interface):
     details = []
     if specification:
         details.append(specification)
-    if url:
-        details.append(f"[reference]({url})")
     if details:
         label = f"{label} - {'; '.join(details)}"
 

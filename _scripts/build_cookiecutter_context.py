@@ -171,6 +171,11 @@ def build_context(contract, template=None):
     if prompts:
         context["__prompts__"] = prompts
 
+    # Apply whitespace control consistently across every text template.
+    context["_jinja2_env_vars"] = {
+        "lstrip_blocks": True,
+        "trim_blocks": True,
+    }
     context.update(build_template_metadata(contract, template))
 
     return context

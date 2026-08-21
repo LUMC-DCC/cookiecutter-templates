@@ -16,6 +16,8 @@ from pathlib import Path
 import pytest
 import yaml
 from cookiecutter.main import cookiecutter
+from jsonschema import Draft7Validator
+from rs_metadata.vocabulary import cff_schema
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,19 +40,25 @@ BASE_CONTEXT = {
                 "given_names": "Ada",
                 "family_names": "Lovelace",
                 "email": "ada@example.org",
-                "affiliation": "LUMC",
+                "affiliation": {
+                    "name": "Leiden University Medical Center",
+                    "identifier": "https://ror.org/05xvt9f17",
+                },
                 "orcid": "0000-0002-1825-0097",
                 "url": "https://example.org/ada",
-                "roles": ["software", "conceptualization"],
+                "roles": ["Original author", "Maintainer"],
             },
             {
                 "name": "Grace Hopper",
                 "given_names": "Grace",
                 "family_names": "Hopper",
                 "email": "grace@example.org",
-                "affiliation": "LUMC",
+                "affiliation": {
+                    "name": "Leiden University Medical Center",
+                    "identifier": "https://ror.org/05xvt9f17",
+                },
                 "orcid": "0000-0001-5109-3700",
-                "roles": ["software"],
+                "roles": ["Co-author"],
             },
         ],
     },
@@ -64,7 +72,16 @@ BASE_CONTEXT = {
         ]
     },
     "principal_investigators": {
-        "entries": [{"name": "Katherine Johnson", "affiliation": "LUMC"}],
+        "entries": [
+            {
+                "name": "Katherine Johnson",
+                "affiliation": {
+                    "name": "Leiden University Medical Center",
+                    "identifier": "https://ror.org/05xvt9f17",
+                },
+                "roles": ["Principal investigator"],
+            }
+        ],
     },
     "organization_name": "LUMC",
     "funding": {
@@ -119,9 +136,9 @@ BASE_CONTEXT = {
     },
     "persistent_identifiers": {
         "entries": [
-            {"type": "DOI", "identifier": "10.5281/zenodo.12345"},
+            {"type": "doi", "identifier": "10.5281/zenodo.12345"},
             {
-                "type": "SWH",
+                "type": "swh",
                 "identifier": "swh:1:dir:bc286860f423ea7ced246ba7458eef4b4541cf2d",
                 "associated_version": "0.2.0",
             },
@@ -151,7 +168,7 @@ BASE_CONTEXT = {
     },
     "include_citation_cff": "yes",
     "documentation_builder": "mkdocs",
-    "documentation_types": {"entries": ["user", "developer", "api"]},
+    "documentation_types": {"entries": ["user", "developer"]},
     "include_contributing": "yes",
     "include_code_of_conduct": "yes",
     "include_governance": "no",
@@ -161,16 +178,12 @@ BASE_CONTEXT = {
     "support_routes": {
         "entries": [
             {
-                "name": "GitHub issues",
-                "type": "issue_tracker",
+                "system": "GitHub issues",
                 "url": "https://github.com/LUMC-DCC/research-template-demo/issues",
-                "purpose": "Bugs and feature requests",
             },
             {
-                "name": "Helpdesk",
-                "type": "helpdesk",
+                "system": "Helpdesk",
                 "url": "https://example.org/helpdesk",
-                "purpose": "General support",
             }
         ],
     },
@@ -247,7 +260,6 @@ BASE_CONTEXT = {
             {
                 "type": "Web API",
                 "specification": "OpenAPI-described service endpoint for analysis jobs",
-                "url": "https://example.org/api/openapi.json",
                 "status": "Experimental",
             },
             {
@@ -261,17 +273,17 @@ BASE_CONTEXT = {
         "entries": [
             {
                 "name": "Linux",
-                "version_constraint": ">=Ubuntu 22.04",
-                "support_status": "supported",
+                "specification": ">=Ubuntu 22.04",
+                "status": "Officially supported",
             },
             {
                 "name": "macOS",
-                "version_constraint": ">=13",
-                "support_status": "supported",
+                "specification": ">=13",
+                "status": "Officially supported",
             },
             {
                 "name": "Windows",
-                "support_status": "untested",
+                "status": "Expected to work",
             },
         ]
     },
@@ -313,7 +325,6 @@ BASE_CONTEXT = {
             },
         ]
     },
-    "include_tests": "yes",
     "test_types": {
         "entries": [
             "Smoke tests",
@@ -337,7 +348,6 @@ BASE_CONTEXT = {
         "entries": [
             {
                 "type": "Docker",
-                "standard": "OCI Image Specification",
                 "details": "Publish tagged images with project releases.",
             },
             {
@@ -459,15 +469,22 @@ def assert_no_template_artifacts(project_path):
     ]
 
     unresolved = []
+    leading_blank_lines = []
+    excessive_blank_lines = []
     markdown_collisions = []
     for path in all_paths:
         if not path.is_file():
             continue
         content = path.read_text(encoding="utf-8")
+        if content.startswith("\n"):
+            leading_blank_lines.append(path.relative_to(project_path))
+        if "\n\n\n\n" in content:
+            excessive_blank_lines.append(path.relative_to(project_path))
         if (
             "{{ cookiecutter" in content
             or "{% " in content
             or "@@PROJECT_" in content
+            or "@@METADATA_" in content
         ):
             unresolved.append(path.relative_to(project_path))
         if path.suffix == ".md" and (
@@ -476,6 +493,8 @@ def assert_no_template_artifacts(project_path):
             markdown_collisions.append(path.relative_to(project_path))
 
     assert unresolved == []
+    assert leading_blank_lines == []
+    assert excessive_blank_lines == []
     assert markdown_collisions == []
 
 
@@ -603,7 +622,7 @@ def assert_selected_test_files(project_path, selected_types):
                 "docs/index.md",
                 "docs/overview.md",
                 "docs/developer.md",
-                "docs/api.md",
+                "docs/reference.md",
                 "docs/legal.md",
                 "docs/release.md",
                 "mkdocs.yml",
@@ -657,7 +676,7 @@ def assert_selected_test_files(project_path, selected_types):
             {
                 "project_slug": "minimal_demo",
                 "documentation_types": {"entries": []},
-                "include_tests": "no",
+                "test_types": {"entries": []},
                 "interfaces": {"entries": []},
                 "license": "",
                 "formatter_tool": "none",
@@ -752,7 +771,7 @@ def test_python_template_generates_expected_option_sets(
             if programming_language.get("name", "").lower() == "python"
             and programming_language.get("version_constraint")
         ),
-        ">=3.10",
+        ">=3.12",
     )
     assert metadata["project"]["requires-python"] == expected_python_constraint
     assert metadata["project"]["description"] == overrides.get(
@@ -792,6 +811,27 @@ def test_python_template_generates_expected_option_sets(
             "github-actions",
             "pip",
         }
+        pre_commit = yaml.safe_load(
+            (project_path / ".pre-commit-config.yaml").read_text(encoding="utf-8")
+        )
+        assert [hook["id"] for hook in pre_commit["repos"][0]["hooks"]] == [
+            "ruff-check",
+            "ruff-format",
+        ]
+        subprocess.run(
+            ["ruff", "check", "."],
+            cwd=project_path,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        subprocess.run(
+            ["ruff", "format", "--check", "."],
+            cwd=project_path,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
     else:
         assert metadata["project"]["dependencies"] == []
         assert "license" not in optional_dependencies
@@ -802,7 +842,7 @@ def test_python_template_generates_expected_option_sets(
         assert "api" not in optional_dependencies
         assert "scripts" not in metadata["project"]
     rendered_context = BASE_CONTEXT | overrides
-    if rendered_context["include_tests"] == "yes":
+    if rendered_context["test_types"]["entries"]:
         assert optional_dependencies["test"] == expected_test_dependencies(
             rendered_context,
         )
@@ -824,7 +864,6 @@ def test_python_template_generates_expected_option_sets(
         "Homepage": "https://example.org/research-template-demo",
         "Documentation": "https://lumc-dcc.github.io/research-template-demo",
         "Issues": "https://github.com/LUMC-DCC/research-template-demo/issues",
-        "Support": "https://example.org/helpdesk",
     }
     if overrides.get("license", BASE_CONTEXT["license"]):
         license_text = (project_path / "LICENSE.txt").read_text(encoding="utf-8")
@@ -842,7 +881,7 @@ def test_python_template_generates_expected_option_sets(
         ("pixi", "prefix-dev/setup-pixi@", "pixi run ", "pixi"),
         (
             "pip",
-            'python -m pip install -e ".[metadata,license,api,test,quality,release,docs]"',
+            'python -m pip install -e ".[license,api,test,quality,release,docs]"',
             "",
             None,
         ),
@@ -1419,13 +1458,14 @@ def test_python_operating_systems_render_platform_metadata_and_ci(
 
     for content in (readme, docs_overview, docs_usage):
         assert "## Platform support" in content
-        assert "- Linux >=Ubuntu 22.04 - supported" in content
-        assert "- macOS >=13 - supported" in content
-        assert "- Windows - untested" in content
+        assert "- Linux >=Ubuntu 22.04 - Officially supported" in content
+        assert "- macOS >=13 - Officially supported" in content
+        assert "- Windows - Expected to work" in content
 
     assert codemeta["operatingSystem"] == [
         "Linux >=Ubuntu 22.04",
         "macOS >=13",
+        "Windows",
     ]
     assert pyproject["project"]["classifiers"] == [
         "Operating System :: POSIX :: Linux",
@@ -1798,7 +1838,7 @@ def test_python_sparql_endpoint_scaffold_is_route_specific(tmp_path, monkeypatch
                 "docs/functions.md",
                 "docs/usage.md",
                 "docs/developer.md",
-                "docs/api.md",
+                "docs/reference.md",
                 "docs/documentation.md",
                 "docs/legal.md",
                 "docs/hooks.py",
@@ -1812,8 +1852,6 @@ def test_python_sparql_endpoint_scaffold_is_route_specific(tmp_path, monkeypatch
                 "docs/Makefile",
                 "docs/make.bat",
                 "docs/deployment.md",
-                "docs/tutorials",
-                "docs/reference",
             ],
             [
                 "mkdocs",
@@ -1835,7 +1873,7 @@ def test_python_sparql_endpoint_scaffold_is_route_specific(tmp_path, monkeypatch
                 "docs/source/functions.md",
                 "docs/source/usage.md",
                 "docs/source/developer.md",
-                "docs/source/api.md",
+                "docs/source/reference.md",
                 "docs/source/documentation.md",
                 "docs/source/legal.md",
                 "docs/source/conf.py",
@@ -1849,8 +1887,6 @@ def test_python_sparql_endpoint_scaffold_is_route_specific(tmp_path, monkeypatch
                 "docs/hooks.py",
                 "docs/source/index.rst",
                 "docs/source/deployment.md",
-                "docs/source/tutorials",
-                "docs/source/reference",
                 "mkdocs.yml",
             ],
             ["myst-parser", "sphinx", "sphinx-book-theme"],
@@ -1868,7 +1904,7 @@ def test_python_sparql_endpoint_scaffold_is_route_specific(tmp_path, monkeypatch
                 "docs/source/functions.md",
                 "docs/source/usage.md",
                 "docs/source/developer.md",
-                "docs/source/api.md",
+                "docs/source/reference.md",
                 "docs/source/documentation.md",
                 "docs/source/legal.md",
                 "docs/source/conf.py",
@@ -1880,8 +1916,6 @@ def test_python_sparql_endpoint_scaffold_is_route_specific(tmp_path, monkeypatch
                 "docs/hooks.py",
                 "docs/source/index.rst",
                 "docs/source/deployment.md",
-                "docs/source/tutorials",
-                "docs/source/reference",
                 "mkdocs.yml",
             ],
             ["myst-parser", "sphinx", "sphinx-book-theme"],
@@ -1956,7 +1990,7 @@ def test_python_documentation_builder_scaffolds_are_selected(
             "functions.md",
             "usage.md",
             "developer.md",
-            "api.md",
+            "reference.md",
             "documentation.md",
             "legal.md",
             "...",
@@ -1994,12 +2028,10 @@ def test_python_documentation_builder_none_uses_generic_docs(tmp_path, monkeypat
     assert (project_path / "docs" / "functions.md").exists()
     assert (project_path / "docs" / "usage.md").exists()
     assert (project_path / "docs" / "developer.md").exists()
-    assert (project_path / "docs" / "api.md").exists()
+    assert (project_path / "docs" / "reference.md").exists()
     assert (project_path / "docs" / "documentation.md").exists()
     assert (project_path / "docs" / "legal.md").exists()
     assert not (project_path / "docs" / "deployment.md").exists()
-    assert not (project_path / "docs" / "tutorials").exists()
-    assert not (project_path / "docs" / "reference").exists()
     assert not (project_path / "docs" / "conf.py").exists()
     assert not (project_path / "mkdocs.yml").exists()
 
@@ -2014,26 +2046,19 @@ def test_python_documentation_types_select_expected_pages(tmp_path, monkeypatch)
     project_path = render_python_project(
         tmp_path,
         monkeypatch,
-        documentation_types={
-            "entries": ["deployment", "tutorial", "reference"],
-        },
+        documentation_types={"entries": ["deployment"]},
     )
 
     assert (project_path / "docs" / "deployment.md").exists()
-    assert (project_path / "docs" / "tutorials" / "index.md").exists()
-    assert (project_path / "docs" / "reference" / "index.md").exists()
     assert not (project_path / "docs" / "usage.md").exists()
     assert not (project_path / "docs" / "developer.md").exists()
-    assert not (project_path / "docs" / "api.md").exists()
+    assert not (project_path / "docs" / "reference.md").exists()
 
     readme = (project_path / "README.md").read_text(encoding="utf-8")
     assert "## Documentation" in readme
     assert "- Deployment notes:" in readme
-    assert "- Tutorials:" in readme
-    assert "- Reference:" in readme
     assert "- User guide:" not in readme
     assert "- Developer guide:" not in readme
-    assert "- API reference:" not in readme
 
     deployment = (project_path / "docs" / "deployment.md").read_text(
         encoding="utf-8"
@@ -2229,7 +2254,8 @@ def test_python_shared_community_files_render_standard_content(tmp_path, monkeyp
     assert "ruff check ." in contributing
     assert "Rebase" in contributing
     assert "CI runs on every push and pull request" in contributing
-    assert "Metadata consistency" in contributing
+    assert "| Metadata |" in contributing
+    assert "rs-metadata validate" in contributing
     assert "The branch is rebased on the target branch" in contributing
     assert "No secrets, private data, or non-public security details" in contributing
     assert "Contributor Covenant" in code_of_conduct
@@ -2286,7 +2312,7 @@ def test_python_shared_community_files_render_standard_content(tmp_path, monkeyp
     assert {
         "name": "Helpdesk",
         "url": "https://example.org/helpdesk",
-        "about": "General support",
+        "about": "Use this route for project support.",
     } in issue_template_config["contact_links"]
 
 
@@ -2498,7 +2524,9 @@ def test_project_context_renders_in_python_readme_docs_and_metadata(
     docs_developer = (project_path / "docs" / "developer.md").read_text(
         encoding="utf-8"
     )
-    docs_api = (project_path / "docs" / "api.md").read_text(encoding="utf-8")
+    docs_reference = (project_path / "docs" / "reference.md").read_text(
+        encoding="utf-8"
+    )
     docs_legal = (project_path / "docs" / "legal.md").read_text(encoding="utf-8")
     codemeta = json.loads((project_path / "codemeta.json").read_text())
 
@@ -2592,7 +2620,7 @@ def test_project_context_renders_in_python_readme_docs_and_metadata(
     )
     assert (
         "- Web API (Experimental) - OpenAPI-described service endpoint for "
-        "analysis jobs; [reference](https://example.org/api/openapi.json)"
+        "analysis jobs"
     ) in docs_overview
     assert (
         "- Script (Experimental) - Batch entry point for scheduled processing"
@@ -2612,9 +2640,9 @@ def test_project_context_renders_in_python_readme_docs_and_metadata(
     assert "### Web API" in docs_developer
     assert "### Script" in docs_developer
     assert "### Portal" not in docs_developer
-    assert "## API interfaces" in docs_api
-    assert "Web API (Experimental)" in docs_api
-    assert "Command-line tool (Stable)" not in docs_api
+    assert "## API interfaces" in docs_reference
+    assert "Web API (Experimental)" in docs_reference
+    assert "Command-line tool (Stable)" not in docs_reference
 
     assert docs_overview.index("Publication:") < docs_overview.index("## Purpose")
     assert "## Legal and Licensing" in readme
@@ -2669,6 +2697,7 @@ def test_python_template_generates_codemeta_metadata(tmp_path, monkeypatch):
     assert codemeta["operatingSystem"] == [
         "Linux >=Ubuntu 22.04",
         "macOS >=13",
+        "Windows",
     ]
     assert codemeta["license"] == "https://spdx.org/licenses/MIT"
     assert codemeta["codeRepository"] == (
@@ -2738,7 +2767,11 @@ def test_python_template_generates_codemeta_metadata(tmp_path, monkeypatch):
             "givenName": "Ada",
             "familyName": "Lovelace",
             "email": "ada@example.org",
-            "affiliation": {"@type": "Organization", "name": "LUMC"},
+            "affiliation": {
+                "@type": "Organization",
+                "@id": "https://ror.org/05xvt9f17",
+                "name": "Leiden University Medical Center",
+            },
             "url": "https://example.org/ada",
         },
         {
@@ -2748,7 +2781,11 @@ def test_python_template_generates_codemeta_metadata(tmp_path, monkeypatch):
             "givenName": "Grace",
             "familyName": "Hopper",
             "email": "grace@example.org",
-            "affiliation": {"@type": "Organization", "name": "LUMC"},
+            "affiliation": {
+                "@type": "Organization",
+                "@id": "https://ror.org/05xvt9f17",
+                "name": "Leiden University Medical Center",
+            },
         },
     ]
     assert codemeta["maintainer"] == [
@@ -2764,14 +2801,18 @@ def test_python_template_generates_codemeta_metadata(tmp_path, monkeypatch):
         {
             "@type": "Person",
             "name": "Katherine Johnson",
-            "affiliation": {"@type": "Organization", "name": "LUMC"},
+            "affiliation": {
+                "@type": "Organization",
+                "@id": "https://ror.org/05xvt9f17",
+                "name": "Leiden University Medical Center",
+            },
         }
     ]
     assert codemeta["identifier"] == [
         "https://doi.org/10.5281/zenodo.12345",
         {
             "@type": "PropertyValue",
-            "propertyID": "SWH",
+            "propertyID": "swh",
             "value": "swh:1:dir:bc286860f423ea7ced246ba7458eef4b4541cf2d",
             "description": "Persistent identifier for version 0.2.0",
         },
@@ -2816,7 +2857,7 @@ def test_python_codemeta_preserves_overlapping_people_roles(tmp_path, monkeypatc
         "given_names": "Ada",
         "family_names": "Lovelace",
         "email": "ada@example.org",
-        "affiliation": "LUMC",
+        "affiliation": {"name": "LUMC"},
         "orcid": "0000-0002-1825-0097",
     }
     project_path = render_python_project(
@@ -2864,7 +2905,7 @@ def test_python_people_metadata_accepts_structured_names(tmp_path, monkeypatch):
                 {
                     "given_names": "Katherine",
                     "family_names": "Johnson",
-                    "affiliation": "LUMC",
+                    "affiliation": {"name": "LUMC"},
                 }
             ]
         },
@@ -2893,9 +2934,10 @@ def test_python_template_generates_citation_metadata(tmp_path, monkeypatch):
     """Ensure Python projects render machine-readable citation metadata."""
     project_path = render_python_project(tmp_path, monkeypatch)
 
-    citation = yaml.safe_load(
-        (project_path / "CITATION.cff").read_text(encoding="utf-8")
-    )
+    citation_text = (project_path / "CITATION.cff").read_text(encoding="utf-8")
+    assert "\n\n" not in citation_text
+    citation = yaml.safe_load(citation_text)
+    Draft7Validator(cff_schema()).validate(citation)
 
     assert citation["cff-version"] == "1.2.0"
     assert citation["title"] == "Research Template Demo"
@@ -2914,7 +2956,7 @@ def test_python_template_generates_citation_metadata(tmp_path, monkeypatch):
         {
             "family-names": "Lovelace",
             "given-names": "Ada",
-            "affiliation": "LUMC",
+            "affiliation": "Leiden University Medical Center",
             "email": "ada@example.org",
             "orcid": "https://orcid.org/0000-0002-1825-0097",
             "website": "https://example.org/ada",
@@ -2922,7 +2964,7 @@ def test_python_template_generates_citation_metadata(tmp_path, monkeypatch):
         {
             "family-names": "Hopper",
             "given-names": "Grace",
-            "affiliation": "LUMC",
+            "affiliation": "Leiden University Medical Center",
             "email": "grace@example.org",
             "orcid": "https://orcid.org/0000-0001-5109-3700",
         },

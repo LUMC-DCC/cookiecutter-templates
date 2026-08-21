@@ -1,20 +1,20 @@
 name: Containers
-{% set container_types = namespace(values=[]) -%}
-{% for specification in cookiecutter.containerization.entries -%}
-{% if specification.type is defined -%}
-{% set _ = container_types.values.append(specification.type) -%}
-{% endif -%}
-{% endfor -%}
-{% set has_docker = "Docker" in container_types.values -%}
-{% set has_oci = "OCI / Podman" in container_types.values -%}
-{% set has_apptainer = "Apptainer / Singularity" in container_types.values -%}
-{% set channels = namespace(values=[]) -%}
-{% for channel in cookiecutter.distribution_channels.entries -%}
-{% set _ = channels.values.append(channel | lower) -%}
-{% endfor -%}
-{% set publish_ghcr = "github container registry" in channels.values or "ghcr" in channels.values or "ghcr.io" in channels.values -%}
-{% set publish_docker_hub = "docker hub" in channels.values or "dockerhub" in channels.values -%}
-{% set primary_oci_file = "Dockerfile" if has_docker else "Containerfile" -%}
+{% set container_types = namespace(values=[]) %}
+{% for specification in cookiecutter.containerization.entries %}
+{% if specification.type is defined %}
+{% set _ = container_types.values.append(specification.type) %}
+{% endif %}
+{% endfor %}
+{% set has_docker = "Docker" in container_types.values %}
+{% set has_oci = "OCI / Podman" in container_types.values %}
+{% set has_apptainer = "Apptainer / Singularity" in container_types.values %}
+{% set channels = namespace(values=[]) %}
+{% for channel in cookiecutter.distribution_channels.entries %}
+{% set _ = channels.values.append(channel | lower) %}
+{% endfor %}
+{% set publish_ghcr = "github container registry" in channels.values or "ghcr" in channels.values or "ghcr.io" in channels.values %}
+{% set publish_docker_hub = "docker hub" in channels.values or "dockerhub" in channels.values %}
+{% set primary_oci_file = "Dockerfile" if has_docker else "Containerfile" %}
 
 on:
   push:
@@ -30,7 +30,7 @@ permissions:
 jobs:
 {% if has_docker or has_oci %}
   oci-build:
-    name: Build {% raw %}${{ matrix.file }}{% endraw %}
+    name: Build ${{ '{{' }} matrix.file {{ '}}' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -49,7 +49,7 @@ jobs:
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
-          file: {% raw %}${{ matrix.file }}{% endraw %}
+          file: ${{ '{{' }} matrix.file {{ '}}' }}
           push: false
 {% endif %}
 {% if has_apptainer %}
@@ -88,13 +88,13 @@ jobs:
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ghcr.io
-          username: {% raw %}${{ github.actor }}{% endraw %}
-          password: {% raw %}${{ secrets.GITHUB_TOKEN }}{% endraw %}
+          username: ${{ '{{' }} github.actor {{ '}}' }}
+          password: ${{ '{{' }} secrets.GITHUB_TOKEN {{ '}}' }}
       - name: Create image tags and labels
         id: meta
         uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
         with:
-          images: ghcr.io/{% raw %}${{ github.repository }}{% endraw %}
+          images: ghcr.io/${{ '{{' }} github.repository {{ '}}' }}
           tags: |
             type=ref,event=tag
             type=raw,value=latest
@@ -104,8 +104,8 @@ jobs:
           context: .
           file: {{ primary_oci_file }}
           push: true
-          tags: {% raw %}${{ steps.meta.outputs.tags }}{% endraw %}
-          labels: {% raw %}${{ steps.meta.outputs.labels }}{% endraw %}
+          tags: ${{ '{{' }} steps.meta.outputs.tags {{ '}}' }}
+          labels: ${{ '{{' }} steps.meta.outputs.labels {{ '}}' }}
 {% endif %}
 {% if (has_docker or has_oci) and publish_docker_hub %}
   publish-docker-hub:
@@ -119,13 +119,13 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
-          username: {% raw %}${{ secrets.DOCKERHUB_USERNAME }}{% endraw %}
-          password: {% raw %}${{ secrets.DOCKERHUB_TOKEN }}{% endraw %}
+          username: ${{ '{{' }} secrets.DOCKERHUB_USERNAME {{ '}}' }}
+          password: ${{ '{{' }} secrets.DOCKERHUB_TOKEN {{ '}}' }}
       - name: Create image tags and labels
         id: meta
         uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
         with:
-          images: {% raw %}${{ secrets.DOCKERHUB_USERNAME }}{% endraw %}/{{ cookiecutter.project_slug | replace('_', '-') }}
+          images: ${{ '{{' }} secrets.DOCKERHUB_USERNAME {{ '}}' }}/{{ cookiecutter.project_slug | replace('_', '-') }}
           tags: |
             type=ref,event=tag
             type=raw,value=latest
@@ -135,6 +135,6 @@ jobs:
           context: .
           file: {{ primary_oci_file }}
           push: true
-          tags: {% raw %}${{ steps.meta.outputs.tags }}{% endraw %}
-          labels: {% raw %}${{ steps.meta.outputs.labels }}{% endraw %}
+          tags: ${{ '{{' }} steps.meta.outputs.tags {{ '}}' }}
+          labels: ${{ '{{' }} steps.meta.outputs.labels {{ '}}' }}
 {% endif %}

@@ -16,41 +16,22 @@ DOCUMENTATION_TYPES = {
     "developer": {
         "label": "Developer guide",
         "path": "developer.md",
-        "description": "repository layout, local development, tests, and contribution workflow",
-        "optional": True,
-    },
-    "api": {
-        "label": "API reference",
-        "path": "api.md",
-        "description": "public Python interfaces, generated API docs, or API endpoint notes",
-        "optional": True,
-    },
-    "tutorial": {
-        "label": "Tutorials",
-        "path": "tutorials",
-        "description": "step-by-step examples for common workflows",
-        "optional": True,
-    },
-    "reference": {
-        "label": "Reference",
-        "path": "reference",
-        "description": "detailed command, configuration, format, or schema reference material",
+        "description": "architecture, local development, tests, contribution workflow, and technical reference",
         "optional": True,
     },
 }
 
 DOCUMENTATION_TYPE_ALIASES = {
-    "api documentation": "api",
-    "api docs": "api",
-    "api reference": "api",
+    "api documentation": "developer",
+    "api docs": "developer",
+    "api reference": "developer",
     "deployment documentation": "deployment",
     "deployment docs": "deployment",
     "developer documentation": "developer",
     "developer docs": "developer",
     "developer guide": "developer",
     "dev": "developer",
-    "reference docs": "reference",
-    "tutorials": "tutorial",
+    "reference docs": "developer",
     "user documentation": "user",
     "user docs": "user",
     "user guide": "user",
@@ -113,11 +94,14 @@ def selected_optional_documentation_paths(entries):
         Optional documentation paths selected by context.
     """
     selected = selected_documentation_types(entries)
-    return {
+    paths = {
         DOCUMENTATION_TYPES[doc_type]["path"]
         for doc_type in selected
         if DOCUMENTATION_TYPES[doc_type]["optional"]
     }
+    if "developer" in selected:
+        paths.add("reference.md")
+    return paths
 
 
 def optional_documentation_paths():
@@ -128,11 +112,13 @@ def optional_documentation_paths():
     set[str]
         Optional documentation paths controlled by ``documentation_types``.
     """
-    return {
+    paths = {
         details["path"]
         for details in DOCUMENTATION_TYPES.values()
         if details["optional"]
     }
+    paths.add("reference.md")
+    return paths
 
 
 def build_readme_documentation_section(entries):

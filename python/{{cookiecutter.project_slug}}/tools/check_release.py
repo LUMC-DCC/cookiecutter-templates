@@ -6,12 +6,11 @@ source of truth.
 """
 
 import argparse
-from pathlib import Path
 import re
 import tomllib
+from pathlib import Path
 
 from packaging.version import InvalidVersion, Version
-
 
 SEMVER_PATTERN = re.compile(
     r"^(0|[1-9]\d*)\."

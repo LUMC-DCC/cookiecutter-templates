@@ -11,10 +11,6 @@ CONTAINER_TYPE_ALIASES = {
     "apptainer": "apptainer",
     "apptainer singularity": "apptainer",
     "singularity": "apptainer",
-    "nix": "nix",
-    "pixi": "pixi",
-    "conda lock": "conda-lock",
-    "lock file": "lock-file",
     "other": "other",
 }
 

@@ -43,7 +43,7 @@ def lacks_test_type(ctx, test_type):
     bool
         Whether the test type is not selected or tests are disabled.
     """
-    return is_no(ctx, "include_tests") or test_type not in entries(ctx, "test_types")
+    return test_type not in entries(ctx, "test_types")
 
 
 def needs_python_project_setup(ctx):
@@ -73,7 +73,7 @@ def needs_python_project_setup(ctx):
     )
     return any(
         (
-            not is_no(ctx, "include_tests"),
+            bool(entries(ctx, "test_types")),
             has_quality_checks(ctx),
             builds_documentation,
             checks_licenses,
@@ -99,11 +99,11 @@ OPTIONAL_PATHS = [
     },
     {
         "path": "tests",
-        "should_remove": lambda ctx: is_no(ctx, "include_tests"),
+        "should_remove": lambda ctx: not entries(ctx, "test_types"),
     },
     {
         "path": ".github/workflows/tests.yml",
-        "should_remove": lambda ctx: is_no(ctx, "include_tests"),
+        "should_remove": lambda ctx: not entries(ctx, "test_types"),
     },
     {
         "path": "tests/test_smoke.py",

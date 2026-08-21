@@ -1,42 +1,56 @@
-{% macro person_name(person) -%}
-{%- if person.name is defined and person.name -%}
+{% macro person_name(person) %}
+{% if person.name is defined and person.name %}
 {{ person.name }}
-{%- else -%}
-{%- set given_names = person.given_names if person.given_names is defined else "" -%}
-{%- set family_names = person.family_names if person.family_names is defined else "" -%}
+{% else %}
+{% set given_names = person.given_names if person.given_names is defined else "" %}
+{% set family_names = person.family_names if person.family_names is defined else "" %}
 {{ (given_names ~ " " ~ family_names) | trim or "Project member" }}
-{%- endif -%}
-{%- endmacro -%}
-{% macro codemeta_person(person, default_type="person") %}
-{% set person_type = person.type if person.type is defined and person.type else default_type -%}
+{% endif %}
+{% endmacro %}
+{% macro codemeta_organization(organization) %}
+      {
+        "@type": "Organization",
+{% if organization.identifier is defined and organization.identifier %}
+        "@id": {{ organization.identifier | tojson }},
+{% endif %}
+        "name": {{ organization.name | tojson }}
+{% if organization.email is defined and organization.email %},
+        "email": {{ organization.email | tojson }}
+{% endif %}
+{% if organization.url is defined and organization.url %},
+        "url": {{ organization.url | tojson }}
+{% endif %}
+{% if organization.address is defined and organization.address %},
+        "address": {{ organization.address | tojson }}
+{% endif %}
+      }
+{% endmacro %}
+{% macro codemeta_person(person) %}
     {
-      "@type": {{ ("Organization" if person_type == "organization" else "Person") | tojson }},
-{% if person.orcid is defined and person.orcid and person_type != "organization" %}
+      "@type": "Person",
+{% if person.orcid is defined and person.orcid %}
       "@id": {{ (person.orcid if person.orcid.startswith("https://orcid.org/") else "https://orcid.org/" ~ person.orcid) | tojson }},
 {% elif person.url is defined and person.url %}
       "@id": {{ person.url | tojson }},
 {% endif %}
       "name": {{ (person_name(person) | trim) | tojson }}
-{% if person_type != "organization" and person.given_names is defined and person.given_names %},
+{% if person.given_names is defined and person.given_names %},
       "givenName": {{ person.given_names | tojson }}
 {% endif %}
-{% if person_type != "organization" and person.family_names is defined and person.family_names %},
+{% if person.family_names is defined and person.family_names %},
       "familyName": {{ person.family_names | tojson }}
 {% endif %}
 {% if person.email is defined and person.email %},
       "email": {{ person.email | tojson }}
 {% endif %}
 {% if person.affiliation is defined and person.affiliation %},
-      "affiliation": {
-        "@type": "Organization",
-        "name": {{ person.affiliation | tojson }}
-      }
+      "affiliation": {{ codemeta_organization(person.affiliation) | trim }}
 {% endif %}
 {% if person.url is defined and person.url %},
       "url": {{ person.url | tojson }}
 {% endif %}
     }
-{%- endmacro %}
+{% endmacro %}
 {% macro codemeta_dependency(dependency) %}
     {
       "@type": "SoftwareSourceCode",
@@ -57,74 +71,68 @@
       "description": {{ dependency.purpose | tojson }}
 {% endif %}
     }
-{%- endmacro %}
-{% macro registry_url(registry) -%}
-{%- set normalized_name = registry.name | lower | replace(".", "") | replace("-", "") | replace(" ", "") -%}
-{%- if registry.url_or_id is defined and registry.url_or_id and (registry.url_or_id.startswith("http://") or registry.url_or_id.startswith("https://")) -%}
+{% endmacro %}
+{% macro registry_url(registry) %}
+{% set normalized_name = registry.name | lower | replace(".", "") | replace("-", "") | replace(" ", "") %}
+{% if registry.url_or_id is defined and registry.url_or_id and (registry.url_or_id.startswith("http://") or registry.url_or_id.startswith("https://")) %}
 {{ registry.url_or_id }}
-{%- elif normalized_name == "biotools" and registry.url_or_id is defined and registry.url_or_id -%}
+{% elif normalized_name == "biotools" and registry.url_or_id is defined and registry.url_or_id %}
 https://bio.tools/{{ registry.url_or_id | replace("biotools:", "") }}
-{%- elif normalized_name == "pypi" and registry.url_or_id is defined and registry.url_or_id -%}
+{% elif normalized_name == "pypi" and registry.url_or_id is defined and registry.url_or_id %}
 https://pypi.org/project/{{ registry.url_or_id }}/
-{%- elif normalized_name == "cran" and registry.url_or_id is defined and registry.url_or_id -%}
+{% elif normalized_name == "cran" and registry.url_or_id is defined and registry.url_or_id %}
 https://cran.r-project.org/package={{ registry.url_or_id }}
-{%- endif -%}
-{%- endmacro %}
-{% macro publication_link(publication) -%}
-{%- if publication.doi is defined and publication.doi -%}
+{% endif %}
+{% endmacro %}
+{% macro publication_link(publication) %}
+{% if publication.doi is defined and publication.doi %}
 {{ publication.doi if publication.doi.startswith("http://") or publication.doi.startswith("https://") else "https://doi.org/" ~ publication.doi }}
-{%- elif publication.url is defined and publication.url -%}
+{% elif publication.url is defined and publication.url %}
 {{ publication.url }}
-{%- elif publication.pmcid is defined and publication.pmcid -%}
+{% elif publication.pmcid is defined and publication.pmcid %}
 https://www.ncbi.nlm.nih.gov/pmc/articles/{{ publication.pmcid }}/
-{%- elif publication.pmid is defined and publication.pmid -%}
+{% elif publication.pmid is defined and publication.pmid %}
 https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
-{%- endif -%}
-{%- endmacro %}
-{% set interface_types = [] -%}
-{% for interface in cookiecutter.interfaces.entries -%}
-{% if interface.type is defined and interface.type and interface.type not in interface_types -%}
-{% set _ = interface_types.append(interface.type) -%}
-{% endif -%}
-{% endfor -%}
-{% set features = [] -%}
-{% for software_function in cookiecutter.software_functions.entries -%}
-{% for operation in software_function.operation if software_function.operation is defined -%}
-{% set feature = operation.uri if operation.uri is defined and operation.uri else operation.term if operation.term is defined else "" -%}
-{% if feature and feature not in features -%}{% set _ = features.append(feature) -%}{% endif -%}
-{% endfor -%}
-{% if software_function.summary is defined and software_function.summary and not software_function.operation and software_function.summary not in features -%}
-{% set _ = features.append(software_function.summary) -%}
-{% endif -%}
-{% endfor -%}
-{% if not features -%}{% set _ = features.append(cookiecutter.purpose or cookiecutter.project_short_description) -%}{% endif -%}
-{% set registry_links = [] -%}
-{% for registry in cookiecutter.registries.entries -%}
-{% set link = registry_url(registry) | trim -%}
-{% if link and link not in registry_links -%}{% set _ = registry_links.append(link) -%}{% endif -%}
-{% endfor -%}
-{% set issue_tracker_urls = [] -%}
-{% for route in cookiecutter.support_routes.entries -%}
-{% if route.type is defined and route.type == "issue_tracker" and route.url is defined and route.url -%}
-{% set _ = issue_tracker_urls.append(route.url) -%}
-{% endif -%}
-{% endfor -%}
-{% set maintainer_people = [] -%}
-{% for maintainer in cookiecutter.maintainers.entries -%}
-{% if maintainer.type is not defined or maintainer.type != "organization" -%}
-{% set _ = maintainer_people.append(maintainer) -%}
-{% endif -%}
-{% endfor -%}
-{% set runtime_platforms = [] -%}
-{% for programming_language in cookiecutter.programming_languages.entries -%}
-{% if programming_language.name is defined and programming_language.name -%}
-{% set runtime = programming_language.name ~ (" " ~ programming_language.version_constraint if programming_language.version_constraint is defined and programming_language.version_constraint else "") -%}
-{% if runtime not in runtime_platforms -%}{% set _ = runtime_platforms.append(runtime) -%}{% endif -%}
-{% endif -%}
-{% endfor -%}
-{% for container in cookiecutter.containerization.entries -%}
-{% if container.type is defined and container.type and container.type not in runtime_platforms -%}{% set _ = runtime_platforms.append(container.type) -%}{% endif -%}
-{% endfor -%}
+{% endif %}
+{% endmacro %}
+{% set interface_types = [] %}
+{% for interface in cookiecutter.interfaces.entries %}
+{% if interface.type is defined and interface.type and interface.type not in interface_types %}
+{% set _ = interface_types.append(interface.type) %}
+{% endif %}
+{% endfor %}
+{% set features = [] %}
+{% for software_function in cookiecutter.software_functions.entries %}
+{% for operation in software_function.operation if software_function.operation is defined %}
+{% set feature = operation.uri if operation.uri is defined and operation.uri else operation.term if operation.term is defined else "" %}
+{% if feature and feature not in features %}{% set _ = features.append(feature) %}{% endif %}
+{% endfor %}
+{% if software_function.summary is defined and software_function.summary and not software_function.operation and software_function.summary not in features %}
+{% set _ = features.append(software_function.summary) %}
+{% endif %}
+{% endfor %}
+{% if not features %}{% set _ = features.append(cookiecutter.purpose or cookiecutter.project_short_description) %}{% endif %}
+{% set registry_links = [] %}
+{% for registry in cookiecutter.registries.entries %}
+{% set link = registry_url(registry) | trim %}
+{% if link and link not in registry_links %}{% set _ = registry_links.append(link) %}{% endif %}
+{% endfor %}
+{% set support_urls = [] %}
+{% for route in cookiecutter.support_routes.entries %}
+{% if route.url is defined and route.url %}
+{% set _ = support_urls.append(route.url) %}
+{% endif %}
+{% endfor %}
+{% set runtime_platforms = [] %}
+{% for programming_language in cookiecutter.programming_languages.entries %}
+{% if programming_language.name is defined and programming_language.name %}
+{% set runtime = programming_language.name ~ (" " ~ programming_language.version_constraint if programming_language.version_constraint is defined and programming_language.version_constraint else "") %}
+{% if runtime not in runtime_platforms %}{% set _ = runtime_platforms.append(runtime) %}{% endif %}
+{% endif %}
+{% endfor %}
+{% for container in cookiecutter.containerization.entries %}
+{% if container.type is defined and container.type and container.type not in runtime_platforms %}{% set _ = runtime_platforms.append(container.type) %}{% endif %}
+{% endfor %}
 {
   "@context": [
     "https://w3id.org/codemeta/3.1",
@@ -164,10 +172,11 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
     }
 {% endif %}
   ]
-{% if cookiecutter.persistent_identifiers.entries or registry_links %},
+,
   "identifier": [
+{% if cookiecutter.persistent_identifiers.entries or registry_links %}
 {% for identifier in cookiecutter.persistent_identifiers.entries %}
-{% set identifier_type = identifier.type | lower -%}
+{% set identifier_type = identifier.type | lower %}
 {% if identifier_type == "doi" %}
     {{ (identifier.identifier if identifier.identifier.startswith("http://") or identifier.identifier.startswith("https://") else "https://doi.org/" ~ identifier.identifier) | tojson }}{% if not loop.last or registry_links %},{% endif %}
 {% elif identifier.identifier.startswith("http://") or identifier.identifier.startswith("https://") %}
@@ -176,8 +185,7 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
     {
       "@type": "PropertyValue",
       "propertyID": {{ identifier.type | tojson }},
-      "value": {{ identifier.identifier | tojson }}{% if identifier.relation is defined and identifier.relation %},
-      "description": {{ identifier.relation | tojson }}{% elif identifier.associated_version is defined and identifier.associated_version %},
+      "value": {{ identifier.identifier | tojson }}{% if identifier.associated_version is defined and identifier.associated_version %},
       "description": {{ ("Persistent identifier for version " ~ identifier.associated_version) | tojson }}{% endif %}
     }{% if not loop.last or registry_links %},{% endif %}
 {% endif %}
@@ -185,11 +193,17 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
 {% for link in registry_links %}
     {{ link | tojson }}{% if not loop.last %},{% endif %}
 {% endfor %}
-  ]
+{% else %}
+    {
+      "@type": "PropertyValue",
+      "propertyID": "placeholder",
+      "value": "REPLACE_WITH_PERSISTENT_IDENTIFIER"
+    }
 {% endif %}
-{% if maintainer_people %},
+  ]
+{% if cookiecutter.maintainers.entries %},
   "maintainer": [
-{% for maintainer in maintainer_people %}
+{% for maintainer in cookiecutter.maintainers.entries %}
 {{ codemeta_person(maintainer) }}{% if not loop.last %},{% endif %}
 {% endfor %}
   ]
@@ -210,11 +224,32 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
 {% if cookiecutter.keywords.entries %},
   "keywords": {{ cookiecutter.keywords.entries | tojson }}
 {% endif %}
-{% if cookiecutter.repository_url %},
-  "codeRepository": {{ cookiecutter.repository_url | tojson }}
+,
+  "codeRepository": {{ (cookiecutter.repository_url or "https://example.org/REPLACE_WITH_REPOSITORY") | tojson }}
+{% if cookiecutter.repository_url %}
 {% if cookiecutter.repository_url.startswith("https://github.com/") and cookiecutter.include_citation_cff == "yes" %},
   "continuousIntegration": {{ (cookiecutter.repository_url.rstrip("/") ~ "/actions") | tojson }}
 {% endif %}
+{% endif %}
+,
+{% if cookiecutter.license %}
+{% if cookiecutter.license.startswith("http://") or cookiecutter.license.startswith("https://") %}
+  "license": {{ cookiecutter.license | tojson }}
+{% elif "\n" not in cookiecutter.license and cookiecutter.license | length < 100 %}
+  "license": {{ ("https://spdx.org/licenses/" ~ cookiecutter.license) | tojson }}
+{% else %}
+  "license": {
+    "@type": "CreativeWork",
+    "name": "Custom project license",
+    "url": "https://example.org/REPLACE_WITH_CUSTOM_LICENSE_URL"
+  }
+{% endif %}
+{% else %}
+  "license": {
+    "@type": "CreativeWork",
+    "name": "REPLACE_WITH_PROJECT_LICENSE",
+    "url": "https://example.org/REPLACE_WITH_LICENSE"
+  }
 {% endif %}
 {% if cookiecutter.homepage_url or cookiecutter.documentation_url %},
   "url": {{ (cookiecutter.homepage_url or cookiecutter.documentation_url) | tojson }}
@@ -225,8 +260,8 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
     "url": {{ cookiecutter.documentation_url | tojson }}
   }
 {% endif %}
-{% if issue_tracker_urls %},
-  "issueTracker": {{ issue_tracker_urls[0] | tojson }}
+{% if support_urls %},
+  "issueTracker": {{ support_urls[0] | tojson }}
 {% endif %}
 {% if cookiecutter.include_changelog == "yes" and cookiecutter.repository_url %},
   "releaseNotes": {{ (cookiecutter.repository_url.rstrip("/") ~ "/blob/HEAD/CHANGELOG.md") | tojson }}
@@ -234,13 +269,13 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
 {% if runtime_platforms %},
   "runtimePlatform": {{ runtime_platforms | tojson }}
 {% endif %}
-{% set operating_systems = [] -%}
-{% for operating_system in cookiecutter.operating_systems.entries -%}
-{% if operating_system.name is defined and operating_system.name and (operating_system.support_status is not defined or operating_system.support_status in ["", "supported", "expected-to-work"]) -%}
-{% set label = operating_system.name ~ (" " ~ operating_system.version_constraint if operating_system.version_constraint is defined and operating_system.version_constraint else "") -%}
-{% set _ = operating_systems.append(label) -%}
-{% endif -%}
-{% endfor -%}
+{% set operating_systems = [] %}
+{% for operating_system in cookiecutter.operating_systems.entries %}
+{% if operating_system.name is defined and operating_system.name and (operating_system.status is not defined or operating_system.status in ["", "Officially supported", "Expected to work"]) %}
+{% set label = operating_system.name ~ (" " ~ operating_system.specification if operating_system.specification is defined and operating_system.specification else "") %}
+{% set _ = operating_systems.append(label) %}
+{% endif %}
+{% endfor %}
 {% if operating_systems %},
   "operatingSystem": {{ operating_systems | tojson }}
 {% endif %}
@@ -251,10 +286,10 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
 {% endfor %}
   ]
 {% endif %}
-{% set funders = [] -%}
-{% for funding in cookiecutter.funding.entries -%}
-{% if funding.funder is defined and funding.funder and funding.funder not in funders -%}{% set _ = funders.append(funding.funder) -%}{% endif -%}
-{% endfor -%}
+{% set funders = [] %}
+{% for funding in cookiecutter.funding.entries %}
+{% if funding.funder is defined and funding.funder and funding.funder not in funders %}{% set _ = funders.append(funding.funder) %}{% endif %}
+{% endfor %}
 {% if funders %},
   "funder": [
 {% for funder in funders %}
@@ -272,21 +307,21 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
 {% endfor %}
   ]
 {% endif %}
-{% set related_links = [] -%}
-{% for software in cookiecutter.related_software.entries -%}
-{% if software.url_or_doi is defined and software.url_or_doi and software.url_or_doi not in related_links -%}{% set _ = related_links.append(software.url_or_doi) -%}{% endif -%}
-{% endfor -%}
+{% set related_links = [] %}
+{% for software in cookiecutter.related_software.entries %}
+{% if software.url_or_doi is defined and software.url_or_doi and software.url_or_doi not in related_links %}{% set _ = related_links.append(software.url_or_doi) %}{% endif %}
+{% endfor %}
 {% if related_links %},
   "relatedLink": {{ related_links | tojson }}
 {% endif %}
 {% if registry_links %},
   "sameAs": {{ registry_links | tojson }}
 {% endif %}
-{% set publication_links = [] -%}
-{% for publication in cookiecutter.publications.entries -%}
-{% set link = publication_link(publication) | trim -%}
-{% if link -%}{% set _ = publication_links.append({"link": link, "title": publication.title if publication.title is defined else ""}) -%}{% endif -%}
-{% endfor -%}
+{% set publication_links = [] %}
+{% for publication in cookiecutter.publications.entries %}
+{% set link = publication_link(publication) | trim %}
+{% if link %}{% set _ = publication_links.append({"link": link, "title": publication.title if publication.title is defined else ""}) %}{% endif %}
+{% endfor %}
 {% if publication_links %},
   "referencePublication": [
 {% for publication in publication_links %}

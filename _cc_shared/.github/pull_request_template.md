@@ -11,12 +11,12 @@ Use a Conventional Commit pull request title, as described in `CONTRIBUTING.md`.
 - [ ] The branch is rebased on the target branch.
 - [ ] The scope is focused enough for one review.
 - [ ] Metadata files are updated when project name, authors, version, license, URLs, citation, or registry information changed.
-{% if cookiecutter.documentation_types.entries -%}
+{% if cookiecutter.documentation_types.entries %}
 - [ ] Documentation is updated when installation, usage, API, CLI, configuration, or behavior changed.
-{% endif -%}
-{% if cookiecutter.include_tests == "yes" -%}
+{% endif %}
+{% if cookiecutter.test_types.entries %}
 - [ ] Tests cover new behavior or changed behavior, including edge cases where relevant.
-{% endif -%}
+{% endif %}
 - [ ] Local checks from `CONTRIBUTING.md` pass, or skipped checks are explained below.
 - [ ] CI passes on the latest commit.
 - [ ] No secrets, private data, sensitive inputs/outputs, or non-public security details are included.

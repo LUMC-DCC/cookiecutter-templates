@@ -22,16 +22,9 @@ Cookiecutter creates the initial metadata from one validated context. After
 generation, maintain `codemeta.json` as the metadata anchor and update the
 relevant ecosystem files when shared facts change.
 
-The LUMC profile requires a release identifier and a license. Supply these
-values before expecting the metadata workflow to pass.
-
-Run the same validation used by CI locally:
-
-```console
-uvx --python 3.11 \
-  --from git+https://github.com/LUMC-DCC/rs-metadata.git@v1 \
-  rs-metadata validate .
-```
+Mandatory profile fields that cannot be inferred contain conspicuous replacement
+placeholders in `codemeta.json`. Replace them with the project's real persistent
+identifier, repository URL, and license before expecting metadata CI to pass.
 
 The generated `metadata.yml` workflow uses the official `LUMC-DCC/rs-metadata`
 action. It validates the LUMC profile, discovers supported ecosystem files,

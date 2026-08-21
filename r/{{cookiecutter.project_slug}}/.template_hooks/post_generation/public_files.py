@@ -214,7 +214,10 @@ def update_interface_references(ctx, cwd):
         source_dir / "developer.md",
         build_developer_interfaces_section(interfaces),
     )
-    append_sections(source_dir / "api.md", build_api_interfaces_section(interfaces))
+    append_sections(
+        source_dir / "reference.md",
+        build_api_interfaces_section(interfaces),
+    )
 
 
 def update_platform_references(ctx, cwd):

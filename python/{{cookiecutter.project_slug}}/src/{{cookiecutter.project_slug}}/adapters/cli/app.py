@@ -9,7 +9,6 @@ import typer
 
 from {{ cookiecutter.project_slug }}.adapters.cli.commands import process
 
-
 # The Typer app is the command registry. Add new commands by importing their
 # modules and registering them below.
 app = typer.Typer(help="{{ cookiecutter.project_short_description }}")

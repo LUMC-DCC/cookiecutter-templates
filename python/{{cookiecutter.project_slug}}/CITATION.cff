@@ -1,24 +1,23 @@
 {% macro yaml_string(value) -%}
 "{{ value | replace('"', '\\"') }}"
-{%- endmacro -%}
+{%- endmacro %}
 {% macro person_name(person) -%}
-{%- if person.name is defined and person.name -%}
+{% if person.name is defined and person.name %}
 {{ person.name }}
-{%- else -%}
-{%- set given_names = person.given_names if person.given_names is defined else "" -%}
-{%- set family_names = person.family_names if person.family_names is defined else "" -%}
+{% else %}
+{% set given_names = person.given_names if person.given_names is defined else "" %}
+{% set family_names = person.family_names if person.family_names is defined else "" %}
 {{ (given_names ~ " " ~ family_names) | trim or "Project member" }}
-{%- endif -%}
-{%- endmacro -%}
+{% endif %}
+{%- endmacro %}
 {% macro cff_person(person) %}
-{% set person_type = person.type if person.type is defined and person.type else "person" -%}
-{% if person_type != "organization" and ((person.family_names is defined and person.family_names) or (person.given_names is defined and person.given_names)) %}
+{% if (person.family_names is defined and person.family_names) or (person.given_names is defined and person.given_names) %}
   - family-names: {{ yaml_string(person.family_names if person.family_names is defined and person.family_names else person_name(person) | trim) }}
 {% if person.given_names is defined and person.given_names %}
     given-names: {{ yaml_string(person.given_names) }}
 {% endif %}
 {% if person.affiliation is defined and person.affiliation %}
-    affiliation: {{ yaml_string(person.affiliation) }}
+    affiliation: {{ yaml_string(person.affiliation.name) }}
 {% endif %}
 {% else %}
   - name: {{ yaml_string(person_name(person) | trim) }}
@@ -36,42 +35,44 @@
 {% if person.url is defined and person.url %}
     website: {{ yaml_string(person.url) }}
 {% endif %}
-{%- endmacro %}
+{% endmacro %}
 {% macro publication_title(publication) -%}
-{%- if publication.title is defined and publication.title -%}
+{% if publication.title is defined and publication.title %}
 {{ publication.title }}
-{%- elif publication.citation is defined and publication.citation -%}
+{% elif publication.citation is defined and publication.citation %}
 {{ publication.citation }}
-{%- elif publication.doi is defined and publication.doi -%}
+{% elif publication.doi is defined and publication.doi %}
 Publication {{ publication.doi }}
-{%- elif publication.url is defined and publication.url -%}
+{% elif publication.url is defined and publication.url %}
 Publication {{ publication.url }}
-{%- elif publication.pmid is defined and publication.pmid -%}
+{% elif publication.pmid is defined and publication.pmid %}
 Publication PMID {{ publication.pmid }}
-{%- elif publication.pmcid is defined and publication.pmcid -%}
+{% elif publication.pmcid is defined and publication.pmcid %}
 Publication {{ publication.pmcid }}
-{%- else -%}
+{% else %}
 Associated publication
-{%- endif -%}
+{% endif %}
 {%- endmacro %}
 {% macro registry_url(registry) -%}
-{%- set normalized_name = registry.name | lower | replace(".", "") | replace("-", "") | replace(" ", "") -%}
-{%- if registry.url_or_id.startswith("http://") or registry.url_or_id.startswith("https://") -%}
+{% set normalized_name = registry.name | lower | replace(".", "") | replace("-", "") | replace(" ", "") %}
+{% if registry.url_or_id.startswith("http://") or registry.url_or_id.startswith("https://") %}
 {{ registry.url_or_id }}
-{%- elif normalized_name == "biotools" -%}
+{% elif normalized_name == "biotools" %}
 https://bio.tools/{{ registry.url_or_id | replace("biotools:", "") }}
-{%- elif normalized_name == "pypi" -%}
+{% elif normalized_name == "pypi" %}
 https://pypi.org/project/{{ registry.url_or_id }}/
-{%- elif normalized_name == "cran" -%}
+{% elif normalized_name == "cran" %}
 https://cran.r-project.org/package={{ registry.url_or_id }}
-{%- else -%}
+{% else %}
 {{ registry.url_or_id }}
-{%- endif -%}
+{% endif %}
 {%- endmacro %}
 {% macro cff_publication_reference(publication, indent, bullet=False) %}
-{% set publication_type = publication.type if publication.type is defined and publication.type else "article" -%}
-{% set first_indent = indent ~ "- " if bullet else indent -%}
-{% set field_indent = indent ~ "  " if bullet else indent -%}
+{% set requested_type = publication.type | lower | replace(" ", "-") if publication.type is defined and publication.type else "article" %}
+{% set cff_types = ["art", "article", "audiovisual", "bill", "blog", "book", "catalogue", "conference-paper", "conference", "data", "database", "dictionary", "edited-work", "encyclopedia", "film-broadcast", "generic", "government-document", "grant", "hearing", "historical-work", "legal-case", "legal-rule", "magazine-article", "manual", "map", "multimedia", "music", "newspaper-article", "pamphlet", "patent", "personal-communication", "proceedings", "report", "serial", "slides", "software-code", "software-container", "software-executable", "software-virtual-machine", "software", "sound-recording", "standard", "statute", "thesis", "unpublished", "video", "website"] %}
+{% set publication_type = requested_type if requested_type in cff_types else "generic" %}
+{% set first_indent = indent ~ "- " if bullet else indent %}
+{% set field_indent = indent ~ "  " if bullet else indent %}
 {{ first_indent }}type: {{ publication_type }}
 {{ field_indent }}title: {{ yaml_string(publication_title(publication) | trim) }}
 {% if publication.authors is defined and publication.authors %}
@@ -98,7 +99,7 @@ https://cran.r-project.org/package={{ registry.url_or_id }}
 {% if publication.note is defined and publication.note %}
 {{ field_indent }}notes: {{ yaml_string(publication.note) }}
 {% endif %}
-{%- endmacro %}
+{% endmacro %}
 cff-version: "1.2.0"
 message: {{ yaml_string("If you use this software, please cite it using the metadata in this file.") }}
 title: {{ yaml_string(cookiecutter.project_name) }}
@@ -136,11 +137,9 @@ keywords:
 identifiers:
 {% for identifier in cookiecutter.persistent_identifiers.entries %}
 {% set identifier_type = identifier.type | lower %}
-  - type: {% if identifier_type in ["doi", "url", "swh"] %}{{ yaml_string(identifier_type) }}{% else %}"other"{% endif %}
+  - type: {{ yaml_string(identifier_type if identifier_type in ["doi", "url", "swh"] else "other") }}
     value: {{ yaml_string(identifier.identifier) }}
-{% if identifier.relation is defined and identifier.relation %}
-    description: {{ yaml_string(identifier.relation) }}
-{% elif identifier.associated_version is defined and identifier.associated_version %}
+{% if identifier.associated_version is defined and identifier.associated_version %}
     description: {{ yaml_string("Persistent identifier for version " ~ identifier.associated_version) }}
 {% endif %}
 {% endfor %}

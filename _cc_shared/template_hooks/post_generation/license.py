@@ -264,7 +264,8 @@ def update_codemeta_license(cwd, license_value, spdx_id=None):
     cwd : pathlib.Path
         Generated project root.
     license_value : str or None
-        License text supplied to the template, or ``None`` to omit metadata.
+        License text supplied to the template, or ``None`` to retain the
+        generated mandatory-field placeholder.
     spdx_id : str or None, optional
         Recognized SPDX identifier.
     """
@@ -281,8 +282,6 @@ def update_codemeta_license(cwd, license_value, spdx_id=None):
             "name": "Custom license",
             "text": license_value,
         }
-    else:
-        data.pop("license", None)
     path.write_text(
         json.dumps(data, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",

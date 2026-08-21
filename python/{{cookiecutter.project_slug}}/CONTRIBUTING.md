@@ -16,23 +16,23 @@ Thank you for improving this project.
 Before starting a larger change, open an issue or discussion so maintainers can
 confirm scope and avoid duplicated work.
 
-{% set effective_documentation_builder = cookiecutter.documentation_builder if cookiecutter.documentation_builder in cookiecutter._template_supported_choices.documentation_builder else cookiecutter._template_defaults.documentation_builder -%}
-{% set should_build_docs = cookiecutter.documentation_types.entries and effective_documentation_builder in ["mkdocs", "sphinx"] -%}
-{% set effective_formatter_tool = cookiecutter.formatter_tool if cookiecutter.formatter_tool in cookiecutter._template_supported_choices.formatter_tool else cookiecutter._template_defaults.formatter_tool -%}
-{% set effective_linter_tool = cookiecutter.linter_tool if cookiecutter.linter_tool in cookiecutter._template_supported_choices.linter_tool else cookiecutter._template_defaults.linter_tool -%}
-{% set effective_type_checker = cookiecutter.type_checker if cookiecutter.type_checker in cookiecutter._template_supported_choices.type_checker else cookiecutter._template_defaults.type_checker -%}
-{% set has_quality_checks = effective_formatter_tool != "none" or effective_linter_tool != "none" or effective_type_checker != "none" -%}
-{% set release_channels = namespace(values=[]) -%}
-{% for channel in cookiecutter.distribution_channels.entries -%}
-{% set _ = release_channels.values.append(channel | lower) -%}
-{% endfor -%}
-{% set has_distribution = "pypi" in release_channels.values or "github release" in release_channels.values or "github releases" in release_channels.values or "conda-forge" in release_channels.values -%}
+{% set effective_documentation_builder = cookiecutter.documentation_builder if cookiecutter.documentation_builder in cookiecutter._template_supported_choices.documentation_builder else cookiecutter._template_defaults.documentation_builder %}
+{% set should_build_docs = cookiecutter.documentation_types.entries and effective_documentation_builder in ["mkdocs", "sphinx"] %}
+{% set effective_formatter_tool = cookiecutter.formatter_tool if cookiecutter.formatter_tool in cookiecutter._template_supported_choices.formatter_tool else cookiecutter._template_defaults.formatter_tool %}
+{% set effective_linter_tool = cookiecutter.linter_tool if cookiecutter.linter_tool in cookiecutter._template_supported_choices.linter_tool else cookiecutter._template_defaults.linter_tool %}
+{% set effective_type_checker = cookiecutter.type_checker if cookiecutter.type_checker in cookiecutter._template_supported_choices.type_checker else cookiecutter._template_defaults.type_checker %}
+{% set has_quality_checks = effective_formatter_tool != "none" or effective_linter_tool != "none" or effective_type_checker != "none" %}
+{% set release_channels = namespace(values=[]) %}
+{% for channel in cookiecutter.distribution_channels.entries %}
+{% set _ = release_channels.values.append(channel | lower) %}
+{% endfor %}
+{% set has_distribution = "pypi" in release_channels.values or "github release" in release_channels.values or "github releases" in release_channels.values or "conda-forge" in release_channels.values %}
 
 Use the pull request template when opening a pull request.
 
 ## Development setup
 
-{% if cookiecutter.language == "python" -%}
+{% if cookiecutter.language == "python" %}
 This project uses `@@PROJECT_MANAGER@@` for its development environment.
 
 ```bash
@@ -46,51 +46,48 @@ Add a Python dependency with:
 ```
 
 @@PROJECT_LOCK_GUIDANCE@@
-{% elif cookiecutter.language == "r" -%}
+{% elif cookiecutter.language == "r" %}
 Install the package dependencies with the package-management workflow used by
 this project.
-{% else -%}
+{% else %}
 Install the project dependencies with the package-management workflow used by
 this project.
 {% endif %}
 
 ## Local checks
 
-{% if cookiecutter.language == "python" -%}
+{% if cookiecutter.language == "python" %}
 | Check | Command |
 | --- | --- |
-{% if cookiecutter.include_citation_cff == "yes" -%}
-| Metadata consistency | `@@METADATA_VALIDATE@@` |
-{% endif -%}
-{% if cookiecutter.include_changelog == "yes" -%}
+{% if cookiecutter.include_changelog == "yes" %}
 | Changelog format | `@@PROJECT_RUN@@python tools/check_changelog.py` |
-{% endif -%}
-{% if has_distribution -%}
+{% endif %}
+{% if has_distribution %}
 | Release metadata | `@@PROJECT_RUN@@python tools/check_release.py` |
-{% endif -%}
-{% if effective_linter_tool == "ruff" -%}
+{% endif %}
+{% if effective_linter_tool == "ruff" %}
 | Lint | `@@PROJECT_RUN@@ruff check .` |
-{% endif -%}
-{% if effective_formatter_tool == "ruff" -%}
+{% endif %}
+{% if effective_formatter_tool == "ruff" %}
 | Format | `@@PROJECT_RUN@@ruff format --check .` |
-{% endif -%}
-{% if effective_type_checker == "mypy" -%}
+{% endif %}
+{% if effective_type_checker == "mypy" %}
 | Type checking | `@@PROJECT_RUN@@mypy src` |
-{% endif -%}
-{% if has_quality_checks -%}
+{% endif %}
+{% if has_quality_checks %}
 | Pre-commit hooks | `@@PROJECT_RUN@@pre-commit run --all-files` |
-{% endif -%}
-{% if cookiecutter.include_tests == "yes" -%}
+{% endif %}
+{% if cookiecutter.test_types.entries %}
 | Tests | `@@PROJECT_RUN@@python -m pytest` |
-{% else -%}
+{% else %}
 | Import check | `@@PROJECT_RUN@@python -c "import {{ cookiecutter.project_slug }}"` |
-{% endif -%}
-{% if should_build_docs and effective_documentation_builder == "mkdocs" -%}
+{% endif %}
+{% if should_build_docs and effective_documentation_builder == "mkdocs" %}
 | Documentation | `@@PROJECT_RUN@@mkdocs build --strict` |
-{% elif should_build_docs and effective_documentation_builder == "sphinx" -%}
+{% elif should_build_docs and effective_documentation_builder == "sphinx" %}
 | Documentation | `@@PROJECT_RUN@@sphinx-build -W -b html docs/source docs/build/html` |
-{% endif -%}
-{% else -%}
+{% endif %}
+{% else %}
 Run the test, metadata, and documentation checks configured for this project.
 {% endif %}
 
@@ -98,30 +95,30 @@ Run the test, metadata, and documentation checks configured for this project.
 
 CI runs on every push and pull request.
 
-{% if cookiecutter.language == "python" -%}
+{% if cookiecutter.language == "python" %}
 | Stage | Runs when | What it does |
 | --- | --- | --- |
-{% if cookiecutter.include_citation_cff == "yes" -%}
+{% if cookiecutter.include_citation_cff == "yes" %}
 | Metadata | Citation metadata is included | Runs `rs-metadata validate`. |
-{% endif -%}
-{% if cookiecutter.include_changelog == "yes" -%}
+{% endif %}
+{% if cookiecutter.include_changelog == "yes" %}
 | Changelog | Changelog is included | Runs `python tools/check_changelog.py`. |
-{% endif -%}
-{% if cookiecutter.license_compatibility_check == "yes" -%}
+{% endif %}
+{% if cookiecutter.license_compatibility_check == "yes" %}
 | License compatibility | License compatibility checking is enabled | Runs `licensecheck`. |
-{% endif -%}
-{% if has_quality_checks -%}
+{% endif %}
+{% if has_quality_checks %}
 | Quality | Quality checks are included | Runs selected linting and type-checking commands. |
-{% endif -%}
-{% if has_distribution -%}
+{% endif %}
+{% if has_distribution %}
 | Distribution | Distribution channels are declared | Validates release metadata and builds Python distributions; tagged releases publish configured channels. |
-{% endif -%}
-{% if cookiecutter.include_tests == "yes" -%}
+{% endif %}
+{% if cookiecutter.test_types.entries %}
 | Tests | Tests are included | Sets up the selected project environment and runs `python -m pytest`. |
-{% endif -%}
-{% if should_build_docs and effective_documentation_builder == "mkdocs" -%}
+{% endif %}
+{% if should_build_docs and effective_documentation_builder == "mkdocs" %}
 | Documentation | MkDocs documentation is included | Sets up the selected project environment and runs `mkdocs build --strict`. |
-{% elif should_build_docs and effective_documentation_builder == "sphinx" -%}
+{% elif should_build_docs and effective_documentation_builder == "sphinx" %}
 | Documentation | Sphinx documentation is included | Sets up the selected project environment and runs `sphinx-build -W -b html docs/source docs/build/html`. |
 {% endif %}
 {% endif %}

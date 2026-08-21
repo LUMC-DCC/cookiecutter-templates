@@ -1,15 +1,15 @@
-{% set interface_types = namespace(values=[]) -%}
-{% for interface in cookiecutter.interfaces.entries -%}
-{% if interface.type is defined and interface.type -%}
-{% set _ = interface_types.values.append(interface.type) -%}
-{% endif -%}
-{% endfor -%}
-{% set has_processing_api = "Web API" in interface_types.values -%}
-{% set has_soap = "Web service" in interface_types.values -%}
-{% set has_api_app = has_processing_api or "SPARQL endpoint" in interface_types.values -%}
-{% set has_portal = "Bioinformatics portal" in interface_types.values or "Database portal" in interface_types.values -%}
-{% set has_web = "Web application" in interface_types.values or "Workbench" in interface_types.values -%}
-{% set http_adapter_count = (1 if has_api_app else 0) + (1 if has_soap else 0) + (1 if has_portal else 0) + (1 if has_web else 0) -%}
+{% set interface_types = namespace(values=[]) %}
+{% for interface in cookiecutter.interfaces.entries %}
+{% if interface.type is defined and interface.type %}
+{% set _ = interface_types.values.append(interface.type) %}
+{% endif %}
+{% endfor %}
+{% set has_processing_api = "Web API" in interface_types.values %}
+{% set has_soap = "Web service" in interface_types.values %}
+{% set has_api_app = has_processing_api or "SPARQL endpoint" in interface_types.values %}
+{% set has_portal = "Bioinformatics portal" in interface_types.values or "Database portal" in interface_types.values %}
+{% set has_web = "Web application" in interface_types.values or "Workbench" in interface_types.values %}
+{% set http_adapter_count = (1 if has_api_app else 0) + (1 if has_soap else 0) + (1 if has_portal else 0) + (1 if has_web else 0) %}
 # Usage
 
 ## Installation
@@ -27,7 +27,7 @@ Install API dependencies before running the API application:
 @@PROJECT_SETUP_API@@
 ```
 
-{% endif -%}
+{% endif %}
 {% if has_web or has_portal %}
 Install web dependencies before running browser-facing applications:
 
@@ -35,7 +35,7 @@ Install web dependencies before running browser-facing applications:
 @@PROJECT_SETUP_WEB@@
 ```
 
-{% endif -%}
+{% endif %}
 {% if has_soap %}
 Install SOAP dependencies before running the web service:
 
@@ -43,7 +43,7 @@ Install SOAP dependencies before running the web service:
 @@PROJECT_SETUP_SOAP@@
 ```
 
-{% endif -%}
+{% endif %}
 ## Run
 
 The package-level smoke command is:
@@ -62,7 +62,7 @@ result = process_text("example input")
 print(result.output_text)
 ```
 
-{% endif -%}
+{% endif %}
 {% if "Command-line tool" in interface_types.values %}
 Run the command-line interface:
 
@@ -70,7 +70,7 @@ Run the command-line interface:
 {{ cookiecutter.project_slug | replace('_', '-') }} process "example input"
 ```
 
-{% endif -%}
+{% endif %}
 {% if "Script" in interface_types.values %}
 Run the standalone script:
 
@@ -78,7 +78,7 @@ Run the standalone script:
 python scripts/run_example.py "example input"
 ```
 
-{% endif -%}
+{% endif %}
 {% if http_adapter_count %}
 Run all selected HTTP interfaces through the deployable application:
 
@@ -86,7 +86,7 @@ Run all selected HTTP interfaces through the deployable application:
 @@PROJECT_RUN@@uvicorn {{ cookiecutter.project_slug }}.adapters.server:app --reload
 ```
 
-{% endif -%}
+{% endif %}
 {% if has_processing_api %}
 Send a processing request:
 
@@ -96,13 +96,13 @@ curl -X POST http://127.0.0.1:8000{% if http_adapter_count > 1 %}/api{% endif %}
   -d '{"text": "example input"}'
 ```
 
-{% endif -%}
+{% endif %}
 {% if has_soap %}
 The WSDL contract is available at
 `http://127.0.0.1:8000{% if http_adapter_count > 1 %}/soap/{% else %}/{% endif %}?wsdl`.
 SOAP clients use that document to discover the generated `process` operation.
 
-{% endif -%}
+{% endif %}
 {% if "SPARQL endpoint" in interface_types.values %}
 Query the starter RDF graph:
 
@@ -110,16 +110,16 @@ Query the starter RDF graph:
 curl "http://127.0.0.1:8000{% if http_adapter_count > 1 %}/api{% endif %}/sparql?query=SELECT%20?s%20?p%20?o%20WHERE%20%7B%20?s%20?p%20?o%20%7D%20LIMIT%2025"
 ```
 
-{% endif -%}
+{% endif %}
 {% if has_web %}
 Open `http://127.0.0.1:8000/` in a browser.
 
-{% endif -%}
+{% endif %}
 {% if has_portal %}
 Open `http://127.0.0.1:8000{% if http_adapter_count > 1 %}/portal{% endif %}/` in a browser, or fetch records from
 `http://127.0.0.1:8000{% if http_adapter_count > 1 %}/portal{% endif %}/records`.
 
-{% endif -%}
+{% endif %}
 {% if "Desktop application" in interface_types.values %}
 Run the desktop application:
 
@@ -127,7 +127,7 @@ Run the desktop application:
 @@PROJECT_RUN@@python -m {{ cookiecutter.project_slug }}.adapters.desktop.app
 ```
 
-{% endif -%}
+{% endif %}
 {% if "Plug-in" in interface_types.values %}
 Inspect the package-provided plug-in entry point:
 
@@ -138,7 +138,7 @@ plugins = entry_points(group="{{ cookiecutter.project_slug }}.plugins")
 print([plugin.name for plugin in plugins])
 ```
 
-{% endif -%}
+{% endif %}
 {% if "Suite" in interface_types.values %}
 Run a suite command from Python:
 
@@ -148,7 +148,7 @@ from {{ cookiecutter.project_slug }}.adapters.suite.runner import run_suite_comm
 print(run_suite_command("process", "example input"))
 ```
 
-{% endif -%}
+{% endif %}
 {% if "Ontology" in interface_types.values %}
 Render the starter ontology document:
 
@@ -158,7 +158,7 @@ from {{ cookiecutter.project_slug }}.ontology.metadata import ontology_document
 print(ontology_document())
 ```
 
-{% endif -%}
+{% endif %}
 {% if "Workflow" in interface_types.values %}
 Run the Python workflow:
 
@@ -169,4 +169,4 @@ result = run_workflow("example input")
 print(result.output_text)
 ```
 
-{% endif -%}
+{% endif %}

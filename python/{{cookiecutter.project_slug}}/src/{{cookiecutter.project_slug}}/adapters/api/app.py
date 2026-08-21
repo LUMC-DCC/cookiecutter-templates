@@ -7,20 +7,20 @@ service layer.
 
 from fastapi import FastAPI
 
-{% set interface_types = namespace(values=[]) -%}
-{% for interface in cookiecutter.interfaces.entries -%}
-{% if interface.type is defined and interface.type -%}
-{% set _ = interface_types.values.append(interface.type) -%}
-{% endif -%}
-{% endfor -%}
+{% set interface_types = namespace(values=[]) %}
+{% for interface in cookiecutter.interfaces.entries %}
+{% if interface.type is defined and interface.type %}
+{% set _ = interface_types.values.append(interface.type) %}
+{% endif %}
+{% endfor %}
 from {{ cookiecutter.project_slug }}.adapters.api.routes import (
     health,
-{% if "Web API" in interface_types.values -%}
+{% if "Web API" in interface_types.values %}
     processing,
-{% endif -%}
-{% if "SPARQL endpoint" in interface_types.values -%}
+{% endif %}
+{% if "SPARQL endpoint" in interface_types.values %}
     sparql,
-{% endif -%}
+{% endif %}
 )
 
 

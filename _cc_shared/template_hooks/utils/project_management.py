@@ -148,7 +148,7 @@ def optional_dependency_groups(ctx):
         "Workbench",
     }:
         groups.append("web")
-    if is_yes(ctx, "include_tests"):
+    if entries(ctx, "test_types"):
         groups.append("test")
 
     quality_fields = ("formatter_tool", "linter_tool", "type_checker")

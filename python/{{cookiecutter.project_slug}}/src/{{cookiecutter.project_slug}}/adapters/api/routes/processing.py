@@ -12,7 +12,6 @@ from {{ cookiecutter.project_slug }}.adapters.api.schemas import (
 )
 from {{ cookiecutter.project_slug }}.services.processing import process_text
 
-
 router = APIRouter(tags=["processing"])
 
 

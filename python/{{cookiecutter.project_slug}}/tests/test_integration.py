@@ -1,28 +1,28 @@
 """Integration tests for generated interface adapters."""
 
-{% set interface_types = namespace(values=[]) -%}
-{% for interface in cookiecutter.interfaces.entries -%}
-{% if interface.type is defined and interface.type -%}
-{% set _ = interface_types.values.append(interface.type) -%}
-{% endif -%}
-{% endfor -%}
-{% set has_cli = "Command-line tool" in interface_types.values -%}
-{% set has_api = "Web API" in interface_types.values or "SPARQL endpoint" in interface_types.values -%}
-{% set has_soap = "Web service" in interface_types.values -%}
-{% set has_script = "Script" in interface_types.values -%}
+{% set interface_types = namespace(values=[]) %}
+{% for interface in cookiecutter.interfaces.entries %}
+{% if interface.type is defined and interface.type %}
+{% set _ = interface_types.values.append(interface.type) %}
+{% endif %}
+{% endfor %}
+{% set has_cli = "Command-line tool" in interface_types.values %}
+{% set has_api = "Web API" in interface_types.values or "SPARQL endpoint" in interface_types.values %}
+{% set has_soap = "Web service" in interface_types.values %}
+{% set has_script = "Script" in interface_types.values %}
 {% if has_script %}
 import importlib.util
 from pathlib import Path
 
-{% endif -%}
+{% endif %}
 {% if has_soap %}
 from wsgiref.util import setup_testing_defaults
 
-{% endif -%}
+{% endif %}
 {% if has_api or has_cli or has_soap %}
 import pytest
 
-{% endif -%}
+{% endif %}
 from {{ cookiecutter.project_slug }}.services.processing import process_text
 
 
@@ -43,7 +43,7 @@ def test_cli_command_reuses_service_layer():
     assert run_cli_process("abc") == "ABC"
 
 
-{% endif -%}
+{% endif %}
 {% if has_api %}
 def test_api_application_registers_routes():
     """Ensure the generated API application registers expected routes."""
@@ -63,7 +63,7 @@ def test_api_application_registers_routes():
 {% endif %}
 
 
-{% endif -%}
+{% endif %}
 {% if has_soap %}
 def test_soap_application_publishes_wsdl():
     """Ensure the SOAP service exposes a usable WSDL contract."""
@@ -97,7 +97,7 @@ def test_soap_application_publishes_wsdl():
     assert b'operation name="process"' in body
 
 
-{% endif -%}
+{% endif %}
 {% if has_script %}
 def test_example_script_can_run_without_cli_process():
     """Ensure the generated script delegates to package code."""

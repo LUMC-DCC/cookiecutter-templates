@@ -54,13 +54,13 @@ further defined and clarified by project maintainers.
 
 ## Enforcement
 
-{% if cookiecutter.code_of_conduct_contact -%}
+{% if cookiecutter.code_of_conduct_contact %}
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to: {{ cookiecutter.code_of_conduct_contact }}
-{% elif cookiecutter.maintainers.entries -%}
+{% elif cookiecutter.maintainers.entries %}
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported privately to the project maintainers listed in the project metadata.
-{% else -%}
+{% else %}
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported privately to the project maintainers.
 {% endif %}

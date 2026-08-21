@@ -6,7 +6,6 @@ from utils.context import (
     template_default,
     template_supported_choices,
 )
-from utils.options import is_no
 
 
 def resolve_test_framework(ctx):
@@ -54,7 +53,7 @@ def select_test_framework(ctx, cwd):
         Generated project root.
     """
     del cwd
-    if is_no(ctx, "include_tests"):
+    if not entries(ctx, "test_types"):
         return
 
     requested, effective = resolve_test_framework(ctx)

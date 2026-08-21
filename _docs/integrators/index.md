@@ -63,7 +63,10 @@ Repeatable metadata values use this shape:
 ```
 
 Person entries may provide a display `name` or structured `given_names` and
-`family_names`; services do not need to duplicate both forms.
+`family_names`; structured names require both parts, and services do not need
+to duplicate both forms. `affiliation` is an organization object with a required
+`name` and optional ROR `identifier`, `url`, `email`, and `address`. A person's
+`roles` is one controlled array; there is no separate singular role field.
 
 The generated JSON Schema controls the allowed keys for each entry type and
 rejects unknown fields. For example, `authors.entries` accepts person fields,
@@ -78,10 +81,14 @@ Services may also provide tooling choices when they know them, such as
 `documentation_builder`. If a service does not provide a tooling choice, the
 selected language template uses its default from `_contracts/template_context.json`.
 
-`operating_systems.entries` describes public platform support. Use
-`support_status` values `supported`, `expected-to-work`, `untested`, or
-`unsupported` so generated documentation and CI can treat platform claims
-consistently.
+`interfaces.entries` uses controlled bio.tools tool types. `type` selects the
+generated scaffold, while optional `specification` and SMP-controlled `status`
+(`Stable`, `Experimental`, or `Internal`) are rendered as public documentation;
+status does not suppress the requested scaffold.
+
+`operating_systems.entries` maps the SMP fields to `name`, `specification`, and
+`status`. Status accepts `Officially supported` or `Expected to work`;
+officially supported platforms define the generated test matrix.
 
 `external_dependencies.entries` describes important external requirements beyond
 the normal language package manifest. Use it for software, standards, ontologies,
@@ -93,11 +100,10 @@ Each entry needs a `name` and may include `version_constraint`, `url`,
 needed by the project. Each entry needs a `name` and may include `provider`,
 `service_types`, `quantity`, and `cost_coverage`.
 
-`include_tests` controls whether a generated test scaffold is included.
 `test_types.entries` uses the SMP testing checklist labels, such as
 `Smoke tests`, `Unit tests`, and `Integration tests`. `test_frameworks.entries`
 uses controlled framework names; the Python template currently supports
-`pytest`.
+`pytest`. An empty test-type list omits tests and their CI workflow.
 
 Quality tools use one controlled selector per responsibility: `formatter_tool`,
 `linter_tool`, and `type_checker`. The Python template currently supports
@@ -118,13 +124,12 @@ management-tools answer to the value supported by the selected template.
 Generated Python projects use the selection consistently in local commands and
 CI but do not ship a generated lockfile.
 
-`containerization.entries` represents the combined container/environment
-question in the SMP and uses a controlled `type`: `Docker`, `OCI / Podman`,
-`Apptainer / Singularity`, `Nix`, `Pixi`, `conda-lock`, `Lock file`, or `Other`.
-The optional `file_url`, `standard`, and `details` values carry the public
-information supplied by the source service. Python generates executable recipes
-for the three container types and documents complete-environment or lock-file
-entries without manufacturing configuration that was not supplied.
+`containerization.entries` selects generated container recipes using `Docker`,
+`OCI / Podman`, `Apptainer / Singularity`, or `Other`; optional `details`
+preserves public context. Pixi is an environment and project manager; Nix is a
+whole-environment manager but is not implemented by the current templates.
+Lockfiles are outputs of the selected project manager rather than container
+types. Python generates executable recipes for the three supported types.
 
 `distribution_channels.entries` is a controlled, repeatable list of package
 registries, container registries, archives, source distribution, installers,
@@ -146,7 +151,9 @@ when the source data says dependency license compatibility is checked.
 ## Documentation and citation
 
 Documentation is controlled by `documentation_types`. Supported canonical values
-are `user`, `deployment`, `developer`, `api`, `tutorial`, and `reference`.
+are `user`, `deployment`, and `developer`. Developer documentation includes the
+technical reference for public APIs, commands, configuration, formats, and
+extension points.
 Passing an empty `documentation_types.entries` list omits the documentation
 scaffold.
 
@@ -189,9 +196,8 @@ Community files are represented as binary include switches:
 `include_contributing`, `include_code_of_conduct`, `include_governance`,
 `include_security`, `include_support`, and `include_changelog`.
 
-Set a switch to `yes` only when the upstream service has enough public
-information to make the file useful. Content should come from the broader
-context fields, such as `support_routes`, `governance_notes`,
+The standard community files default to included and can be disabled explicitly.
+Content comes from broader context fields, such as `support_routes`, `governance_notes`,
 `code_of_conduct_contact`, `security_contact`, `security_measures`,
 `additional_security_measures`, `maintenance_level`, `public_risk_notes`,
 `continuity_plan`, and release fields.
@@ -204,9 +210,8 @@ For SMP or DSW adapters, useful mappings include:
 - governance text to `include_governance = yes` and `governance_notes`
 - security and access-control expectation to `include_security = yes`,
   `security_contact`, and `security_measures`
-- bug-reporting or feature-request expectation to `include_support = yes`,
-  and `support_routes`; use `type = issue_tracker` for the main public issue
-  tracker
+- bug-reporting or feature-request expectation to `include_support = yes` and
+  `support_routes`; each route contains a `system` and optional public `url`
 
 When `include_contributing` is enabled, the generated project includes
 `CONTRIBUTING.md` and a pull request template. When `include_support` is

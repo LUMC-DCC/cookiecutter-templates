@@ -6,11 +6,10 @@ mechanical consistency without deciding whether a change deserves an entry.
 
 from __future__ import annotations
 
-from datetime import date
-from pathlib import Path
 import re
 import sys
-
+from datetime import date
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CHANGELOG_PATH = ROOT / "CHANGELOG.md"
@@ -59,13 +58,13 @@ def collect_reference_labels(lines: list[str]) -> set[str]:
         Reference labels defined at the bottom of the changelog.
     """
     return {
-        match.group("label")
-        for line in lines
-        if (match := REFERENCE_RE.match(line))
+        match.group("label") for line in lines if (match := REFERENCE_RE.match(line))
     }
 
 
-def validate_release_heading(line_number: int, title: str) -> tuple[str | None, str | None]:
+def validate_release_heading(
+    line_number: int, title: str
+) -> tuple[str | None, str | None]:
     """Validate a Keep a Changelog release heading.
 
     Parameters
@@ -84,8 +83,7 @@ def validate_release_heading(line_number: int, title: str) -> tuple[str | None, 
     if not match:
         return (
             None,
-            f"line {line_number}: use '## [Unreleased]' or "
-            "'## [version] - YYYY-MM-DD'",
+            f"line {line_number}: use '## [Unreleased]' or '## [version] - YYYY-MM-DD'",
         )
 
     label = match.group("label")

@@ -1,21 +1,21 @@
 # Support
 
-{% if cookiecutter.documentation_url or cookiecutter.support_routes.entries -%}
+{% if cookiecutter.documentation_url or cookiecutter.support_routes.entries %}
 ## Routes
 
 | Need | Route |
 | --- | --- |
-{% if cookiecutter.documentation_url -%}
+{% if cookiecutter.documentation_url %}
 | Documentation | {{ cookiecutter.documentation_url }} |
-{% endif -%}
-{% for route in cookiecutter.support_routes.entries -%}
-| {{ route.purpose if route.purpose is defined and route.purpose else route.name if route.name is defined and route.name else route.type if route.type is defined and route.type else "Support" }} | {{ route.url if route.url is defined and route.url else route.contact if route.contact is defined and route.contact else route.name if route.name is defined and route.name else "Contact the maintainers" }} |
+{% endif %}
+{% for route in cookiecutter.support_routes.entries %}
+| {{ route.system }} | {{ route.url if route.url is defined and route.url else "Contact the maintainers" }} |
 {% endfor %}
 
-{% else -%}
+{% else %}
 Contact the project maintainers for support.
 
-{% endif -%}
+{% endif %}
 Use the issue templates for bug reports and feature requests when they are
 available.
 
@@ -29,10 +29,10 @@ When asking for help, include:
 - expected behavior
 - observed behavior and full error message
 
-{% if cookiecutter.maintenance_level -%}
+{% if cookiecutter.maintenance_level %}
 ## Maintenance level
 
 {{ cookiecutter.maintenance_level }}
 
-{% endif -%}
+{% endif %}
 Support is limited to the public maintenance commitment for this project.
