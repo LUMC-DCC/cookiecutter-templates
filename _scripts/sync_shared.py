@@ -1,10 +1,11 @@
-"""Synchronize shared Cookiecutter assets into each language template.
+"""Synchronize or verify shared assets in each language template.
 
 Shared files live in ``_cc_shared`` and are copied into every template that has
 a ``{{cookiecutter.project_slug}}`` project directory. Cookiecutter context
 files are generated per template so language-specific defaults can differ.
 """
 
+import argparse
 import shutil
 import sys
 import time
@@ -12,11 +13,15 @@ from pathlib import Path
 
 sys.dont_write_bytecode = True
 
-from build_cookiecutter_context import build_context, load_policies, write_context
+from build_cookiecutter_context import (
+    build_context,
+    context_json,
+    load_policies,
+    write_context,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 POLICY_PATH = ROOT / "_config" / "template_policies.json"
-SHARED_CONTEXT_PATH = ROOT / "_cc_shared" / "cookiecutter.json"
 
 TEMPLATE_DIRS = sorted(
     (
@@ -32,7 +37,6 @@ TEMPLATE_DIRS = sorted(
 RELATIVE_SYNC_MAP = {
     "hooks": "hooks",
     "template_hooks": "{{cookiecutter.project_slug}}/.template_hooks",
-    "cookiecutter.json": "cookiecutter.json",
     ".github/ISSUE_TEMPLATE": "{{cookiecutter.project_slug}}/.github/ISSUE_TEMPLATE",
     ".github/dependabot.yml": "{{cookiecutter.project_slug}}/.github/dependabot.yml",
     ".github/pull_request_template.md": (
@@ -47,7 +51,6 @@ RELATIVE_SYNC_MAP = {
     "tools/check_changelog.py": (
         "{{cookiecutter.project_slug}}/tools/check_changelog.py"
     ),
-    "CONTRIBUTING.md": "{{cookiecutter.project_slug}}/CONTRIBUTING.md",
 }
 
 IGNORED_SYNC_NAMES = {
@@ -58,9 +61,6 @@ IGNORED_SYNC_NAMES = {
 IGNORED_SYNC_SUFFIXES = {
     ".pyc",
 }
-
-# Collect modified paths
-MODIFIED_PATHS = []
 
 
 def should_ignore(path: Path):
@@ -79,8 +79,14 @@ def should_ignore(path: Path):
     return path.name in IGNORED_SYNC_NAMES or path.suffix in IGNORED_SYNC_SUFFIXES
 
 
-def sync_cookiecutter_context(policies, template_name: str, dst: Path):
-    """Write one template-specific Cookiecutter context file.
+def sync_cookiecutter_context(
+    policies,
+    template_name: str,
+    dst: Path,
+    *,
+    write: bool,
+):
+    """Synchronize one template-specific Cookiecutter context file.
 
     Parameters
     ----------
@@ -90,30 +96,33 @@ def sync_cookiecutter_context(policies, template_name: str, dst: Path):
         Template name used to resolve template-specific defaults.
     dst : pathlib.Path
         Destination ``cookiecutter.json`` path.
+    write : bool
+        Whether to update a mismatched destination.
 
     Returns
     -------
     bool
         Whether the context file changed.
     """
-    if write_context(
-        build_context(policies=policies, template=template_name),
-        dst,
-    ):
-        MODIFIED_PATHS.append(dst)
-        print(f"[sync] Generated Cookiecutter context for {template_name} → {dst}")
-        return True
-    return False
+    context = build_context(policies=policies, template=template_name)
+    if not write:
+        expected = context_json(context)
+        return not dst.is_file() or dst.read_text(encoding="utf-8") != expected
+    return write_context(context, dst)
 
 
-def remove_path(path: Path):
-    """Remove a file or directory, retrying transient filesystem failures.
+def remove_path(path: Path, *, write: bool):
+    """Remove a path when writing, retrying transient filesystem failures.
 
     Parameters
     ----------
     path : pathlib.Path
         Path to remove.
+    write : bool
+        Whether filesystem changes are enabled.
     """
+    if not write:
+        return
     for attempt in range(3):
         try:
             if path.is_dir() and not path.is_symlink():
@@ -129,8 +138,8 @@ def remove_path(path: Path):
             time.sleep(0.1)
 
 
-def copy_file_if_changed(src: Path, dst: Path):
-    """Copy a file only when destination content differs.
+def copy_file_if_changed(src: Path, dst: Path, *, write: bool):
+    """Compare one file and optionally update a mismatched destination.
 
     Parameters
     ----------
@@ -138,6 +147,8 @@ def copy_file_if_changed(src: Path, dst: Path):
         Source file.
     dst : pathlib.Path
         Destination file.
+    write : bool
+        Whether to update a mismatched destination.
 
     Returns
     -------
@@ -147,13 +158,14 @@ def copy_file_if_changed(src: Path, dst: Path):
     if dst.exists() and dst.is_file() and dst.read_bytes() == src.read_bytes():
         return False
 
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, dst)
+    if write:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
     return True
 
 
-def sync_dir(src: Path, dst: Path):
-    """Mirror one directory while preserving the destination root.
+def sync_dir(src: Path, dst: Path, *, write: bool):
+    """Compare one directory and optionally mirror it to a destination.
 
     Parameters
     ----------
@@ -161,35 +173,40 @@ def sync_dir(src: Path, dst: Path):
         Source directory.
     dst : pathlib.Path
         Destination directory.
+    write : bool
+        Whether to update a mismatched destination.
 
     Returns
     -------
     bool
         Whether the destination directory changed.
     """
-    changed = not dst.exists() or not dst.is_dir()
-
-    if dst.exists() and not dst.is_dir():
-        remove_path(dst)
-
-    dst.mkdir(parents=True, exist_ok=True)
+    if not dst.exists() or not dst.is_dir():
+        if not write:
+            return True
+        if dst.exists():
+            remove_path(dst, write=True)
+        dst.mkdir(parents=True, exist_ok=True)
+        changed = True
+    else:
+        changed = False
 
     src_entries = {entry.name for entry in src.iterdir() if not should_ignore(entry)}
     for dst_entry in dst.iterdir():
         if dst_entry.name not in src_entries:
-            remove_path(dst_entry)
+            remove_path(dst_entry, write=write)
             changed = True
 
     for src_entry in src.iterdir():
         if should_ignore(src_entry):
             continue
-        changed = sync_path(src_entry, dst / src_entry.name) or changed
+        changed = sync_path(src_entry, dst / src_entry.name, write=write) or changed
 
     return changed
 
 
-def sync_path(src: Path, dst: Path):
-    """Synchronize one file or directory.
+def sync_path(src: Path, dst: Path, *, write: bool):
+    """Compare one path and optionally synchronize it.
 
     Parameters
     ----------
@@ -197,6 +214,8 @@ def sync_path(src: Path, dst: Path):
         Source path.
     dst : pathlib.Path
         Destination path.
+    write : bool
+        Whether to update a mismatched destination.
 
     Returns
     -------
@@ -208,48 +227,70 @@ def sync_path(src: Path, dst: Path):
 
     if src.is_file():
         if dst.exists() and dst.is_dir():
-            remove_path(dst)
-        if copy_file_if_changed(src, dst):
-            MODIFIED_PATHS.append(dst)
-            print(f"[sync] Synced {src} → {dst}")
-            return True
-        return False
+            remove_path(dst, write=write)
+        return copy_file_if_changed(src, dst, write=write)
     elif src.is_dir():
-        if sync_dir(src, dst):
-            MODIFIED_PATHS.append(dst)
-            print(f"[sync] Synced {src} → {dst}")
-            return True
-        return False
+        return sync_dir(src, dst, write=write)
     else:
         print(f"[warning] Unknown source type: {src}")
         return False
 
 
-def main():
-    """Run synchronization for every discovered language template."""
-    MODIFIED_PATHS.clear()
-    policies = load_policies(POLICY_PATH)
-    if write_context(build_context(policies=policies), SHARED_CONTEXT_PATH):
-        MODIFIED_PATHS.append(SHARED_CONTEXT_PATH)
+def synchronize(*, write: bool):
+    """Synchronize or verify every discovered language template.
 
-    seen = set()
+    Parameters
+    ----------
+    write : bool
+        Whether mismatched generated files should be updated.
+
+    Returns
+    -------
+    list[pathlib.Path]
+        Out-of-sync destination paths.
+    """
+    mismatches = []
+    policies = load_policies(POLICY_PATH)
+
     for template_dir in TEMPLATE_DIRS:
+        context_path = template_dir / "cookiecutter.json"
+        if sync_cookiecutter_context(
+            policies,
+            template_dir.name,
+            context_path,
+            write=write,
+        ):
+            mismatches.append(context_path)
+
         for rel_src, rel_dst in RELATIVE_SYNC_MAP.items():
             src = ROOT / "_cc_shared" / rel_src
             dst = template_dir / rel_dst
-            key = (str(src), str(dst))
+            if sync_path(src, dst, write=write):
+                mismatches.append(dst)
 
-            if key in seen:
-                continue
-            seen.add(key)
+    return mismatches
 
-            if rel_src == "cookiecutter.json":
-                sync_cookiecutter_context(policies, template_dir.name, dst)
-            else:
-                sync_path(src, dst)
 
-    for path in MODIFIED_PATHS:
-        print(f"[modified]{path}")
+def main():
+    """Run the command-line interface."""
+    parser = argparse.ArgumentParser()
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--write", action="store_true", help="update derived files")
+    mode.add_argument(
+        "--check",
+        action="store_true",
+        help="report drift without changing files",
+    )
+    args = parser.parse_args()
+
+    mismatches = synchronize(write=args.write)
+    prefix = "[sync] Updated" if args.write else "[out-of-sync]"
+    for path in mismatches:
+        print(f"{prefix} {path.relative_to(ROOT)}")
+
+    if mismatches and args.check:
+        print("Run `poetry run python _scripts/sync_shared.py --write` to update them.")
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

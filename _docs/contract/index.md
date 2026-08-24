@@ -46,8 +46,8 @@ completeness.
 After changing local policy, shared hooks, or field usage, run:
 
 ```bash
-poetry run python _scripts/sync_shared.py
-poetry run python _scripts/build_field_usage_docs.py
+poetry run python _scripts/sync_shared.py --write
+poetry run python _scripts/build_field_usage_docs.py --write
 ```
 
 Public field changes belong in `rsm-schema`. Reusable-file changes belong in

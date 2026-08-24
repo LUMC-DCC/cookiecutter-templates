@@ -2,8 +2,14 @@ repos:
   - repo: local
     hooks:
       - id: sync-shared
-        name: Sync shared cookiecutter assets
-        entry: poetry run python _scripts/sync_shared.py
+        name: Check shared cookiecutter assets
+        entry: poetry run python _scripts/sync_shared.py --check
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: field-usage-docs
+        name: Check generated field usage documentation
+        entry: poetry run python _scripts/build_field_usage_docs.py --check
         language: system
         pass_filenames: false
         always_run: true

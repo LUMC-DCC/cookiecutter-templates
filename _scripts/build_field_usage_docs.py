@@ -108,9 +108,28 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--usage", type=Path, default=DEFAULT_USAGE_PATH)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--write", action="store_true", help="update documentation")
+    mode.add_argument(
+        "--check",
+        action="store_true",
+        help="report drift without changing documentation",
+    )
     args = parser.parse_args()
 
-    write_docs(build_table(load_usage(args.usage)), args.output)
+    content = build_table(load_usage(args.usage))
+    current = args.output.read_text(encoding="utf-8") if args.output.exists() else None
+    if current == content:
+        return
+    if args.check:
+        print(f"[out-of-sync] {args.output.relative_to(ROOT)}")
+        print(
+            "Run `poetry run python _scripts/build_field_usage_docs.py --write` "
+            "to update it."
+        )
+        raise SystemExit(1)
+    write_docs(content, args.output)
+    print(f"[docs] Updated {args.output.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

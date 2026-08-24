@@ -24,9 +24,17 @@ Cookiecutter defaults and prompts. `_config/template_policies.json` adds the
 language-specific slug constraints and supported choices stored as private hook
 metadata.
 
-`_scripts/sync_shared.py` writes `_cc_shared/cookiecutter.json`, writes each
-language `cookiecutter.json`, and mirrors shared hooks and assets. None of these
-generated context files is a public contract.
+`_scripts/sync_shared.py --write` writes each language `cookiecutter.json` and
+mirrors shared hooks and assets. These language contexts are derived template
+inputs, not public contracts. Its `--check` mode reports drift without changing
+the worktree and is used by pre-commit and CI.
+
+The synchronized copies are intentional build artifacts. A template selected
+with Cookiecutter's `directory` option must contain its own context, hooks, and
+render tree. `pre_gen_project` runs only after that template and its context
+have been selected, so it can validate generation but cannot supply missing
+template-source files. Keep shared sources canonical under `_cc_shared/` and do
+not edit their language copies directly.
 
 At generation time, the post-generation hook:
 
@@ -77,8 +85,8 @@ maintained list.
 ```bash
 poetry lock
 poetry install --with dev,docs
-poetry run python _scripts/sync_shared.py
-poetry run python _scripts/build_field_usage_docs.py
+poetry run python _scripts/sync_shared.py --write
+poetry run python _scripts/build_field_usage_docs.py --write
 poetry run pre-commit run --all-files
 poetry run ruff check .
 poetry run ruff format --check .
@@ -90,5 +98,6 @@ poetry run mkdocs build --strict
 git diff --check
 ```
 
-CI runs the same generation, audit, test, and documentation gates. Third-party
-Actions remain pinned to full commit SHAs and are updated through Dependabot.
+CI checks derived files without rewriting them, then runs each audit, quality,
+test, and documentation gate once. Third-party Actions remain pinned to full
+commit SHAs and are updated through Dependabot.

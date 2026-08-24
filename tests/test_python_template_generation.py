@@ -1094,8 +1094,7 @@ def test_python_project_manager_controls_setup_and_commands(
         assert setup_python["with"] == {"python-version-file": "pyproject.toml"}
     assert setup_text in action or setup_text in contributing
     assert f"run: {run_prefix}python -m pytest" in tests_workflow
-    expected_manager_text = f"uses `{project_manager}` for its development environment"
-    assert expected_manager_text in contributing
+    assert "## Development setup" in contributing
     if tool_config:
         assert tool_config in pyproject["tool"]
 
@@ -2327,12 +2326,11 @@ def test_python_shared_community_files_render_standard_content(tmp_path, monkeyp
     support = (project_path / "SUPPORT.md").read_text(encoding="utf-8")
 
     assert "Conventional Commits" in contributing
-    assert "pre-commit run --all-files" in contributing
     assert "ruff check ." in contributing
     assert "Rebase" in contributing
-    assert "CI runs on every push and pull request" in contributing
+    assert "CI runs on pushes and pull requests" in contributing
     assert "| Metadata |" in contributing
-    assert "rs-metadata validate" in contributing
+    assert "Validate generated metadata files." in contributing
     assert "The branch is rebased on the target branch" in contributing
     assert "No secrets, private data, or non-public security details" in contributing
     assert "Contributor Covenant" in code_of_conduct
@@ -2367,8 +2365,6 @@ def test_python_shared_community_files_render_standard_content(tmp_path, monkeyp
     )
     assert "Check changelog format" in changelog_workflow
     assert "python tools/check_changelog.py" in changelog_workflow
-    assert "License compatibility" in contributing
-    assert "licensecheck" in contributing
     assert "Maintainers hand over active work" in governance
     assert "Lack of maintainers" in governance
     assert "Research Software Team" in governance

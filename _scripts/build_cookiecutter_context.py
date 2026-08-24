@@ -18,7 +18,6 @@ from rsm_schema import schema as rsm_schema
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_POLICY_PATH = ROOT / "_config" / "template_policies.json"
-DEFAULT_OUTPUT_PATH = ROOT / "_cc_shared" / "cookiecutter.json"
 
 
 def load_rsm_schema() -> dict[str, Any]:
@@ -192,19 +191,35 @@ def write_context(context: Mapping[str, Any], path: Path) -> bool:
     bool
         Whether the destination changed.
     """
-    content = json.dumps(context, indent=2, ensure_ascii=False) + "\n"
+    content = context_json(context)
     if path.exists() and path.read_text(encoding="utf-8") == content:
         return False
     path.write_text(content, encoding="utf-8")
     return True
 
 
+def context_json(context: Mapping[str, Any]) -> str:
+    """Serialize a generated Cookiecutter context consistently.
+
+    Parameters
+    ----------
+    context
+        Cookiecutter context data.
+
+    Returns
+    -------
+    str
+        Pretty-printed JSON ending in one newline.
+    """
+    return json.dumps(context, indent=2, ensure_ascii=False) + "\n"
+
+
 def main() -> None:
     """Run the command-line interface."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--policies", type=Path, default=DEFAULT_POLICY_PATH)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
-    parser.add_argument("--template")
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--template", required=True)
     args = parser.parse_args()
     write_context(
         build_context(policies=load_policies(args.policies), template=args.template),

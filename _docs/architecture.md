@@ -24,15 +24,16 @@ copy.
 - `CHANGELOG.md` and `CODE_OF_CONDUCT.md`
 - `GOVERNANCE.md`, `SECURITY.md`, and `SUPPORT.md`
 - `.zenodo.json`
+- `CONTRIBUTING.md`
 
 Their prose, metadata mappings, SPDX behavior, and output-schema tests belong in
 that package. This repository tests that the right model is selected and that
 the complete generated project works.
 
-`CONTRIBUTING.md`, GitHub collaboration files, workflows, and language-specific
-package files remain here. Issue forms and the pull-request template could also
-move when their models can represent repository-hosting choices without
-depending on a language scaffold.
+GitHub collaboration files, workflows, and language-specific package files
+remain here. Issue forms and the pull-request template could also move when
+their models can represent repository-hosting choices without depending on a
+language scaffold.
 
 ## Generation flow
 

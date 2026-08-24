@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.14,<4.0"
 dependencies = [
     "rsm-schema @ git+https://github.com/lumc-dcc/rsm-schema.git@0b033ce05c388310cdfa86c24eddd521f097a0b0",
-    "rs-files-templates @ git+https://github.com/LUMC-DCC/rs-files-templates.git@c87dae01f44ad9d637e84e685e2cd0eb5e0bf19e",
+    "rs-files-templates @ git+https://github.com/LUMC-DCC/rs-files-templates.git@8b8ac019bd8eb9978ac13c0d0df626a290ac3cdf",
 ]
 
 [project.urls]

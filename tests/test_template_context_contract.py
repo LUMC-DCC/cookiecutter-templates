@@ -99,9 +99,6 @@ def test_every_packaged_repository_file_is_integrated():
 def test_cookiecutter_contexts_are_derived_from_rsm(context_builder):
     """Ensure shared and language contexts match the schema adapter output."""
     policies = context_builder.load_policies(POLICY_PATH)
-    expected_shared = context_builder.build_context(policies=policies)
-    assert load_json(ROOT / "_cc_shared" / "cookiecutter.json") == expected_shared
-
     for template in policies:
         expected = context_builder.build_context(
             policies=policies,

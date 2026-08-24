@@ -147,8 +147,9 @@ addresses, affiliations, ORCID identifiers, and websites.
 The template generates `codemeta.json` as the metadata anchor and optionally
 generates `CITATION.cff`. The `rs-metadata` workflow validates the LUMC profile
 and compares CodeMeta with Python package, citation, and container metadata.
-Generated developer guidance includes the isolated local validation command.
-See [Metadata](metadata.md) for the repository-wide strategy.
+See [Metadata](metadata.md) for the repository-wide strategy. The generated
+contributing guide summarizes the selected project manager, quality tools,
+tests, documentation builder, metadata, and distribution capabilities.
 
 When `CHANGELOG.md` is included, the Python template also includes
 `tools/check_changelog.py`. GitHub Actions runs this check from the shared

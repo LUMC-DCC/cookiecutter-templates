@@ -24,6 +24,8 @@ legal, and community files are rendered by
 ```bash
 poetry install --with docs,dev
 poetry run pre-commit install
+poetry run python _scripts/sync_shared.py --write
+poetry run python _scripts/build_field_usage_docs.py --write
 poetry run pre-commit run --all-files
 poetry run ruff check .
 poetry run ruff format --check .

@@ -10,6 +10,7 @@ from rs_files_templates import (
     CitationModel,
     CodeMetaModel,
     CodeOfConductModel,
+    ContributingModel,
     GovernanceModel,
     LicenseModel,
     SecurityModel,
@@ -24,6 +25,7 @@ from utils.rsm import rsm_payload
 COMMUNITY_MODELS = {
     "CHANGELOG.md": ChangelogModel,
     "CODE_OF_CONDUCT.md": CodeOfConductModel,
+    "CONTRIBUTING.md": ContributingModel,
     "GOVERNANCE.md": GovernanceModel,
     "SECURITY.md": SecurityModel,
     "SUPPORT.md": SupportModel,
@@ -39,6 +41,7 @@ REPOSITORY_FILE_MODELS = (
     SecurityModel,
     SupportModel,
     ZenodoModel,
+    ContributingModel,
 )
 
 
