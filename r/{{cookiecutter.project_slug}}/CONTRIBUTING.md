@@ -59,7 +59,7 @@ this project.
 {% if cookiecutter.language == "python" %}
 | Check | Command |
 | --- | --- |
-{% if cookiecutter.include_changelog == "yes" %}
+{% if "CHANGELOG.md" in cookiecutter.community_files.entries %}
 | Changelog format | `@@PROJECT_RUN@@python tools/check_changelog.py` |
 {% endif %}
 {% if has_distribution %}
@@ -101,7 +101,7 @@ CI runs on every push and pull request.
 {% if cookiecutter.include_citation_cff == "yes" %}
 | Metadata | Citation metadata is included | Runs `rs-metadata validate`. |
 {% endif %}
-{% if cookiecutter.include_changelog == "yes" %}
+{% if "CHANGELOG.md" in cookiecutter.community_files.entries %}
 | Changelog | Changelog is included | Runs `python tools/check_changelog.py`. |
 {% endif %}
 {% if cookiecutter.license_compatibility_check == "yes" %}

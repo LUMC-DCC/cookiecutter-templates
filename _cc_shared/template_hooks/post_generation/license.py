@@ -393,13 +393,18 @@ def update_license_file(ctx, cwd):
         Rendered Cookiecutter context.
     cwd : pathlib.Path
         Generated project root.
+
+    Returns
+    -------
+    str or None
+        Confirmed SPDX identifier, or ``None`` for absent or custom licenses.
     """
     license_path = cwd / "LICENSE.txt"
     license_value = ctx.get("license", "").strip()
     if not license_value:
         remove_path(license_path)
         update_license_metadata(cwd, None)
-        return
+        return None
 
     base_url = os.environ.get("SPDX_LICENSE_API_BASE", DEFAULT_SPDX_LICENSE_API_BASE)
     try:
@@ -411,7 +416,8 @@ def update_license_file(ctx, cwd):
             encoding="utf-8",
         )
         update_license_metadata(cwd, license_value)
-        return
+        return None
 
     license_path.write_text(render_license_text(record), encoding="utf-8")
     update_license_metadata(cwd, license_value, record["licenseId"])
+    return record["licenseId"]

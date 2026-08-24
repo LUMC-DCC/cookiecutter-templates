@@ -36,6 +36,11 @@ Callers should:
 The templates may accept rich nested values such as `authors.entries`,
 `funding.entries`, and `interfaces.entries`.
 
+Integrator payloads must explicitly provide `language`, `project_name`,
+`project_slug`, and `project_short_description`. These identify the generated
+project and should not silently inherit demonstration defaults. Other fields
+are optional and use the defaults declared in the contract.
+
 `project_slug` follows the selected language's package-name rules:
 
 | Language | Accepted shape |
@@ -73,9 +78,8 @@ rejects unknown fields. For example, `authors.entries` accepts person fields,
 while `funding.entries` accepts funding fields. This lets integrators catch
 mapping mistakes in their own service before rendering a repository.
 
-On/off template options are scalar `yes`/`no` values. Community-file inclusion
-uses this form, for example `include_support: "yes"` or
-`include_changelog: "no"`.
+Independent on/off options are scalar `yes`/`no` values. Controlled
+multi-selects use an `entries` array, including `community_files`.
 
 Services may also provide tooling choices when they know them, such as
 `documentation_builder`. If a service does not provide a tooling choice, the
@@ -85,6 +89,11 @@ selected language template uses its default from `_contracts/template_context.js
 generated scaffold, while optional `specification` and SMP-controlled `status`
 (`Stable`, `Experimental`, or `Internal`) are rendered as public documentation;
 status does not suppress the requested scaffold.
+
+`software_functions.entries` is the canonical interoperability structure for
+operations, inputs, outputs, and commands. Input and output format records may
+carry an EDAM term and URI plus `version_constraint`, `schema_constraints`, and
+`sample_url`. Sample URLs also become linked CodeMeta supporting-data nodes.
 
 `operating_systems.entries` maps the SMP fields to `name`, `specification`, and
 `status`. Status accepts `Officially supported` or `Expected to work`;
@@ -139,6 +148,17 @@ matching tags, and publishes OCI images for GitHub Container Registry and
 Docker Hub when an OCI recipe is present. Other selected channels are included
 in generated release guidance for project-specific setup.
 
+Use `Zenodo` as a distribution channel when releases will be archived there.
+The generated `.zenodo.json` is derived from existing public project metadata;
+`registries` remains for software catalogue records such as bio.tools or the
+Research Software Directory.
+
+README badges are derived rather than separately controlled. Repository,
+documentation, distribution-channel, persistent-identifier, interface, and CI
+fields determine which badges have enough information to render. External
+self-assessment badges should be added only after the project has an assessment
+URL or project identifier from the issuing service.
+
 `versioning_scheme` is one controlled choice: `SemVer`, `CalVer`, or `Custom`.
 Use `versioning_scheme_details` for an exact CalVer pattern such as `YYYY.MM` or
 to preserve a custom policy from the source service. `version` remains the
@@ -166,6 +186,9 @@ disabled, generated metadata checks compare the remaining metadata files.
 
 ## Resources, sustainability, and risk
 
+`problem_statement` and `value_proposition` preserve the corresponding public
+SMP motivation answers in the generated project overview.
+
 `resource_requirements` is public prose describing typical and worst-case
 memory, storage, compute, GPU, wall-clock, or scaling needs.
 
@@ -177,6 +200,9 @@ controlled `entries` list using the choices declared in the context schema.
 
 Use `security_measures.entries` for the controlled SMP measures and
 `additional_security_measures` for public measures outside that list.
+Use `regulatory_requirements.entries` for public selections from the SMP
+compliance checklist and `additional_regulatory_requirements` for public
+requirements outside it.
 `security_contact`, `public_risk_notes`, `sensitive_data_statement`, and
 `dmp_reference` must contain only information suitable for a public
 repository.
@@ -192,9 +218,16 @@ silently mistaken for custom license text.
 
 ## Community files
 
-Community files are represented as binary include switches:
-`include_contributing`, `include_code_of_conduct`, `include_governance`,
-`include_security`, `include_support`, and `include_changelog`.
+Community files use one controlled filename array. All standard files are
+selected by default; pass an empty array to generate none:
+
+```json
+{
+  "community_files": {
+    "entries": ["CONTRIBUTING.md", "SECURITY.md", "SUPPORT.md"]
+  }
+}
+```
 
 The standard community files default to included and can be disabled explicitly.
 Content comes from broader context fields, such as `support_routes`, `governance_notes`,
@@ -204,18 +237,17 @@ Content comes from broader context fields, such as `support_routes`, `governance
 
 For SMP or DSW adapters, useful mappings include:
 
-- contributing guidelines expectation to `include_contributing = yes`
-- code of conduct expectation to `include_code_of_conduct = yes`
-- release or changelog expectation to `include_changelog = yes`
-- governance text to `include_governance = yes` and `governance_notes`
-- security and access-control expectation to `include_security = yes`,
+- contributing guidelines expectation to `CONTRIBUTING.md`
+- code of conduct expectation to `CODE_OF_CONDUCT.md`
+- release or changelog expectation to `CHANGELOG.md`
+- governance text to `GOVERNANCE.md` and `governance_notes`
+- security and access-control expectation to `SECURITY.md`,
   `security_contact`, and `security_measures`
-- bug-reporting or feature-request expectation to `include_support = yes` and
+- bug-reporting or feature-request expectation to `SUPPORT.md` and
   `support_routes`; each route contains a `system` and optional public `url`
 
-When `include_contributing` is enabled, the generated project includes
-`CONTRIBUTING.md` and a pull request template. When `include_support` is
-enabled, the generated project includes `SUPPORT.md` and structured GitHub issue
+Selecting `CONTRIBUTING.md` also includes a pull request template. When
+`SUPPORT.md` is selected, the generated project includes structured GitHub issue
 forms. These GitHub templates use public context only.
 
 The shared community files use broadly recognized conventions where possible:

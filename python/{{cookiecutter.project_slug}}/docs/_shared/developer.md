@@ -237,7 +237,7 @@ Set up the complete development environment with `@@PROJECT_MANAGER@@`:
 Run the applicable checks through the managed environment:
 
 ```bash
-{% if cookiecutter.include_changelog == "yes" %}
+{% if "CHANGELOG.md" in cookiecutter.community_files.entries %}
 @@PROJECT_RUN@@python tools/check_changelog.py
 {% endif %}
 {% if effective_linter_tool == "ruff" %}

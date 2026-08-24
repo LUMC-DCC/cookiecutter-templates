@@ -53,20 +53,6 @@ Publication {{ publication.pmcid }}
 Associated publication
 {% endif %}
 {%- endmacro %}
-{% macro registry_url(registry) -%}
-{% set normalized_name = registry.name | lower | replace(".", "") | replace("-", "") | replace(" ", "") %}
-{% if registry.url_or_id.startswith("http://") or registry.url_or_id.startswith("https://") %}
-{{ registry.url_or_id }}
-{% elif normalized_name == "biotools" %}
-https://bio.tools/{{ registry.url_or_id | replace("biotools:", "") }}
-{% elif normalized_name == "pypi" %}
-https://pypi.org/project/{{ registry.url_or_id }}/
-{% elif normalized_name == "cran" %}
-https://cran.r-project.org/package={{ registry.url_or_id }}
-{% else %}
-{{ registry.url_or_id }}
-{% endif %}
-{%- endmacro %}
 {% macro cff_publication_reference(publication, indent, bullet=False) %}
 {% set requested_type = publication.type | lower | replace(" ", "-") if publication.type is defined and publication.type else "article" %}
 {% set cff_types = ["art", "article", "audiovisual", "bill", "blog", "book", "catalogue", "conference-paper", "conference", "data", "database", "dictionary", "edited-work", "encyclopedia", "film-broadcast", "generic", "government-document", "grant", "hearing", "historical-work", "legal-case", "legal-rule", "magazine-article", "manual", "map", "multimedia", "music", "newspaper-article", "pamphlet", "patent", "personal-communication", "proceedings", "report", "serial", "slides", "software-code", "software-container", "software-executable", "software-virtual-machine", "software", "sound-recording", "standard", "statute", "thesis", "unpublished", "video", "website"] %}
@@ -132,8 +118,7 @@ keywords:
   - {{ yaml_string(keyword) }}
 {% endfor %}
 {% endif %}
-{% set registry_identifiers = cookiecutter.registries.entries | selectattr("url_or_id", "defined") | selectattr("url_or_id") | list %}
-{% if cookiecutter.persistent_identifiers.entries or registry_identifiers %}
+{% if cookiecutter.persistent_identifiers.entries %}
 identifiers:
 {% for identifier in cookiecutter.persistent_identifiers.entries %}
 {% set identifier_type = identifier.type | lower %}
@@ -141,13 +126,6 @@ identifiers:
     value: {{ yaml_string(identifier.identifier) }}
 {% if identifier.associated_version is defined and identifier.associated_version %}
     description: {{ yaml_string("Persistent identifier for version " ~ identifier.associated_version) }}
-{% endif %}
-{% endfor %}
-{% for registry in registry_identifiers %}
-  - type: "other"
-    value: {{ yaml_string(registry_url(registry) | trim) }}
-{% if registry.name %}
-    description: {{ yaml_string(registry.name) }}
 {% endif %}
 {% endfor %}
 {% endif %}

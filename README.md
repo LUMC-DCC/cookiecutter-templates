@@ -1,5 +1,7 @@
 # LUMC research software templates
 
+[![CI](https://github.com/LUMC-DCC/cookiecutter-templates/actions/workflows/ci.yml/badge.svg)](https://github.com/LUMC-DCC/cookiecutter-templates/actions/workflows/ci.yml) [![Documentation](https://img.shields.io/badge/docs-online-blue?labelColor=gray)](https://lumc-dcc.github.io/cookiecutter-templates/)
+
 Service-agnostic Cookiecutter templates for creating maintainable, FAIR
 research software repositories. The Python template is the current reference
 implementation; shared contracts and assets support additional language

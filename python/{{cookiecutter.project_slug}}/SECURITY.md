@@ -60,6 +60,18 @@ publish public details only after disclosure is appropriate.
 {{ cookiecutter.public_risk_notes }}
 
 {% endif %}
+{% if cookiecutter.regulatory_requirements.entries or cookiecutter.additional_regulatory_requirements %}
+## Regulatory and policy requirements
+
+{% for requirement in cookiecutter.regulatory_requirements.entries %}
+- {{ requirement }}
+{% endfor %}
+{% if cookiecutter.additional_regulatory_requirements %}
+
+{{ cookiecutter.additional_regulatory_requirements }}
+{% endif %}
+
+{% endif %}
 {% if cookiecutter.dmp_reference %}
 ## Data management reference
 

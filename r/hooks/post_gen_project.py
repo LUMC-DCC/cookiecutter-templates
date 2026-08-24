@@ -26,6 +26,7 @@ from post_generation.project_management import configure_project_manager
 from post_generation.quality import select_quality_tools
 from post_generation.testing import select_test_framework
 from post_generation.validation import validate_context
+from post_generation.zenodo import select_zenodo_metadata
 
 
 def cleanup():
@@ -39,7 +40,8 @@ def cleanup():
     select_community_files(ctx, cwd)
     select_metadata_files(ctx, cwd)
     update_public_context(ctx, cwd)
-    update_license_file(ctx, cwd)
+    spdx_id = update_license_file(ctx, cwd)
+    select_zenodo_metadata(ctx, cwd, spdx_id)
     configure_project_manager(ctx, cwd)
     select_quality_tools(ctx, cwd)
     select_test_framework(ctx, cwd)

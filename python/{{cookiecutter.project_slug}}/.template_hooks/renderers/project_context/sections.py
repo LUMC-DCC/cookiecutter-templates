@@ -3,9 +3,11 @@
 from renderers.project_context.basic import (
     build_audience_section,
     build_funding_section,
+    build_problem_statement_section,
     build_purpose_categories_section,
     build_purpose_section,
     build_related_software_section,
+    build_value_proposition_section,
 )
 from renderers.project_context.interoperability import (
     build_external_dependencies_section,
@@ -22,6 +24,7 @@ def build_project_context_sections(
     ctx,
     include_funding,
     include_interoperability=True,
+    include_motivation_details=True,
 ):
     """Build public project context sections.
 
@@ -33,6 +36,8 @@ def build_project_context_sections(
         Whether to include funding acknowledgements.
     include_interoperability : bool, default=True
         Whether to include interoperability summaries.
+    include_motivation_details : bool, default=True
+        Whether to include the full problem and value statements.
 
     Returns
     -------
@@ -45,6 +50,11 @@ def build_project_context_sections(
         build_audience_section(entries(ctx, "audiences")),
         build_related_software_section(entries(ctx, "related_software")),
     ]
+    if include_motivation_details:
+        sections[2:2] = [
+            build_problem_statement_section(ctx.get("problem_statement", "")),
+            build_value_proposition_section(ctx.get("value_proposition", "")),
+        ]
     if include_interoperability:
         sections.extend(
             [

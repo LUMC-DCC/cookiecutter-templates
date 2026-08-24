@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 
 import pytest
-
+from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_PATH = ROOT / "_contracts" / "template_context.json"
@@ -22,11 +22,7 @@ FIELD_DOC_GENERATOR_PATH = ROOT / "_scripts" / "build_field_usage_docs.py"
 FIELD_USAGE_AUDIT_PATH = ROOT / "_scripts" / "audit_field_usage_status.py"
 FIELD_USAGE_DOC_PATH = ROOT / "_docs" / "contract" / "field-usage.md"
 VALIDATION_PATH = (
-    ROOT
-    / "_cc_shared"
-    / "template_hooks"
-    / "post_generation"
-    / "validation.py"
+    ROOT / "_cc_shared" / "template_hooks" / "post_generation" / "validation.py"
 )
 
 
@@ -202,9 +198,7 @@ def test_template_cookiecutter_contexts_use_template_defaults():
     assert python_context["_template_supported_choices"]["test_frameworks"] == [
         "pytest"
     ]
-    assert r_context["_template_supported_choices"]["test_frameworks"] == [
-        "testthat"
-    ]
+    assert r_context["_template_supported_choices"]["test_frameworks"] == ["testthat"]
     assert python_context["formatter_tool"][0] == "ruff"
     assert python_context["linter_tool"][0] == "ruff"
     assert python_context["type_checker"][0] == "none"
@@ -361,27 +355,57 @@ def test_person_entries_accept_name_or_structured_parts():
     }
 
 
-def test_community_file_fields_are_binary_switches():
-    """Ensure community-file options render as binary include switches."""
+def test_community_files_are_one_controlled_selector():
+    """Ensure community files use one controlled filename selector."""
     contract = load_contract()
     fields = {field["name"]: field for field in contract["fields"]}
     context = load_generator().build_context(contract)
     schema = json.loads(CONTEXT_SCHEMA_PATH.read_text(encoding="utf-8"))
+    expected = [
+        "CONTRIBUTING.md",
+        "CODE_OF_CONDUCT.md",
+        "GOVERNANCE.md",
+        "SECURITY.md",
+        "SUPPORT.md",
+        "CHANGELOG.md",
+    ]
 
-    for name in [
-        "include_contributing",
-        "include_code_of_conduct",
-        "include_governance",
-        "include_security",
-        "include_support",
-        "include_changelog",
-    ]:
-        assert fields[name]["type"] == "choice"
-        assert fields[name]["choices"] == ["yes", "no"]
-        assert context[name] == ["yes", "no"]
-        assert schema["properties"][name]["type"] == "string"
-        assert schema["properties"][name]["enum"] == ["yes", "no"]
-        assert "entries" not in schema["properties"][name].get("properties", {})
+    assert fields["community_files"]["type"] == "string_array"
+    assert fields["community_files"]["default"] == expected
+    assert fields["community_files"]["item_schema"]["enum"] == expected
+    assert context["community_files"] == {"entries": expected}
+    assert schema["properties"]["community_files"]["default"] == {"entries": expected}
+    assert (
+        schema["properties"]["community_files"]["properties"]["entries"]["items"][
+            "enum"
+        ]
+        == expected
+    )
+
+
+def test_integrator_required_fields_are_core_project_identity():
+    """Ensure only caller-owned project identity is required at the root."""
+    schema = json.loads(CONTEXT_SCHEMA_PATH.read_text(encoding="utf-8"))
+
+    assert schema["required"] == [
+        "language",
+        "project_name",
+        "project_slug",
+        "project_short_description",
+    ]
+
+
+def test_array_field_defaults_match_their_wrapper_schema():
+    """Ensure repeatable defaults use the Cookiecutter entries wrapper."""
+    schema = json.loads(CONTEXT_SCHEMA_PATH.read_text(encoding="utf-8"))
+    fields = {field["name"]: field for field in load_contract()["fields"]}
+
+    for name, field in fields.items():
+        if field["type"] not in {"object_array", "string_array"}:
+            continue
+        assert schema["properties"][name]["default"] == {
+            "entries": field.get("default", [])
+        }
 
 
 def test_containerization_types_are_controlled():
@@ -550,6 +574,20 @@ def test_repeatable_contract_fields_have_controlled_entry_shapes():
         assert schema["properties"]
 
 
+def test_repeatable_entry_types_require_meaningful_content():
+    """Ensure no structured entry accepts an empty object."""
+    schema = json.loads(CONTEXT_SCHEMA_PATH.read_text(encoding="utf-8"))
+
+    for name, definition in schema["$defs"].items():
+        fragment = {
+            "$schema": schema["$schema"],
+            "$defs": schema["$defs"],
+            **definition,
+        }
+        errors = list(Draft202012Validator(fragment).iter_errors({}))
+        assert errors, f"{name} accepts an empty object"
+
+
 def test_integrator_schema_controls_entries_wrapper():
     """Ensure the JSON Schema keeps nested context values constrained."""
     schema = json.loads(CONTEXT_SCHEMA_PATH.read_text(encoding="utf-8"))
@@ -603,9 +641,7 @@ def test_field_usage_documentation_targets_are_template_agnostic():
     documentation_paths = []
     for field in usage["fields"]:
         documentation_paths.extend(
-            target
-            for target in field["targets"]
-            if target.startswith("docs/")
+            target for target in field["targets"] if target.startswith("docs/")
         )
 
     assert documentation_paths == []

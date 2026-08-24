@@ -1,7 +1,5 @@
 """Render public interoperability summaries for generated documentation."""
 
-from urllib.parse import quote
-
 from renderers.project_context.terms import (
     format_edam_term_label,
     format_function_io_label,
@@ -510,73 +508,6 @@ def interface_type_values(interface_entries):
             if interface.get("type", "").strip()
         }
     )
-
-
-def shields_badge_url(label, message, color="blue", label_color="gray"):
-    """Build a Shields.io static badge URL.
-
-    Parameters
-    ----------
-    label : str
-        Left-hand badge text.
-    message : str
-        Right-hand badge text.
-    color : str, default="blue"
-        Right-hand badge color.
-    label_color : str, default="gray"
-        Left-hand badge color.
-
-    Returns
-    -------
-    str
-        Shields.io badge URL.
-    """
-    def escape_path_part(value):
-        """Escape one Shields.io path part.
-
-        Parameters
-        ----------
-        value : str
-            Badge path segment.
-
-        Returns
-        -------
-        str
-            Escaped path segment.
-        """
-        return quote(value.replace("-", "--"), safe="")
-
-    return (
-        "https://img.shields.io/badge/"
-        f"{escape_path_part(label)}-"
-        f"{escape_path_part(message)}-"
-        f"{escape_path_part(color)}"
-        f"?labelColor={quote(label_color, safe='')}"
-    )
-
-
-def build_interface_badge(interface_entries):
-    """Build a README badge for public interface types.
-
-    Parameters
-    ----------
-    interface_entries : list[dict]
-        Interface records from the rendered Cookiecutter context.
-
-    Returns
-    -------
-    str
-        Markdown image badge, or an empty string.
-    """
-    interface_types = interface_type_values(interface_entries)
-    if not interface_types:
-        return ""
-
-    url = shields_badge_url(
-        label="tool type",
-        message=" | ".join(interface_types),
-    )
-    return f"![Tool Type]({url})"
 
 
 def api_like_interface(interface):

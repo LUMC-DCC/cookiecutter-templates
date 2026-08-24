@@ -13,13 +13,14 @@ import json
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CONTRACT_PATH = ROOT / "_contracts" / "template_context.json"
 DEFAULT_OUTPUT_PATH = ROOT / "_contracts" / "template_context.schema.json"
 
 
-def with_common_metadata(field: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
+def with_common_metadata(
+    field: dict[str, Any], schema: dict[str, Any]
+) -> dict[str, Any]:
     """Add description and default metadata to one field schema.
 
     Parameters
@@ -37,12 +38,14 @@ def with_common_metadata(field: dict[str, Any], schema: dict[str, Any]) -> dict[
     schema = copy.deepcopy(schema)
     if field.get("description"):
         schema["description"] = field["description"]
-    if "default" in field:
+    if "default" in field and "default" not in schema:
         schema["default"] = field["default"]
     return schema
 
 
-def entries_schema(field: dict[str, Any], item_schema: dict[str, Any]) -> dict[str, Any]:
+def entries_schema(
+    field: dict[str, Any], item_schema: dict[str, Any]
+) -> dict[str, Any]:
     """Build the ``{"entries": [...]}`` wrapper schema.
 
     Parameters
@@ -157,11 +160,7 @@ def build_schema(contract: dict[str, Any]) -> dict[str, Any]:
     dict
         JSON Schema document.
     """
-    required = [
-        field["name"]
-        for field in contract["fields"]
-        if field.get("required")
-    ]
+    required = [field["name"] for field in contract["fields"] if field.get("required")]
     schema = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://lumc-dcc.github.io/cookiecutter-templates/template_context.schema.json",
@@ -170,8 +169,7 @@ def build_schema(contract: dict[str, Any]) -> dict[str, Any]:
         "type": "object",
         "additionalProperties": False,
         "properties": {
-            field["name"]: field_schema(field)
-            for field in contract["fields"]
+            field["name"]: field_schema(field) for field in contract["fields"]
         },
         "$defs": copy.deepcopy(contract.get("entry_schemas", {})),
     }

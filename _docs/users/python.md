@@ -114,6 +114,13 @@ deployment page includes only relevant runtime notes.
 The generated project includes public metadata in the places where Python users
 and research software registries usually expect it: package metadata,
 documentation, README content, and citation metadata.
+Python package links use PEP 753's well-known `Project-URL` labels for source,
+homepage, documentation, issues, changelog, release notes, downloads, and
+funding whenever the corresponding context is available.
+
+When the corresponding metadata is available, the README presents compact
+badges for the primary CI workflow, published documentation, GitHub releases,
+PyPI, the project DOI, and selected interface types.
 
 When `programming_languages` includes a Python entry with `version_constraint`,
 that value is used for `project.requires-python` in `pyproject.toml`.
@@ -198,6 +205,9 @@ PyPI, GitHub Releases, or conda-forge, the template adds release dependencies,
 `tools/check_release.py`, and `distribution.yml`.
 The workflow validates the version and tag, builds and checks the wheel and
 source distribution, and publishes the channels it can configure directly.
+Selecting Zenodo also generates `.zenodo.json` for Zenodo's GitHub release
+archiving, populated from the same authorship, project, recognized grant,
+publication, keyword, version, and license context as the other metadata files.
 
 The project manager configures the language-level development environment.
 `containerization` separately selects Docker, OCI/Podman, or

@@ -133,6 +133,28 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
 {% for container in cookiecutter.containerization.entries %}
 {% if container.type is defined and container.type and container.type not in runtime_platforms %}{% set _ = runtime_platforms.append(container.type) %}{% endif %}
 {% endfor %}
+{% set supporting_data = [] %}
+{% set supporting_data_urls = [] %}
+{% for software_function in cookiecutter.software_functions.entries %}
+{% for io_record in software_function.input if software_function.input is defined %}
+{% for data_format in io_record.format if io_record.format is defined %}
+{% if data_format.sample_url is defined and data_format.sample_url and data_format.sample_url not in supporting_data_urls %}
+{% set _ = supporting_data_urls.append(data_format.sample_url) %}
+{% set _ = supporting_data.append({"name": data_format.term if data_format.term is defined and data_format.term else "Example input data", "url": data_format.sample_url}) %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% for io_record in software_function.output if software_function.output is defined %}
+{% for data_format in io_record.format if io_record.format is defined %}
+{% if data_format.sample_url is defined and data_format.sample_url and data_format.sample_url not in supporting_data_urls %}
+{% set _ = supporting_data_urls.append(data_format.sample_url) %}
+{% set _ = supporting_data.append({"name": data_format.term if data_format.term is defined and data_format.term else "Example output data", "url": data_format.sample_url}) %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% set has_quality_ci = cookiecutter.formatter_tool != "none" or cookiecutter.linter_tool != "none" or cookiecutter.type_checker != "none" %}
+{% set has_generated_ci = cookiecutter.include_citation_cff == "yes" or "CHANGELOG.md" in cookiecutter.community_files.entries or cookiecutter.documentation_types.entries or cookiecutter.test_types.entries or has_quality_ci or cookiecutter.containerization.entries or cookiecutter.distribution_channels.entries or (cookiecutter.license and cookiecutter.license_compatibility_check == "yes") %}
 {
   "@context": [
     "https://w3id.org/codemeta/3.1",
@@ -146,6 +168,9 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
   "version": {{ cookiecutter.version | tojson }},
   "developmentStatus": {{ cookiecutter.development_status | tojson }},
   "applicationCategory": {% if not interface_types %}"Library"{% elif interface_types | length == 1 %}{{ interface_types[0] | tojson }}{% else %}{{ interface_types | tojson }}{% endif %},
+{% if cookiecutter.purpose_categories.entries %}
+  "applicationSubCategory": {{ cookiecutter.purpose_categories.entries | tojson }},
+{% endif %}
   "schema:featureList": {{ features | tojson }},
   "programmingLanguage": [
 {% if cookiecutter.programming_languages.entries %}
@@ -174,24 +199,21 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
   ]
 ,
   "identifier": [
-{% if cookiecutter.persistent_identifiers.entries or registry_links %}
+{% if cookiecutter.persistent_identifiers.entries %}
 {% for identifier in cookiecutter.persistent_identifiers.entries %}
 {% set identifier_type = identifier.type | lower %}
 {% if identifier_type == "doi" %}
-    {{ (identifier.identifier if identifier.identifier.startswith("http://") or identifier.identifier.startswith("https://") else "https://doi.org/" ~ identifier.identifier) | tojson }}{% if not loop.last or registry_links %},{% endif %}
+    {{ (identifier.identifier if identifier.identifier.startswith("http://") or identifier.identifier.startswith("https://") else "https://doi.org/" ~ identifier.identifier) | tojson }}{% if not loop.last %},{% endif %}
 {% elif identifier.identifier.startswith("http://") or identifier.identifier.startswith("https://") %}
-    {{ identifier.identifier | tojson }}{% if not loop.last or registry_links %},{% endif %}
+    {{ identifier.identifier | tojson }}{% if not loop.last %},{% endif %}
 {% else %}
     {
       "@type": "PropertyValue",
       "propertyID": {{ identifier.type | tojson }},
       "value": {{ identifier.identifier | tojson }}{% if identifier.associated_version is defined and identifier.associated_version %},
       "description": {{ ("Persistent identifier for version " ~ identifier.associated_version) | tojson }}{% endif %}
-    }{% if not loop.last or registry_links %},{% endif %}
+    }{% if not loop.last %},{% endif %}
 {% endif %}
-{% endfor %}
-{% for link in registry_links %}
-    {{ link | tojson }}{% if not loop.last %},{% endif %}
 {% endfor %}
 {% else %}
     {
@@ -227,7 +249,7 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
 ,
   "codeRepository": {{ (cookiecutter.repository_url or "https://example.org/REPLACE_WITH_REPOSITORY") | tojson }}
 {% if cookiecutter.repository_url %}
-{% if cookiecutter.repository_url.startswith("https://github.com/") and cookiecutter.include_citation_cff == "yes" %},
+{% if cookiecutter.repository_url.startswith("https://github.com/") and has_generated_ci %},
   "continuousIntegration": {{ (cookiecutter.repository_url.rstrip("/") ~ "/actions") | tojson }}
 {% endif %}
 {% endif %}
@@ -263,7 +285,7 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
 {% if support_urls %},
   "issueTracker": {{ support_urls[0] | tojson }}
 {% endif %}
-{% if cookiecutter.include_changelog == "yes" and cookiecutter.repository_url %},
+{% if "CHANGELOG.md" in cookiecutter.community_files.entries and cookiecutter.repository_url %},
   "releaseNotes": {{ (cookiecutter.repository_url.rstrip("/") ~ "/blob/HEAD/CHANGELOG.md") | tojson }}
 {% endif %}
 {% if runtime_platforms %},
@@ -283,6 +305,18 @@ https://pubmed.ncbi.nlm.nih.gov/{{ publication.pmid }}/
   "softwareRequirements": [
 {% for dependency in cookiecutter.external_dependencies.entries %}
 {{ codemeta_dependency(dependency) }}{% if not loop.last %},{% endif %}
+{% endfor %}
+  ]
+{% endif %}
+{% if supporting_data %},
+  "supportingData": [
+{% for data_feed in supporting_data %}
+    {
+      "@type": "DataFeed",
+      "@id": {{ data_feed.url | tojson }},
+      "name": {{ data_feed.name | tojson }},
+      "url": {{ data_feed.url | tojson }}
+    }{% if not loop.last %},{% endif %}
 {% endfor %}
   ]
 {% endif %}

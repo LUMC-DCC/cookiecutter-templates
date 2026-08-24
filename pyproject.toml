@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/LUMC-DCC/cookiecutter-templates"
+"Source Code" = "https://github.com/LUMC-DCC/cookiecutter-templates"
 Documentation = "https://lumc-dcc.github.io/cookiecutter-templates"
 
 

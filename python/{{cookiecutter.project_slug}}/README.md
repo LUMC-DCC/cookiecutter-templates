@@ -13,7 +13,7 @@ Documentation: {{ cookiecutter.documentation_url }}
 {% set effective_type_checker = cookiecutter.type_checker if cookiecutter.type_checker in cookiecutter._template_supported_choices.type_checker else cookiecutter._template_defaults.type_checker %}
 {% set has_quality_checks = effective_formatter_tool != "none" or effective_linter_tool != "none" or effective_type_checker != "none" %}
 {% set has_tests = cookiecutter.test_types.entries | length > 0 %}
-{% set has_local_checks = cookiecutter.include_changelog == "yes" or has_quality_checks or has_tests %}
+{% set has_local_checks = "CHANGELOG.md" in cookiecutter.community_files.entries or has_quality_checks or has_tests %}
 
 ## Installation
 
@@ -38,7 +38,7 @@ Run the package entry point inside the managed environment:
 Run the checks that are configured for this project before opening a pull request:
 
 ```bash
-{% if cookiecutter.include_changelog == "yes" %}
+{% if "CHANGELOG.md" in cookiecutter.community_files.entries %}
 @@PROJECT_RUN@@python tools/check_changelog.py
 {% endif %}
 {% if effective_linter_tool == "ruff" %}

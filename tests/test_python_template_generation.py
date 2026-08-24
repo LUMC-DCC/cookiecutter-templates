@@ -19,7 +19,6 @@ from cookiecutter.main import cookiecutter
 from jsonschema import Draft7Validator
 from rs_metadata.vocabulary import cff_schema
 
-
 ROOT = Path(__file__).resolve().parents[1]
 PYTHON_TEMPLATE = ROOT / "python"
 SPDX_LICENSE_TEXT = "MIT License\n\nPermission is hereby granted for testing."
@@ -106,6 +105,10 @@ BASE_CONTEXT = {
     "purpose_categories": {
         "entries": ["Data analysis", "Integration & interfacing"],
     },
+    "problem_statement": "Researchers need repeatable project scaffolds.",
+    "value_proposition": (
+        "The template standardizes reusable foundations without hiding the code."
+    ),
     "audiences": {"entries": ["researchers", "research software engineers"]},
     "related_software": {
         "entries": [
@@ -169,12 +172,13 @@ BASE_CONTEXT = {
     "include_citation_cff": "yes",
     "documentation_builder": "mkdocs",
     "documentation_types": {"entries": ["user", "developer"]},
-    "include_contributing": "yes",
-    "include_code_of_conduct": "yes",
-    "include_governance": "no",
-    "include_security": "no",
-    "include_support": "no",
-    "include_changelog": "yes",
+    "community_files": {
+        "entries": [
+            "CONTRIBUTING.md",
+            "CODE_OF_CONDUCT.md",
+            "CHANGELOG.md",
+        ]
+    },
     "support_routes": {
         "entries": [
             {
@@ -184,7 +188,7 @@ BASE_CONTEXT = {
             {
                 "system": "Helpdesk",
                 "url": "https://example.org/helpdesk",
-            }
+            },
         ],
     },
     "code_of_conduct_contact": "mailto:conduct@example.org",
@@ -223,6 +227,9 @@ BASE_CONTEXT = {
                             {
                                 "term": "CSV",
                                 "uri": "http://edamontology.org/format_3752",
+                                "version_constraint": ">=1.0",
+                                "schema_constraints": "Columns: sample_id, value",
+                                "sample_url": "https://example.org/data/example.csv",
                             },
                             {
                                 "term": "TSV",
@@ -363,6 +370,12 @@ BASE_CONTEXT = {
     "continuity_plan": "",
     "retirement_criteria": {"entries": []},
     "public_risk_notes": "",
+    "regulatory_requirements": {
+        "entries": ["GDPR - General Data Protection Regulation (EU data protection)"]
+    },
+    "additional_regulatory_requirements": (
+        "Project releases follow the institutional research code."
+    ),
     "security_contact": "mailto:security@example.org",
     "security_measures": {
         "entries": [
@@ -463,10 +476,7 @@ def assert_no_template_artifacts(project_path):
     all_paths = list(project_path.rglob("*"))
     assert not [path for path in all_paths if path.name == ".DS_Store"]
     assert not (project_path / ".template_hooks").exists()
-    assert not [
-        path for path in all_paths
-        if "{{" in path.name or "}}" in path.name
-    ]
+    assert not [path for path in all_paths if "{{" in path.name or "}}" in path.name]
 
     unresolved = []
     leading_blank_lines = []
@@ -487,9 +497,7 @@ def assert_no_template_artifacts(project_path):
             or "@@METADATA_" in content
         ):
             unresolved.append(path.relative_to(project_path))
-        if path.suffix == ".md" and (
-            "```##" in content or "|\n##" in content
-        ):
+        if path.suffix == ".md" and ("```##" in content or "|\n##" in content):
             markdown_collisions.append(path.relative_to(project_path))
 
     assert unresolved == []
@@ -513,7 +521,11 @@ def assert_external_actions_are_pinned(project_path):
             content,
         ):
             if not action.startswith("./"):
-                assert COMMIT_SHA_PATTERN.fullmatch(reference), (path, action, reference)
+                assert COMMIT_SHA_PATTERN.fullmatch(reference), (
+                    path,
+                    action,
+                    reference,
+                )
 
 
 def expected_test_dependencies(context):
@@ -569,9 +581,7 @@ def expected_quality_dependencies(context):
     linter_tool = context.get("linter_tool", "none")
     type_checker = context.get("type_checker", "none")
     has_quality_checks = (
-        formatter_tool != "none"
-        or linter_tool != "none"
-        or type_checker != "none"
+        formatter_tool != "none" or linter_tool != "none" or type_checker != "none"
     )
     dependencies = ["pre-commit"] if has_quality_checks else []
     if formatter_tool == "ruff" or linter_tool == "ruff":
@@ -668,6 +678,7 @@ def assert_selected_test_files(project_path, selected_types):
                 ".github/ISSUE_TEMPLATE",
                 "tests/test_property.py",
                 "Containerfile",
+                ".zenodo.json",
                 "licenses",
             ],
         ),
@@ -684,9 +695,7 @@ def assert_selected_test_files(project_path, selected_types):
                 "type_checker": "none",
                 "distribution_channels": {"entries": []},
                 "containerization": {"entries": []},
-                "include_contributing": "no",
-                "include_code_of_conduct": "no",
-                "include_changelog": "no",
+                "community_files": {"entries": []},
             },
             [
                 "README.md",
@@ -726,6 +735,7 @@ def assert_selected_test_files(project_path, selected_types):
                 ".github/workflows/changelog.yml",
                 ".github/workflows/license-compatibility.yml",
                 ".github/actions/setup-python-project",
+                ".zenodo.json",
                 "licenses",
             ],
         ),
@@ -856,19 +866,103 @@ def test_python_template_generates_expected_option_sets(
         "Ada Lovelace",
         "Grace Hopper",
     ]
-    assert [maintainer["name"] for maintainer in metadata["project"]["maintainers"]] == [
+    assert [
+        maintainer["name"] for maintainer in metadata["project"]["maintainers"]
+    ] == [
         "Research Software Team",
     ]
-    assert metadata["project"]["urls"] == {
-        "Repository": "https://github.com/LUMC-DCC/research-template-demo",
+    expected_urls = {
+        "Source Code": "https://github.com/LUMC-DCC/research-template-demo",
         "Homepage": "https://example.org/research-template-demo",
         "Documentation": "https://lumc-dcc.github.io/research-template-demo",
-        "Issues": "https://github.com/LUMC-DCC/research-template-demo/issues",
+        "Issue Tracker": "https://github.com/LUMC-DCC/research-template-demo/issues",
+        "Funding": "https://example.org/grants/lumc-2024-001",
     }
+    if "CHANGELOG.md" in rendered_context["community_files"]["entries"]:
+        expected_urls["Changelog"] = (
+            "https://github.com/LUMC-DCC/research-template-demo/blob/HEAD/CHANGELOG.md"
+        )
+    if "GitHub Releases" in rendered_context["distribution_channels"]["entries"]:
+        expected_urls["Release Notes"] = (
+            "https://github.com/LUMC-DCC/research-template-demo/releases"
+        )
+    if "PyPI" in rendered_context["distribution_channels"]["entries"]:
+        expected_urls["Download"] = f"https://pypi.org/project/{expected_name}/#files"
+    assert metadata["project"]["urls"] == expected_urls
     if overrides.get("license", BASE_CONTEXT["license"]):
         license_text = (project_path / "LICENSE.txt").read_text(encoding="utf-8")
         if overrides.get("license", BASE_CONTEXT["license"]) == "MIT":
             assert license_text == f"{SPDX_LICENSE_TEXT}\n"
+
+
+def test_python_readme_badges_follow_available_project_metadata(
+    tmp_path,
+    monkeypatch,
+):
+    """Ensure README badges are derived from generated capabilities."""
+    project_path = render_python_project(tmp_path, monkeypatch)
+    readme = (project_path / "README.md").read_text(encoding="utf-8")
+
+    assert (
+        "https://github.com/LUMC-DCC/research-template-demo/"
+        "actions/workflows/tests.yml/badge.svg"
+    ) in readme
+    assert "![Documentation]" in readme
+    assert "img.shields.io/github/v/release/LUMC-DCC/research-template-demo" in readme
+    assert "img.shields.io/pypi/v/research-template-demo" in readme
+    assert "zenodo.org/badge/DOI/10.5281/zenodo.12345.svg" in readme
+    assert "![Tool Type]" in readme
+
+
+def test_python_zenodo_channel_generates_release_metadata(
+    tmp_path,
+    monkeypatch,
+):
+    """Ensure Zenodo selection writes complete GitHub release metadata."""
+    project_path = render_python_project(
+        tmp_path,
+        monkeypatch,
+        distribution_channels={"entries": ["Zenodo"]},
+        funding={
+            "entries": [
+                {
+                    "funder": "European Commission",
+                    "award_number": "777541",
+                },
+                {
+                    "funder": "LUMC",
+                    "award_number": "LUMC-2024-001",
+                },
+            ]
+        },
+    )
+
+    metadata = json.loads((project_path / ".zenodo.json").read_text())
+    assert metadata["title"] == "Research Template Demo"
+    assert metadata["version"] == "0.2.0"
+    assert metadata["upload_type"] == "software"
+    assert metadata["access_right"] == "open"
+    assert metadata["license"] == "MIT"
+    assert metadata["creators"][0] == {
+        "name": "Lovelace, Ada",
+        "affiliation": "Leiden University Medical Center",
+        "orcid": "0000-0002-1825-0097",
+    }
+    assert metadata["contributors"] == [
+        {"name": "Research Software Team", "type": "ContactPerson"},
+        {
+            "name": "Katherine Johnson",
+            "affiliation": "Leiden University Medical Center",
+            "type": "ProjectLeader",
+        },
+    ]
+    assert metadata["grants"] == [{"id": "777541"}]
+    assert metadata["related_identifiers"][0] == {
+        "identifier": "10.1234/example",
+        "relation": "isDocumentedBy",
+        "scheme": "doi",
+        "resource_type": "publication-article",
+    }
 
 
 @pytest.mark.parametrize(
@@ -921,15 +1015,11 @@ def test_python_project_manager_controls_setup_and_commands(
     assert_no_template_artifacts(project_path)
 
     action = (
-        project_path
-        / ".github"
-        / "actions"
-        / "setup-python-project"
-        / "action.yml"
+        project_path / ".github" / "actions" / "setup-python-project" / "action.yml"
     ).read_text(encoding="utf-8")
-    tests_workflow = (
-        project_path / ".github" / "workflows" / "tests.yml"
-    ).read_text(encoding="utf-8")
+    tests_workflow = (project_path / ".github" / "workflows" / "tests.yml").read_text(
+        encoding="utf-8"
+    )
     contributing = (project_path / "CONTRIBUTING.md").read_text(encoding="utf-8")
     pyproject = tomllib.loads((project_path / "pyproject.toml").read_text())
 
@@ -945,9 +1035,7 @@ def test_python_project_manager_controls_setup_and_commands(
         assert setup_python["with"] == {"python-version-file": "pyproject.toml"}
     assert setup_text in action or setup_text in contributing
     assert f"run: {run_prefix}python -m pytest" in tests_workflow
-    expected_manager_text = (
-        f"uses `{project_manager}` for its development environment"
-    )
+    expected_manager_text = f"uses `{project_manager}` for its development environment"
     assert expected_manager_text in contributing
     if tool_config:
         assert tool_config in pyproject["tool"]
@@ -989,9 +1077,9 @@ def test_python_containerization_generates_composable_recipes_and_ci(
     dockerfile = (project_path / "Dockerfile").read_text(encoding="utf-8")
     containerfile = (project_path / "Containerfile").read_text(encoding="utf-8")
     apptainer = (project_path / "Apptainer.def").read_text(encoding="utf-8")
-    workflow = (
-        project_path / ".github" / "workflows" / "containers.yml"
-    ).read_text(encoding="utf-8")
+    workflow = (project_path / ".github" / "workflows" / "containers.yml").read_text(
+        encoding="utf-8"
+    )
 
     assert yaml.safe_load(workflow)["name"] == "Containers"
     assert dockerfile == containerfile
@@ -1007,9 +1095,12 @@ def test_python_containerization_generates_composable_recipes_and_ci(
     assert "publish-ghcr:" in workflow
     assert "publish-docker-hub:" in workflow
     assert not (project_path / ".github" / "workflows" / "distribution.yml").exists()
-    assert "release" not in tomllib.loads(
-        (project_path / "pyproject.toml").read_text(encoding="utf-8")
-    )["project"]["optional-dependencies"]
+    assert (
+        "release"
+        not in tomllib.loads(
+            (project_path / "pyproject.toml").read_text(encoding="utf-8")
+        )["project"]["optional-dependencies"]
+    )
 
 
 def test_python_release_policy_drives_docs_checks_and_distribution_ci(
@@ -1034,13 +1125,11 @@ def test_python_release_policy_drives_docs_checks_and_distribution_ci(
         },
     )
 
-    release_docs = (project_path / "docs" / "release.md").read_text(
+    release_docs = (project_path / "docs" / "release.md").read_text(encoding="utf-8")
+    changelog = (project_path / "CHANGELOG.md").read_text(encoding="utf-8")
+    workflow = (project_path / ".github" / "workflows" / "distribution.yml").read_text(
         encoding="utf-8"
     )
-    changelog = (project_path / "CHANGELOG.md").read_text(encoding="utf-8")
-    workflow = (
-        project_path / ".github" / "workflows" / "distribution.yml"
-    ).read_text(encoding="utf-8")
     pyproject = tomllib.loads((project_path / "pyproject.toml").read_text())
 
     assert yaml.safe_load(workflow)["name"] == "Distribution"
@@ -1113,9 +1202,9 @@ def test_python_test_framework_defaults_to_supported_pytest(tmp_path, monkeypatc
     )
 
     pyproject = tomllib.loads((project_path / "pyproject.toml").read_text())
-    workflow = (
-        project_path / ".github" / "workflows" / "tests.yml"
-    ).read_text(encoding="utf-8")
+    workflow = (project_path / ".github" / "workflows" / "tests.yml").read_text(
+        encoding="utf-8"
+    )
 
     assert "pytest" in pyproject["project"]["optional-dependencies"]["test"]
     assert "python -m pytest" in workflow
@@ -1133,12 +1222,10 @@ def test_python_quality_tool_defaults_render_ruff_and_pre_commit(
     )
 
     pyproject = tomllib.loads((project_path / "pyproject.toml").read_text())
-    pre_commit = (project_path / ".pre-commit-config.yaml").read_text(
+    pre_commit = (project_path / ".pre-commit-config.yaml").read_text(encoding="utf-8")
+    workflow = (project_path / ".github" / "workflows" / "quality.yml").read_text(
         encoding="utf-8"
     )
-    workflow = (
-        project_path / ".github" / "workflows" / "quality.yml"
-    ).read_text(encoding="utf-8")
 
     assert pyproject["project"]["optional-dependencies"]["quality"] == [
         "pre-commit",
@@ -1172,12 +1259,10 @@ def test_python_quality_tool_selectors_render_mypy_when_selected(
     )
 
     pyproject = tomllib.loads((project_path / "pyproject.toml").read_text())
-    pre_commit = (project_path / ".pre-commit-config.yaml").read_text(
+    pre_commit = (project_path / ".pre-commit-config.yaml").read_text(encoding="utf-8")
+    workflow = (project_path / ".github" / "workflows" / "quality.yml").read_text(
         encoding="utf-8"
     )
-    workflow = (
-        project_path / ".github" / "workflows" / "quality.yml"
-    ).read_text(encoding="utf-8")
 
     rendered_context = BASE_CONTEXT | {
         "type_checker": "mypy",
@@ -1244,9 +1329,9 @@ def test_python_quality_selectors_keep_responsibilities_independent(
     pre_commit = (project_path / ".pre-commit-config.yaml").read_text(
         encoding="utf-8",
     )
-    workflow = (
-        project_path / ".github" / "workflows" / "quality.yml"
-    ).read_text(encoding="utf-8")
+    workflow = (project_path / ".github" / "workflows" / "quality.yml").read_text(
+        encoding="utf-8"
+    )
 
     assert expected_command in pre_commit
     assert expected_command in workflow
@@ -1404,9 +1489,7 @@ def test_python_license_compatibility_check_controls_ci_and_config(
         project_path / ".github" / "workflows" / "license-compatibility.yml"
     ).read_text(encoding="utf-8")
 
-    assert pyproject["project"]["optional-dependencies"]["license"] == [
-        "licensecheck"
-    ]
+    assert pyproject["project"]["optional-dependencies"]["license"] == ["licensecheck"]
     assert pyproject["tool"]["licensecheck"] == {
         "license": "MIT",
         "format": "simple",
@@ -1417,9 +1500,7 @@ def test_python_license_compatibility_check_controls_ci_and_config(
     assert "licensecheck" in workflow
 
 
-def test_python_license_compatibility_check_can_be_disabled(
-    tmp_path, monkeypatch
-):
+def test_python_license_compatibility_check_can_be_disabled(tmp_path, monkeypatch):
     """Ensure license compatibility files are omitted when disabled."""
     project_path = render_python_project(
         tmp_path,
@@ -1444,9 +1525,7 @@ def test_python_operating_systems_render_platform_metadata_and_ci(
     project_path = render_python_project(tmp_path, monkeypatch)
 
     readme = (project_path / "README.md").read_text(encoding="utf-8")
-    docs_overview = (project_path / "docs" / "overview.md").read_text(
-        encoding="utf-8"
-    )
+    docs_overview = (project_path / "docs" / "overview.md").read_text(encoding="utf-8")
     docs_usage = (project_path / "docs" / "usage.md").read_text(encoding="utf-8")
     pyproject = tomllib.loads((project_path / "pyproject.toml").read_text())
     codemeta = json.loads((project_path / "codemeta.json").read_text())
@@ -1480,16 +1559,12 @@ def test_python_operating_systems_render_platform_metadata_and_ci(
     ).read_text(encoding="utf-8")
 
 
-def test_python_external_dependencies_render_docs_and_codemeta(
-    tmp_path, monkeypatch
-):
+def test_python_external_dependencies_render_docs_and_codemeta(tmp_path, monkeypatch):
     """Ensure external dependencies render as docs and CodeMeta metadata."""
     project_path = render_python_project(tmp_path, monkeypatch)
 
     readme = (project_path / "README.md").read_text(encoding="utf-8")
-    docs_overview = (project_path / "docs" / "overview.md").read_text(
-        encoding="utf-8"
-    )
+    docs_overview = (project_path / "docs" / "overview.md").read_text(encoding="utf-8")
     docs_usage = (project_path / "docs" / "usage.md").read_text(encoding="utf-8")
     codemeta = json.loads((project_path / "codemeta.json").read_text())
 
@@ -1514,7 +1589,7 @@ def test_python_external_dependencies_render_docs_and_codemeta(
             "name": "Graphviz",
             "url": "https://graphviz.org/",
             "version": ">=9",
-                "license": "https://spdx.org/licenses/EPL-1.0",
+            "license": "https://spdx.org/licenses/EPL-1.0",
             "description": "Diagram rendering for reports",
         },
         {
@@ -1522,15 +1597,13 @@ def test_python_external_dependencies_render_docs_and_codemeta(
             "@id": "https://edamontology.org/",
             "name": "EDAM ontology",
             "url": "https://edamontology.org/",
-                "license": "https://spdx.org/licenses/CC-BY-SA-4.0",
+            "license": "https://spdx.org/licenses/CC-BY-SA-4.0",
             "description": "Controlled vocabulary for function metadata",
         },
     ]
 
 
-def test_python_external_services_render_generated_docs_only(
-    tmp_path, monkeypatch
-):
+def test_python_external_services_render_generated_docs_only(tmp_path, monkeypatch):
     """Ensure external services render to docs without expanding README."""
     project_path = render_python_project(
         tmp_path,
@@ -1539,9 +1612,7 @@ def test_python_external_services_render_generated_docs_only(
     )
 
     readme = (project_path / "README.md").read_text(encoding="utf-8")
-    docs_overview = (project_path / "docs" / "overview.md").read_text(
-        encoding="utf-8"
-    )
+    docs_overview = (project_path / "docs" / "overview.md").read_text(encoding="utf-8")
     docs_deployment = (project_path / "docs" / "deployment.md").read_text(
         encoding="utf-8"
     )
@@ -1592,20 +1663,10 @@ def test_python_interfaces_keep_matching_code_scaffolds(tmp_path, monkeypatch):
     )
 
     assert (
-        project_path
-        / "src"
-        / "interface_scaffold_demo"
-        / "adapters"
-        / "cli"
-        / "app.py"
+        project_path / "src" / "interface_scaffold_demo" / "adapters" / "cli" / "app.py"
     ).exists()
     assert (
-        project_path
-        / "src"
-        / "interface_scaffold_demo"
-        / "adapters"
-        / "api"
-        / "app.py"
+        project_path / "src" / "interface_scaffold_demo" / "adapters" / "api" / "app.py"
     ).exists()
     assert (project_path / "scripts" / "run_example.py").exists()
 
@@ -1749,9 +1810,7 @@ def test_python_canonical_tool_types_select_expected_scaffolds(tmp_path, monkeyp
         "uvicorn[standard]",
     ]
     assert optional_dependencies["web"] == ["fastapi", "uvicorn[standard]"]
-    assert metadata["tool"]["hatch"]["metadata"] == {
-        "allow-direct-references": True
-    }
+    assert metadata["tool"]["hatch"]["metadata"] == {"allow-direct-references": True}
     assert metadata["project"]["entry-points"] == {
         "canonical_interfaces_demo.plugins": {
             "example": "canonical_interfaces_demo.adapters.plugin.registry:get_plugin",
@@ -1773,30 +1832,16 @@ def test_python_sparql_endpoint_scaffold_is_route_specific(tmp_path, monkeypatch
     )
 
     routes_dir = (
-        project_path
-        / "src"
-        / "sparql_endpoint_demo"
-        / "adapters"
-        / "api"
-        / "routes"
+        project_path / "src" / "sparql_endpoint_demo" / "adapters" / "api" / "routes"
     )
     app_module = (
-        project_path
-        / "src"
-        / "sparql_endpoint_demo"
-        / "adapters"
-        / "api"
-        / "app.py"
+        project_path / "src" / "sparql_endpoint_demo" / "adapters" / "api" / "app.py"
     ).read_text(encoding="utf-8")
 
     assert (routes_dir / "health.py").exists()
     assert (routes_dir / "sparql.py").exists()
     assert (
-        project_path
-        / "src"
-        / "sparql_endpoint_demo"
-        / "ontology"
-        / "graph.py"
+        project_path / "src" / "sparql_endpoint_demo" / "ontology" / "graph.py"
     ).exists()
     assert not (routes_dir / "processing.py").exists()
     assert not (
@@ -1969,14 +2014,17 @@ def test_python_documentation_builder_scaffolds_are_selected(
         assert "nav" not in mkdocs_config
 
         hook_path = project_path / "docs" / "hooks.py"
-        spec = importlib.util.spec_from_file_location("generated_mkdocs_hooks", hook_path)
+        spec = importlib.util.spec_from_file_location(
+            "generated_mkdocs_hooks", hook_path
+        )
         hook = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(hook)
         resolved_config = hook.on_config({})
         assert resolved_config["site_name"] == BASE_CONTEXT["project_name"]
-        assert resolved_config["site_description"] == BASE_CONTEXT[
-            "project_long_description"
-        ]
+        assert (
+            resolved_config["site_description"]
+            == BASE_CONTEXT["project_long_description"]
+        )
         assert resolved_config["repo_url"] == BASE_CONTEXT["repository_url"]
         assert resolved_config["repo_name"] == "research-template-demo"
         pages_config = yaml.safe_load((project_path / "docs" / ".pages").read_text())
@@ -2060,9 +2108,7 @@ def test_python_documentation_types_select_expected_pages(tmp_path, monkeypatch)
     assert "- User guide:" not in readme
     assert "- Developer guide:" not in readme
 
-    deployment = (project_path / "docs" / "deployment.md").read_text(
-        encoding="utf-8"
-    )
+    deployment = (project_path / "docs" / "deployment.md").read_text(encoding="utf-8")
     assert "## HTTP service" in deployment
     assert "uvicorn research_template_demo.adapters.server:app" in deployment
     assert "## Script" in deployment
@@ -2072,17 +2118,12 @@ def test_python_documentation_types_select_expected_pages(tmp_path, monkeypatch)
     assert "[Graphviz >=9](https://graphviz.org/)" in deployment
 
 
-def test_python_community_file_switches_select_expected_files(tmp_path, monkeypatch):
-    """Ensure binary community-file fields control optional files."""
+def test_python_community_file_selector_keeps_expected_files(tmp_path, monkeypatch):
+    """Ensure the controlled community selector keeps requested files."""
     project_path = render_python_project(
         tmp_path,
         monkeypatch,
-        include_contributing="no",
-        include_code_of_conduct="no",
-        include_governance="yes",
-        include_security="yes",
-        include_support="yes",
-        include_changelog="no",
+        community_files={"entries": ["GOVERNANCE.md", "SECURITY.md", "SUPPORT.md"]},
         public_risk_notes="Use the institutional security route for private reports.",
     )
 
@@ -2232,9 +2273,16 @@ def test_python_shared_community_files_render_standard_content(tmp_path, monkeyp
     project_path = render_python_project(
         tmp_path,
         monkeypatch,
-        include_governance="yes",
-        include_security="yes",
-        include_support="yes",
+        community_files={
+            "entries": [
+                "CONTRIBUTING.md",
+                "CODE_OF_CONDUCT.md",
+                "GOVERNANCE.md",
+                "SECURITY.md",
+                "SUPPORT.md",
+                "CHANGELOG.md",
+            ]
+        },
         release_frequency="quarterly",
         continuity_plan="Maintainers hand over active work through reviewed issues.",
         retirement_criteria={"entries": ["Lack of maintainers"]},
@@ -2284,7 +2332,10 @@ def test_python_shared_community_files_render_standard_content(tmp_path, monkeyp
         project_path / ".github" / "workflows" / "changelog.yml"
     ).read_text(encoding="utf-8")
     assert "Validate research software metadata" in metadata_workflow
-    assert "LUMC-DCC/rs-metadata@27f3da06c4bae5f735c492608b5ffea6c2715c21" in metadata_workflow
+    assert (
+        "LUMC-DCC/rs-metadata@27f3da06c4bae5f735c492608b5ffea6c2715c21"
+        in metadata_workflow
+    )
     assert "Check changelog format" in changelog_workflow
     assert "python tools/check_changelog.py" in changelog_workflow
     assert "License compatibility" in contributing
@@ -2299,6 +2350,9 @@ def test_python_shared_community_files_render_standard_content(tmp_path, monkeyp
     assert "Vulnerability scanning (e.g., Snyk, Dependabot)" in security
     assert "Security reports are reviewed privately" in security
     assert "Use coordinated disclosure" in security
+    assert "## Regulatory and policy requirements" in security
+    assert "GDPR - General Data Protection Regulation" in security
+    assert BASE_CONTEXT["additional_regulatory_requirements"] in security
     assert "DMP-123" in security
     assert BASE_CONTEXT["documentation_url"] in support
     assert "## What to include" in support
@@ -2396,12 +2450,14 @@ def test_generated_python_package_imports(tmp_path, monkeypatch):
         [
             sys.executable,
             "-c",
-            "from importable_demo import __version__; "
-            "from importable_demo import process_text; "
-            "from importable_demo.main import main; "
-            "assert __version__ == '0.2.0'; "
-            "assert callable(main); "
-            "assert process_text('abc').output_text == 'ABC'",
+            (
+                "from importable_demo import __version__; "
+                "from importable_demo import process_text; "
+                "from importable_demo.main import main; "
+                "assert __version__ == '0.2.0'; "
+                "assert callable(main); "
+                "assert process_text('abc').output_text == 'ABC'"
+            ),
         ],
         cwd=project_path,
         env=env,
@@ -2460,13 +2516,13 @@ def test_project_name_renders_in_python_public_surfaces(tmp_path, monkeypatch):
     assert result.stdout.strip() == "SPECIFIC PROJECT NAME"
 
 
-def test_project_long_description_renders_in_python_public_surfaces(tmp_path, monkeypatch):
+def test_project_long_description_renders_in_python_public_surfaces(
+    tmp_path, monkeypatch
+):
     """Ensure project_long_description renders in narrative public surfaces."""
     project_path = render_python_project(tmp_path, monkeypatch)
 
-    docs_overview = (project_path / "docs" / "overview.md").read_text(
-        encoding="utf-8"
-    )
+    docs_overview = (project_path / "docs" / "overview.md").read_text(encoding="utf-8")
     codemeta = json.loads((project_path / "codemeta.json").read_text())
     citation = yaml.safe_load(
         (project_path / "CITATION.cff").read_text(encoding="utf-8")
@@ -2481,9 +2537,7 @@ def test_funding_renders_in_python_public_metadata_and_docs(tmp_path, monkeypatc
     """Ensure multiple funding records render in public metadata and docs."""
     project_path = render_python_project(tmp_path, monkeypatch)
 
-    docs_overview = (project_path / "docs" / "overview.md").read_text(
-        encoding="utf-8"
-    )
+    docs_overview = (project_path / "docs" / "overview.md").read_text(encoding="utf-8")
     codemeta = json.loads((project_path / "codemeta.json").read_text())
 
     assert "## Funding" in docs_overview
@@ -2514,9 +2568,7 @@ def test_project_context_renders_in_python_readme_docs_and_metadata(
     project_path = render_python_project(tmp_path, monkeypatch)
 
     readme = (project_path / "README.md").read_text(encoding="utf-8")
-    docs_overview = (project_path / "docs" / "overview.md").read_text(
-        encoding="utf-8"
-    )
+    docs_overview = (project_path / "docs" / "overview.md").read_text(encoding="utf-8")
     docs_functions = (project_path / "docs" / "functions.md").read_text(
         encoding="utf-8"
     )
@@ -2531,10 +2583,14 @@ def test_project_context_renders_in_python_readme_docs_and_metadata(
     codemeta = json.loads((project_path / "codemeta.json").read_text())
 
     expected_related = [
-        "- [Snakemake](https://snakemake.readthedocs.io) "
-        "- workflow orchestration inspiration",
-        "- [Research Object Crate](https://www.researchobject.org/ro-crate/) "
-        "- metadata interoperability",
+        (
+            "- [Snakemake](https://snakemake.readthedocs.io) "
+            "- workflow orchestration inspiration"
+        ),
+        (
+            "- [Research Object Crate](https://www.researchobject.org/ro-crate/) "
+            "- metadata interoperability"
+        ),
     ]
 
     for content in (readme, docs_overview):
@@ -2553,6 +2609,12 @@ def test_project_context_renders_in_python_readme_docs_and_metadata(
         assert "## Related Software" in content
         for related_software in expected_related:
             assert related_software in content
+    assert "## Problem" in docs_overview
+    assert BASE_CONTEXT["problem_statement"] in docs_overview
+    assert "## Value and need" in docs_overview
+    assert BASE_CONTEXT["value_proposition"] in docs_overview
+    assert BASE_CONTEXT["problem_statement"] not in readme
+    assert BASE_CONTEXT["value_proposition"] not in readme
     assert "## Programming languages" not in readme
     assert (
         "![Tool Type](https://img.shields.io/badge/tool%20type-"
@@ -2577,17 +2639,10 @@ def test_project_context_renders_in_python_readme_docs_and_metadata(
     assert "## Input data formats" not in docs_overview
     assert "## Output data formats" not in docs_overview
     assert "## Functions and operations" in docs_overview
-    assert (
-        "- Statistical data analysis - operation: "
-        "[Statistical data analysis](http://edamontology.org/operation_2238); "
-        "input: [Expression data](http://edamontology.org/data_2603) "
-        "([CSV](http://edamontology.org/format_3752), "
-        "[TSV](http://edamontology.org/format_3475)); "
-        "output: [Expression data](http://edamontology.org/data_2603) "
-        "([JSON](http://edamontology.org/format_3464)); command: "
-        "`research-template-demo analyse input.csv`; "
-        "Summarizes numeric observations by group."
-    ) in docs_overview
+    assert "Statistical data analysis" in docs_overview
+    assert "Columns: sample_id, value" in docs_overview
+    assert "[sample](https://example.org/data/example.csv)" in docs_overview
+    assert "`research-template-demo analyse input.csv`" in docs_overview
     assert "# Functions and operations" in docs_functions
     assert "## Statistical data analysis" in docs_functions
     assert "**Operations**" in docs_functions
@@ -2596,11 +2651,9 @@ def test_project_context_renders_in_python_readme_docs_and_metadata(
         in docs_functions
     )
     assert "**Inputs**" in docs_functions
-    assert (
-        "- [Expression data](http://edamontology.org/data_2603) "
-        "([CSV](http://edamontology.org/format_3752), "
-        "[TSV](http://edamontology.org/format_3475))"
-    ) in docs_functions
+    assert "[Expression data](http://edamontology.org/data_2603)" in docs_functions
+    assert "Columns: sample_id, value" in docs_functions
+    assert "[sample](https://example.org/data/example.csv)" in docs_functions
     assert "**Outputs**" in docs_functions
     assert (
         "- [Expression data](http://edamontology.org/data_2603) "
@@ -2630,9 +2683,9 @@ def test_project_context_renders_in_python_readme_docs_and_metadata(
     assert "Command-line tool (Stable)" in docs_usage
     assert "Web API (Experimental)" in docs_usage
     assert "Script (Experimental)" in docs_usage
-    assert "research-template-demo process \"example input\"" in docs_usage
+    assert 'research-template-demo process "example input"' in docs_usage
     assert "uvicorn research_template_demo.adapters.server:app --reload" in docs_usage
-    assert "python scripts/run_example.py \"example input\"" in docs_usage
+    assert 'python scripts/run_example.py "example input"' in docs_usage
     assert "adapters.web.app" not in docs_usage
     assert "## Interface contracts" in docs_developer
     assert "implementation files" in docs_developer
@@ -2650,17 +2703,18 @@ def test_project_context_renders_in_python_readme_docs_and_metadata(
     assert "# Legal and licensing" in docs_legal
     assert "This project is licensed under `MIT`." in docs_legal
     assert (
-        "Dependencies are expected to use licenses compatible with MIT."
-        in docs_legal
+        "Dependencies are expected to use licenses compatible with MIT." in docs_legal
     )
     assert (
         "Dependencies are expected to use licenses compatible with MIT."
         not in docs_overview
     )
     assert (
-        "Dependencies are expected to use licenses compatible with MIT."
-        not in readme
+        "Dependencies are expected to use licenses compatible with MIT." not in readme
     )
+    assert "## Regulatory and policy requirements" in docs_legal
+    assert "GDPR - General Data Protection Regulation" in docs_legal
+    assert BASE_CONTEXT["additional_regulatory_requirements"] in docs_legal
     assert codemeta["relatedLink"] == [
         "https://snakemake.readthedocs.io",
         "https://www.researchobject.org/ro-crate/",
@@ -2687,9 +2741,11 @@ def test_python_template_generates_codemeta_metadata(tmp_path, monkeypatch):
         "Web API",
         "Script",
     ]
-    assert codemeta["schema:featureList"] == [
-        "http://edamontology.org/operation_2238"
+    assert codemeta["applicationSubCategory"] == [
+        "Data analysis",
+        "Integration & interfacing",
     ]
+    assert codemeta["schema:featureList"] == ["http://edamontology.org/operation_2238"]
     assert codemeta["programmingLanguage"] == [
         {"@type": "ComputerLanguage", "name": "Python", "version": ">=3.11"},
         {"@type": "ComputerLanguage", "name": "R", "version": ">=4.3"},
@@ -2708,6 +2764,14 @@ def test_python_template_generates_codemeta_metadata(tmp_path, monkeypatch):
         "@type": "CreativeWork",
         "url": "https://lumc-dcc.github.io/research-template-demo",
     }
+    assert codemeta["supportingData"] == [
+        {
+            "@type": "DataFeed",
+            "@id": "https://example.org/data/example.csv",
+            "name": "CSV",
+            "url": "https://example.org/data/example.csv",
+        }
+    ]
     assert codemeta["provider"] == {
         "@type": "Organization",
         "name": "LUMC",
@@ -2816,6 +2880,8 @@ def test_python_template_generates_codemeta_metadata(tmp_path, monkeypatch):
             "value": "swh:1:dir:bc286860f423ea7ced246ba7458eef4b4541cf2d",
             "description": "Persistent identifier for version 0.2.0",
         },
+    ]
+    assert codemeta["sameAs"] == [
         "https://pypi.org/project/research-template-demo/",
         "https://bio.tools/research-template-demo",
     ]
@@ -2845,9 +2911,7 @@ def test_organization_name_renders_when_authors_are_missing(tmp_path, monkeypatc
             "name": "Example Institute",
         }
     ]
-    assert citation["authors"] == [
-        {"name": "Example Institute"}
-    ]
+    assert citation["authors"] == [{"name": "Example Institute"}]
 
 
 def test_python_codemeta_preserves_overlapping_people_roles(tmp_path, monkeypatch):
@@ -2909,7 +2973,7 @@ def test_python_people_metadata_accepts_structured_names(tmp_path, monkeypatch):
                 }
             ]
         },
-        include_governance="yes",
+        community_files={"entries": ["GOVERNANCE.md"]},
     )
 
     pyproject = tomllib.loads((project_path / "pyproject.toml").read_text())
@@ -2986,16 +3050,6 @@ def test_python_template_generates_citation_metadata(tmp_path, monkeypatch):
             "value": "swh:1:dir:bc286860f423ea7ced246ba7458eef4b4541cf2d",
             "description": "Persistent identifier for version 0.2.0",
         },
-        {
-            "type": "other",
-            "value": "https://pypi.org/project/research-template-demo/",
-            "description": "PyPI",
-        },
-        {
-            "type": "other",
-            "value": "https://bio.tools/research-template-demo",
-            "description": "bio.tools",
-        },
     ]
     assert citation["preferred-citation"] == {
         "type": "article",
@@ -3040,9 +3094,7 @@ def test_generated_python_metadata_passes_lumc_profile(tmp_path, monkeypatch):
                     "title": "Fast and accurate short read alignment",
                     "doi": "10.1093/bioinformatics/btp352",
                     "preferred": True,
-                    "authors": [
-                        {"given_names": "Ada", "family_names": "Lovelace"}
-                    ],
+                    "authors": [{"given_names": "Ada", "family_names": "Lovelace"}],
                 }
             ]
         },

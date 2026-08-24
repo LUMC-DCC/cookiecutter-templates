@@ -94,6 +94,44 @@ def build_purpose_section(purpose):
     return f"## Purpose\n\n{purpose}"
 
 
+def build_problem_statement_section(problem_statement):
+    """Build the generated problem statement section.
+
+    Parameters
+    ----------
+    problem_statement : str
+        Public description of the problem addressed by the software.
+
+    Returns
+    -------
+    str
+        Markdown section, or an empty string.
+    """
+    if not problem_statement:
+        return ""
+
+    return f"## Problem\n\n{problem_statement}"
+
+
+def build_value_proposition_section(value_proposition):
+    """Build the generated project value section.
+
+    Parameters
+    ----------
+    value_proposition : str
+        Public explanation of the project's value and need.
+
+    Returns
+    -------
+    str
+        Markdown section, or an empty string.
+    """
+    if not value_proposition:
+        return ""
+
+    return f"## Value and need\n\n{value_proposition}"
+
+
 def build_purpose_categories_section(purpose_categories):
     """Build the generated purpose categories section.
 
@@ -174,7 +212,6 @@ def build_funding_section(funding_entries):
         return ""
 
     funding_lines = [
-        f"- {format_funding_label(funding)}"
-        for funding in funding_entries
+        f"- {format_funding_label(funding)}" for funding in funding_entries
     ]
     return "## Funding\n\n" + "\n".join(funding_lines)

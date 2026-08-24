@@ -1,24 +1,24 @@
 """Update generated public-facing project context files."""
 
 from post_generation.documentation import docs_source_dir, has_documentation
+from renderers.badges import build_readme_badges
 from renderers.documentation_types import build_readme_documentation_section
 from renderers.legal import build_legal_page_content, build_legal_section
 from renderers.project_context import (
     build_api_interfaces_section,
     build_biotools_function_blocks,
+    build_developer_functions_section,
     build_developer_interfaces_section,
     build_external_dependencies_section,
     build_external_services_section,
-    build_developer_functions_section,
-    build_interface_badge,
     build_operating_systems_section,
     build_project_context_sections,
     build_resource_requirements_section,
     build_security_and_data_section,
     build_software_functions_page,
     build_sustainability_section,
-    build_user_interfaces_section,
     build_user_functions_section,
+    build_user_interfaces_section,
 )
 from renderers.publications import build_publication_note
 from renderers.release import (
@@ -155,9 +155,7 @@ def update_functions_page(ctx, cwd):
     if not has_documentation(ctx):
         return
 
-    content = build_software_functions_page(
-        entries(ctx, "software_functions")
-    )
+    content = build_software_functions_page(entries(ctx, "software_functions"))
     if not content:
         return
 
@@ -256,15 +254,11 @@ def update_dependency_references(ctx, cwd):
     source_dir = docs_source_dir(cwd)
     append_sections(
         source_dir / "usage.md",
-        build_external_dependencies_section(
-            entries(ctx, "external_dependencies")
-        ),
+        build_external_dependencies_section(entries(ctx, "external_dependencies")),
     )
     append_sections(
         source_dir / "deployment.md",
-        build_external_dependencies_section(
-            entries(ctx, "external_dependencies")
-        ),
+        build_external_dependencies_section(entries(ctx, "external_dependencies")),
     )
 
 
@@ -410,6 +404,8 @@ def update_legal(ctx, cwd):
     content = build_legal_page_content(
         ctx.get("license", ""),
         ctx.get("license_compatibility_notes", ""),
+        entries(ctx, "regulatory_requirements"),
+        ctx.get("additional_regulatory_requirements", ""),
     )
     for legal_path in legal_candidates(cwd):
         if legal_path.exists():
@@ -429,7 +425,7 @@ def update_readme(ctx, cwd):
     """
     insert_after_title(
         cwd / "README.md",
-        build_interface_badge(entries(ctx, "interfaces")),
+        build_readme_badges(ctx),
     )
 
     publication_note = build_publication_note(entries(ctx, "publications"))
@@ -448,6 +444,7 @@ def update_readme(ctx, cwd):
         ctx,
         include_funding=False,
         include_interoperability=False,
+        include_motivation_details=False,
     )
     platform_section = build_operating_systems_section(
         entries(ctx, "operating_systems")
@@ -456,9 +453,7 @@ def update_readme(ctx, cwd):
         ctx.get("license", ""),
         "",
     )
-    function_blocks = build_biotools_function_blocks(
-        entries(ctx, "software_functions")
-    )
+    function_blocks = build_biotools_function_blocks(entries(ctx, "software_functions"))
     policy_fallback = ""
     if not has_documentation(ctx):
         policy_fallback = "\n\n".join(

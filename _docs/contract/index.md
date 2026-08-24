@@ -46,9 +46,15 @@ each entry is still controlled: `object_array` fields point to named
 `entry_schemas`, `string_array` fields define an `item_schema`, and the generated
 JSON Schema rejects unknown top-level and nested properties.
 
-Single on/off options use scalar `yes`/`no` choices. Community files are modeled
-this way with fields such as `include_contributing`, `include_security`, and
-`include_changelog`.
+Root `required` fields are values an integration service must deliberately
+supply: `language`, `project_name`, `project_slug`, and
+`project_short_description`. Defaults still support direct Cookiecutter use.
+Other fields may be omitted and use controlled defaults or empty values.
+
+Symmetric multi-select controls use controlled `entries` arrays. For example,
+`community_files.entries` contains only supported root filenames. Scalar
+`yes`/`no` fields are reserved for independent binary policies such as
+`include_citation_cff`.
 
 `language` selects the template directory that Cookiecutter renders.
 `programming_languages` describes the generated project implementation and can

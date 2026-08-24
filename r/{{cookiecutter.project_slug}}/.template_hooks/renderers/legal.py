@@ -71,7 +71,12 @@ def build_legal_section(license_value, compatibility_notes):
     return "## Legal and Licensing\n\n" + "\n\n".join(lines)
 
 
-def build_legal_page_content(license_value, compatibility_notes):
+def build_legal_page_content(
+    license_value,
+    compatibility_notes,
+    regulatory_requirements=None,
+    additional_regulatory_requirements="",
+):
     """Build content for the generated legal documentation page.
 
     Parameters
@@ -80,6 +85,10 @@ def build_legal_page_content(license_value, compatibility_notes):
         SPDX license identifier, custom license text, or an empty string.
     compatibility_notes : str
         Public notes about license compatibility.
+    regulatory_requirements : list[str] or None, optional
+        Controlled public regulatory and policy requirements.
+    additional_regulatory_requirements : str, optional
+        Additional public regulatory or policy requirements.
 
     Returns
     -------
@@ -89,5 +98,18 @@ def build_legal_page_content(license_value, compatibility_notes):
     lines = build_legal_lines(license_value, compatibility_notes)
     if not lines:
         lines = ["No project license has been selected yet."]
+
+    requirements = regulatory_requirements or []
+    if requirements or additional_regulatory_requirements:
+        requirement_lines = [
+            "## Regulatory and policy requirements",
+            "",
+            *(f"- {requirement}" for requirement in requirements),
+        ]
+        if additional_regulatory_requirements:
+            if requirements:
+                requirement_lines.append("")
+            requirement_lines.append(additional_regulatory_requirements)
+        lines.append("\n".join(requirement_lines))
 
     return "\n\n" + "\n\n".join(lines) + "\n"

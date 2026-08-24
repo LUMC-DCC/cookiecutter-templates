@@ -1,5 +1,5 @@
 {
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Implementation map for applying every template context field to generated repository artifacts.",
   "templates": {
     "python": "Python template",
@@ -215,9 +215,32 @@
       "name": "purpose_categories",
       "targets": [
         "README purpose categories",
-        "docs overview purpose categories"
+        "docs overview purpose categories",
+        "CodeMeta applicationSubCategory"
       ],
       "notes": "Public purpose categories rendered in human-facing project context.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "problem_statement",
+      "targets": [
+        "docs overview problem section"
+      ],
+      "notes": "Public problem statement from the SMP motivation chapter.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "value_proposition",
+      "targets": [
+        "docs overview value section"
+      ],
+      "notes": "Public explanation of the project's value and need for new software.",
       "statuses": {
         "python": "implemented",
         "r": "partial"
@@ -252,6 +275,7 @@
       "name": "repository_url",
       "targets": [
         "package repository URL",
+        "README CI and release badges",
         "citation repository-code",
         "CodeMeta codeRepository",
         "MkDocs repository link",
@@ -284,6 +308,7 @@
       "name": "documentation_url",
       "targets": [
         "README docs link",
+        "README documentation badge",
         "package docs URL",
         "citation landing URL",
         "CodeMeta landing fallback URL",
@@ -314,6 +339,7 @@
       "name": "persistent_identifiers",
       "targets": [
         "citation identifiers",
+        "README DOI badge",
         "CodeMeta identifiers",
         "rs-metadata validation"
       ],
@@ -421,70 +447,20 @@
       }
     },
     {
-      "name": "include_contributing",
+      "name": "community_files",
       "targets": [
         "CONTRIBUTING.md inclusion",
-        "pull request template inclusion"
-      ],
-      "notes": "Binary switch for including the standard contributing guide scaffold and pull request template.",
-      "statuses": {
-        "python": "control",
-        "r": "control"
-      }
-    },
-    {
-      "name": "include_code_of_conduct",
-      "targets": [
-        "CODE_OF_CONDUCT.md inclusion"
-      ],
-      "notes": "Binary switch for including the standard code of conduct scaffold.",
-      "statuses": {
-        "python": "control",
-        "r": "control"
-      }
-    },
-    {
-      "name": "include_governance",
-      "targets": [
-        "GOVERNANCE.md inclusion"
-      ],
-      "notes": "Binary switch for including the standard governance scaffold.",
-      "statuses": {
-        "python": "control",
-        "r": "control"
-      }
-    },
-    {
-      "name": "include_security",
-      "targets": [
-        "SECURITY.md inclusion"
-      ],
-      "notes": "Binary switch for including the standard security policy scaffold.",
-      "statuses": {
-        "python": "control",
-        "r": "control"
-      }
-    },
-    {
-      "name": "include_support",
-      "targets": [
+        "CODE_OF_CONDUCT.md inclusion",
+        "GOVERNANCE.md inclusion",
+        "SECURITY.md inclusion",
         "SUPPORT.md inclusion",
-        "GitHub issue template inclusion"
-      ],
-      "notes": "Binary switch for including the standard support scaffold and structured GitHub issue forms.",
-      "statuses": {
-        "python": "control",
-        "r": "control"
-      }
-    },
-    {
-      "name": "include_changelog",
-      "targets": [
         "CHANGELOG.md inclusion",
+        "pull request template inclusion",
+        "GitHub issue template inclusion",
         "changelog validator inclusion",
         "shared CI changelog check"
       ],
-      "notes": "Binary switch for including the standard changelog scaffold and deterministic Keep a Changelog format check.",
+      "notes": "Controlled filename selector for standard community files and their directly associated collaboration automation.",
       "statuses": {
         "python": "control",
         "r": "control"
@@ -546,9 +522,10 @@
       "targets": [
         "README bio.tools function blocks",
         "docs functions and operations summary",
-        "CodeMeta schema:featureList"
+        "CodeMeta schema:featureList",
+        "CodeMeta supportingData sample nodes"
       ],
-      "notes": "Links public EDAM operations to inputs, outputs, command examples, and notes. Function inputs and outputs are the canonical source for data and format metadata.",
+      "notes": "Links public EDAM operations to inputs, outputs, command examples, and notes. Function inputs and outputs are the canonical source for format versions, constraints, sample URLs, and supporting-data metadata.",
       "statuses": {
         "python": "implemented",
         "r": "partial"
@@ -765,9 +742,11 @@
         "Python distribution dependencies",
         "Python distribution workflow",
         "Python container publication workflow",
+        "Zenodo release metadata",
+        "README release and package badges",
         "changelog release channels"
       ],
-      "notes": "Python automates PyPI, GitHub Releases, GitHub Container Registry, and Docker Hub paths; other destinations are documented for their external setup.",
+      "notes": "Python automates PyPI, GitHub Releases, GitHub Container Registry, and Docker Hub paths. Selecting Zenodo generates release metadata for its GitHub integration; other destinations are documented for their external setup.",
       "statuses": {
         "python": "implemented",
         "r": "partial"
@@ -843,6 +822,30 @@
         "SECURITY.md public risk notes"
       ],
       "notes": "Public risk notes only; sensitive detail belongs elsewhere.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "regulatory_requirements",
+      "targets": [
+        "generated legal page compliance section",
+        "SECURITY.md compliance section"
+      ],
+      "notes": "Controlled public requirements from the SMP compliance checklist.",
+      "statuses": {
+        "python": "implemented",
+        "r": "partial"
+      }
+    },
+    {
+      "name": "additional_regulatory_requirements",
+      "targets": [
+        "generated legal page additional requirements",
+        "SECURITY.md additional compliance requirements"
+      ],
+      "notes": "Public free-text complement to the controlled compliance list.",
       "statuses": {
         "python": "implemented",
         "r": "partial"

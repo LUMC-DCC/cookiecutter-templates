@@ -5,8 +5,9 @@ from post_generation.documentation import (
     resolve_documentation_builder,
 )
 from post_generation.quality import has_pre_commit, has_quality_checks
-from utils.context import entries
+from renderers.community_files import selected_community_files
 from utils.containerization import has_container_recipe, has_container_type
+from utils.context import entries
 from utils.interfaces import (
     has_api_interface,
     has_cli_interface,
@@ -46,6 +47,24 @@ def lacks_test_type(ctx, test_type):
     return test_type not in entries(ctx, "test_types")
 
 
+def lacks_community_file(ctx, path):
+    """Return whether a controlled community file is not selected.
+
+    Parameters
+    ----------
+    ctx : dict
+        Rendered Cookiecutter context.
+    path : str
+        Root community-file path.
+
+    Returns
+    -------
+    bool
+        Whether the path is absent from ``community_files``.
+    """
+    return path not in selected_community_files(ctx)
+
+
 def needs_python_project_setup(ctx):
     """Return whether any generated workflow needs the Python setup action.
 
@@ -63,13 +82,12 @@ def needs_python_project_setup(ctx):
         return False
 
     _, documentation_builder = resolve_documentation_builder(ctx)
-    builds_documentation = (
-        has_documentation(ctx)
-        and documentation_builder in {"mkdocs", "sphinx"}
-    )
-    checks_licenses = (
-        not is_no(ctx, "license_compatibility_check")
-        and bool(ctx.get("license", "").strip())
+    builds_documentation = has_documentation(ctx) and documentation_builder in {
+        "mkdocs",
+        "sphinx",
+    }
+    checks_licenses = not is_no(ctx, "license_compatibility_check") and bool(
+        ctx.get("license", "").strip()
     )
     return any(
         (
@@ -77,9 +95,7 @@ def needs_python_project_setup(ctx):
             has_quality_checks(ctx),
             builds_documentation,
             checks_licenses,
-            has_python_distribution(
-                entries(ctx, "distribution_channels")
-            ),
+            has_python_distribution(entries(ctx, "distribution_channels")),
         )
     )
 
@@ -141,11 +157,11 @@ OPTIONAL_PATHS = [
     },
     {
         "path": "tools/check_changelog.py",
-        "should_remove": lambda ctx: is_no(ctx, "include_changelog"),
+        "should_remove": lambda ctx: lacks_community_file(ctx, "CHANGELOG.md"),
     },
     {
         "path": ".github/workflows/changelog.yml",
-        "should_remove": lambda ctx: is_no(ctx, "include_changelog"),
+        "should_remove": lambda ctx: lacks_community_file(ctx, "CHANGELOG.md"),
     },
     {
         "path": ".github/workflows/license-compatibility.yml",
@@ -164,14 +180,14 @@ OPTIONAL_PATHS = [
     },
     {
         "path": ".github/workflows/containers.yml",
-        "should_remove": lambda ctx: not has_container_recipe(
-            entries(ctx, "containerization")
+        "should_remove": lambda ctx: (
+            not has_container_recipe(entries(ctx, "containerization"))
         ),
     },
     {
         "path": ".github/workflows/distribution.yml",
-        "should_remove": lambda ctx: not has_python_distribution(
-            entries(ctx, "distribution_channels")
+        "should_remove": lambda ctx: (
+            not has_python_distribution(entries(ctx, "distribution_channels"))
         ),
     },
     {
@@ -180,11 +196,14 @@ OPTIONAL_PATHS = [
     },
     {
         "path": ".github/ISSUE_TEMPLATE",
-        "should_remove": lambda ctx: is_no(ctx, "include_support"),
+        "should_remove": lambda ctx: lacks_community_file(ctx, "SUPPORT.md"),
     },
     {
         "path": ".github/pull_request_template.md",
-        "should_remove": lambda ctx: is_no(ctx, "include_contributing"),
+        "should_remove": lambda ctx: lacks_community_file(
+            ctx,
+            "CONTRIBUTING.md",
+        ),
     },
     {
         "path": "LICENSE.txt",
@@ -192,36 +211,44 @@ OPTIONAL_PATHS = [
     },
     {
         "path": "Dockerfile",
-        "should_remove": lambda ctx: not has_container_type(
-            entries(ctx, "containerization"),
-            "docker",
+        "should_remove": lambda ctx: (
+            not has_container_type(
+                entries(ctx, "containerization"),
+                "docker",
+            )
         ),
     },
     {
         "path": "Containerfile",
-        "should_remove": lambda ctx: not has_container_type(
-            entries(ctx, "containerization"),
-            "oci",
+        "should_remove": lambda ctx: (
+            not has_container_type(
+                entries(ctx, "containerization"),
+                "oci",
+            )
         ),
     },
     {
         "path": ".dockerignore",
-        "should_remove": lambda ctx: not (
-            has_container_type(entries(ctx, "containerization"), "docker")
-            or has_container_type(entries(ctx, "containerization"), "oci")
+        "should_remove": lambda ctx: (
+            not (
+                has_container_type(entries(ctx, "containerization"), "docker")
+                or has_container_type(entries(ctx, "containerization"), "oci")
+            )
         ),
     },
     {
         "path": "Apptainer.def",
-        "should_remove": lambda ctx: not has_container_type(
-            entries(ctx, "containerization"),
-            "apptainer",
+        "should_remove": lambda ctx: (
+            not has_container_type(
+                entries(ctx, "containerization"),
+                "apptainer",
+            )
         ),
     },
     {
         "path": "tools/check_release.py",
-        "should_remove": lambda ctx: not has_python_distribution(
-            entries(ctx, "distribution_channels")
+        "should_remove": lambda ctx: (
+            not has_python_distribution(entries(ctx, "distribution_channels"))
         ),
     },
     {
@@ -288,8 +315,7 @@ OPTIONAL_PATHS = [
     {
         "path": "src/{project_slug}/ontology",
         "should_remove": lambda ctx: (
-            not has_ontology_interface(ctx)
-            and not has_sparql_interface(ctx)
+            not has_ontology_interface(ctx) and not has_sparql_interface(ctx)
         ),
     },
     {

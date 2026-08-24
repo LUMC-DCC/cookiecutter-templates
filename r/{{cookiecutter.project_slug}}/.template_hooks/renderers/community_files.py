@@ -1,15 +1,14 @@
-"""Select explicitly requested community files."""
+"""Select controlled community files requested by the project context."""
 
-from utils.options import is_yes
+from utils.context import entries
 
-
-COMMUNITY_FILE_FIELDS = {
-    "include_changelog": "CHANGELOG.md",
-    "include_code_of_conduct": "CODE_OF_CONDUCT.md",
-    "include_contributing": "CONTRIBUTING.md",
-    "include_governance": "GOVERNANCE.md",
-    "include_security": "SECURITY.md",
-    "include_support": "SUPPORT.md",
+COMMUNITY_FILES = {
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "GOVERNANCE.md",
+    "SECURITY.md",
+    "SUPPORT.md",
 }
 
 
@@ -24,13 +23,9 @@ def selected_community_files(ctx):
     Returns
     -------
     set[str]
-        Repository paths selected by explicit context fields.
+        Controlled repository paths selected in ``community_files``.
     """
-    return {
-        rel_path
-        for field_name, rel_path in COMMUNITY_FILE_FIELDS.items()
-        if is_yes(ctx, field_name)
-    }
+    return set(entries(ctx, "community_files")) & COMMUNITY_FILES
 
 
 def all_community_files():
@@ -39,6 +34,6 @@ def all_community_files():
     Returns
     -------
     set[str]
-        Repository paths controlled by explicit community-file fields.
+        Repository paths controlled by ``community_files``.
     """
-    return set(COMMUNITY_FILE_FIELDS.values())
+    return set(COMMUNITY_FILES)

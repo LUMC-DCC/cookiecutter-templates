@@ -115,12 +115,12 @@ release notes, governance, and security reporting.
 
 | File | Main context fields |
 | --- | --- |
-| `CONTRIBUTING.md` | `test_types`, `documentation_types`, quality selectors, `include_contributing` |
+| `CONTRIBUTING.md` | `test_types`, `documentation_types`, quality selectors |
 | `CODE_OF_CONDUCT.md` | `code_of_conduct_contact`, `maintainers` |
 | `GOVERNANCE.md` | `maintainers`, `principal_investigators`, `governance_notes`, `continuity_plan`, `retirement_criteria` |
-| `SECURITY.md` | `security_contact`, `security_measures`, `additional_security_measures`, `sensitive_data_statement`, `public_risk_notes`, `dmp_reference` |
+| `SECURITY.md` | `security_contact`, security and regulatory fields, `sensitive_data_statement`, `public_risk_notes`, `dmp_reference` |
 | `SUPPORT.md` | `documentation_url`, `support_routes`, `maintenance_level` |
-| `CHANGELOG.md` | `version`, `repository_url`, `versioning_scheme`, `versioning_scheme_details`, `release_frequency`, `distribution_channels`, `include_changelog` |
+| `CHANGELOG.md` | `version`, `repository_url`, `versioning_scheme`, `versioning_scheme_details`, `release_frequency`, `distribution_channels` |
 
 Review these files before sharing the repository publicly, especially private
 contact routes for community and security reports.

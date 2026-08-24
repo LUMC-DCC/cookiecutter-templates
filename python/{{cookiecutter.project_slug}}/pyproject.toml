@@ -179,10 +179,16 @@ example = {{ toml_string(cookiecutter.project_slug ~ ".adapters.plugin.registry:
 {% set _ = support_urls.append(route.url) %}
 {% endif %}
 {% endfor %}
-{% if cookiecutter.repository_url or cookiecutter.homepage_url or cookiecutter.documentation_url or support_urls %}
+{% set funding_urls = [] %}
+{% for funding in cookiecutter.funding.entries %}
+{% if funding.grant_url is defined and funding.grant_url %}
+{% set _ = funding_urls.append(funding.grant_url) %}
+{% endif %}
+{% endfor %}
+{% if cookiecutter.repository_url or cookiecutter.homepage_url or cookiecutter.documentation_url or support_urls or funding_urls or "pypi" in release_channels.values %}
 [project.urls]
 {% if cookiecutter.repository_url %}
-Repository = {{ toml_string(cookiecutter.repository_url) }}
+"Source Code" = {{ toml_string(cookiecutter.repository_url) }}
 {% endif %}
 {% if cookiecutter.homepage_url %}
 Homepage = {{ toml_string(cookiecutter.homepage_url) }}
@@ -191,7 +197,19 @@ Homepage = {{ toml_string(cookiecutter.homepage_url) }}
 Documentation = {{ toml_string(cookiecutter.documentation_url) }}
 {% endif %}
 {% if support_urls %}
-Issues = {{ toml_string(support_urls[0]) }}
+"Issue Tracker" = {{ toml_string(support_urls[0]) }}
+{% endif %}
+{% if "CHANGELOG.md" in cookiecutter.community_files.entries and cookiecutter.repository_url.startswith("https://github.com/") %}
+Changelog = {{ toml_string(cookiecutter.repository_url.rstrip("/") ~ "/blob/HEAD/CHANGELOG.md") }}
+{% endif %}
+{% if "github releases" in release_channels.values and cookiecutter.repository_url.startswith("https://github.com/") %}
+"Release Notes" = {{ toml_string(cookiecutter.repository_url.rstrip("/") ~ "/releases") }}
+{% endif %}
+{% if "pypi" in release_channels.values %}
+Download = {{ toml_string("https://pypi.org/project/" ~ cookiecutter.project_slug | replace("_", "-") ~ "/#files") }}
+{% endif %}
+{% if funding_urls %}
+Funding = {{ toml_string(funding_urls[0]) }}
 {% endif %}
 {% endif %}
 {% if include_soap_adapter %}

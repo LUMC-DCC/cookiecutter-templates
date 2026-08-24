@@ -38,6 +38,8 @@
   "purpose_categories": {
     "entries": []
   },
+  "problem_statement": "",
+  "value_proposition": "",
   "audiences": {
     "entries": []
   },
@@ -79,30 +81,16 @@
       "developer"
     ]
   },
-  "include_contributing": [
-    "yes",
-    "no"
-  ],
-  "include_code_of_conduct": [
-    "yes",
-    "no"
-  ],
-  "include_governance": [
-    "yes",
-    "no"
-  ],
-  "include_security": [
-    "yes",
-    "no"
-  ],
-  "include_support": [
-    "yes",
-    "no"
-  ],
-  "include_changelog": [
-    "yes",
-    "no"
-  ],
+  "community_files": {
+    "entries": [
+      "CONTRIBUTING.md",
+      "CODE_OF_CONDUCT.md",
+      "GOVERNANCE.md",
+      "SECURITY.md",
+      "SUPPORT.md",
+      "CHANGELOG.md"
+    ]
+  },
   "support_routes": {
     "entries": []
   },
@@ -217,6 +205,10 @@
     "entries": []
   },
   "public_risk_notes": "",
+  "regulatory_requirements": {
+    "entries": []
+  },
+  "additional_regulatory_requirements": "",
   "security_contact": "",
   "security_measures": {
     "entries": []
@@ -241,12 +233,7 @@
     "license_compatibility_check": "Check dependency license compatibility",
     "include_citation_cff": "Include citation file",
     "documentation_builder": "Documentation builder",
-    "include_contributing": "Include contributing guide",
-    "include_code_of_conduct": "Include code of conduct",
-    "include_governance": "Include governance file",
-    "include_security": "Include security policy",
-    "include_support": "Include support file",
-    "include_changelog": "Include changelog",
+    "community_files": "Community files",
     "formatter_tool": "Formatter",
     "linter_tool": "Linter",
     "type_checker": "Type checker",
