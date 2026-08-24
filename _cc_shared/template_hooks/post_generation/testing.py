@@ -26,13 +26,16 @@ def resolve_test_framework(ctx):
         for framework in (template_default(ctx, "test_frameworks") or [])
         if normalize_choice(framework)
     ]
-    supported = set(template_supported_choices(ctx, "test_frameworks"))
+    supported_values = template_supported_choices(ctx, "test_frameworks")
+    supported = set(supported_values)
     requested = [
         normalize_choice(framework)
         for framework in entries(ctx, "test_frameworks")
         if normalize_choice(framework)
     ]
-    default = defaults[0] if defaults else "pytest"
+    default = (
+        defaults[0] if defaults else (supported_values[0] if supported_values else "")
+    )
 
     for framework in requested:
         if framework in supported:
@@ -60,6 +63,6 @@ def select_test_framework(ctx, cwd):
     if requested and requested != effective:
         print(
             "[warning] Test framework "
-            f"{requested!r} is not supported for {ctx['language']!r}; "
-            f"using the language default {effective!r}."
+            f"{requested!r} is not supported for {ctx['_template_name']!r}; "
+            f"using {effective!r}."
         )

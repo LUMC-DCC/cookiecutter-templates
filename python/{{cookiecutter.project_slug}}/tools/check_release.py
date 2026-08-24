@@ -37,8 +37,8 @@ def load_project_version(path=Path("pyproject.toml")):
     metadata = tomllib.loads(path.read_text(encoding="utf-8"))
     return (
         metadata["project"]["version"],
-        {{ cookiecutter.versioning_scheme | tojson }},
-        {{ cookiecutter.versioning_scheme_details | tojson }},
+        {{ cookiecutter.versioning.scheme | tojson }},
+        {{ cookiecutter.versioning.scheme_details | tojson }},
     )
 
 

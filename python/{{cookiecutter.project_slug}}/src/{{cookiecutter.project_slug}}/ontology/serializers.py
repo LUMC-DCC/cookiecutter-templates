@@ -1,4 +1,4 @@
-"""Serializers for {{ cookiecutter.project_name }} ontology data.
+"""Serializers for {{ (cookiecutter.project_name or cookiecutter.project_slug) }} ontology data.
 
 The starter serializer writes a Turtle document from an RDFLib graph. Keeping
 serialization in one module makes it straightforward to add formats such as RDF

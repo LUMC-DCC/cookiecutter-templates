@@ -5,8 +5,7 @@ from urllib.parse import quote, urlparse
 
 from renderers.community_files import selected_community_files
 from renderers.project_context.interoperability import interface_type_values
-from utils.context import entries, resolve_choice
-from utils.options import is_no
+from utils.context import entries, object_value, resolve_object_choice
 
 
 def shields_badge_url(label, message, color="blue", label_color="gray"):
@@ -130,20 +129,20 @@ def primary_workflow(ctx):
     str
         Workflow file name, or an empty string when CI is not generated.
     """
-    if str(ctx.get("language", "")).strip().lower() == "python":
+    if str(ctx.get("_template_name", "")).strip().lower() == "python":
         if entries(ctx, "test_types"):
             return "tests.yml"
 
         quality_choices = (
-            resolve_choice(ctx, "formatter_tool")[1],
-            resolve_choice(ctx, "linter_tool")[1],
-            resolve_choice(ctx, "type_checker")[1],
+            resolve_object_choice(ctx, "quality_tools", "formatter")[1],
+            resolve_object_choice(ctx, "quality_tools", "linter")[1],
+            resolve_object_choice(ctx, "quality_tools", "type_checker")[1],
         )
-        if any(choice != "none" for choice in quality_choices):
+        if any(quality_choices):
             return "quality.yml"
         if entries(ctx, "documentation_types"):
             return "docs.yml"
-    if not is_no(ctx, "include_citation_cff"):
+    if ctx.get("include_metadata", False):
         return "metadata.yml"
     if "CHANGELOG.md" in selected_community_files(ctx):
         return "changelog.yml"
@@ -194,7 +193,7 @@ def build_readme_badges(ctx):
         Space-separated Markdown badges.
     """
     badges = []
-    repository_url = str(ctx.get("repository_url", "")).rstrip("/")
+    repository_url = str(object_value(ctx, "urls", "repository")).rstrip("/")
     github = github_repository(repository_url)
     channels = selected_channels(ctx)
     distribution_name = str(ctx.get("project_slug", "")).replace("_", "-")
@@ -204,7 +203,7 @@ def build_readme_badges(ctx):
         workflow_url = f"{repository_url}/actions/workflows/{workflow}"
         badges.append(markdown_badge("CI", f"{workflow_url}/badge.svg", workflow_url))
 
-    documentation_url = str(ctx.get("documentation_url", "")).strip()
+    documentation_url = str(object_value(ctx, "urls", "documentation")).strip()
     if documentation_url:
         badges.append(
             markdown_badge(

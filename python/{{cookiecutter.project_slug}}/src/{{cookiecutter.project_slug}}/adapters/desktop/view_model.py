@@ -25,12 +25,12 @@ class DesktopViewModel:
     message: str
 
 
-def build_view_model(text: str = "{{ cookiecutter.project_name }}") -> DesktopViewModel:
+def build_view_model(text: str = "{{ (cookiecutter.project_name or cookiecutter.project_slug) }}") -> DesktopViewModel:
     """Build display-ready data for the desktop UI.
 
     Parameters
     ----------
-    text : str, default="{{ cookiecutter.project_name }}"
+    text : str, default="{{ (cookiecutter.project_name or cookiecutter.project_slug) }}"
         Text to process.
 
     Returns
@@ -42,6 +42,6 @@ def build_view_model(text: str = "{{ cookiecutter.project_name }}") -> DesktopVi
     # the GUI.
     result = process_text(text)
     return DesktopViewModel(
-        title="{{ cookiecutter.project_name }}",
+        title="{{ (cookiecutter.project_name or cookiecutter.project_slug) }}",
         message=result.output_text,
     )

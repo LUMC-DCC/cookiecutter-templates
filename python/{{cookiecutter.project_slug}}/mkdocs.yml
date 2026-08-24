@@ -1,7 +1,7 @@
-site_name: "{{ cookiecutter.project_name }}"
+site_name: "{{ (cookiecutter.project_name or cookiecutter.project_slug) }}"
 docs_dir: docs
 
-# Keep project identity and repository links current from codemeta.json.
+# Keep project identity and repository links current from CodeMeta or pyproject.toml.
 hooks:
   - docs/hooks.py
 

@@ -1,25 +1,66 @@
-"""Configure Sphinx from package and CodeMeta metadata."""
+"""Configure Sphinx from generated project metadata.
+
+CodeMeta is preferred when selected. PEP 621 package metadata provides the
+same core values when the optional metadata files are absent.
+"""
 
 import json
 import sys
+import tomllib
 from datetime import date
 from importlib import metadata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-CODEMETA = json.loads((ROOT / "codemeta.json").read_text(encoding="utf-8"))
+CODEMETA_PATH = ROOT / "codemeta.json"
+PYPROJECT_PATH = ROOT / "pyproject.toml"
+
+
+def load_project_metadata():
+    """Load normalized public metadata for Sphinx.
+
+    Returns
+    -------
+    dict
+        Project name, version, authors, and repository URL.
+    """
+    if CODEMETA_PATH.exists():
+        codemeta = json.loads(CODEMETA_PATH.read_text(encoding="utf-8"))
+        authors = [
+            entry.get("name", "")
+            for entry in codemeta.get("author", [])
+            if isinstance(entry, dict) and entry.get("name")
+        ]
+        return {
+            "name": codemeta["name"],
+            "version": codemeta["version"],
+            "authors": authors,
+            "repository": codemeta.get("codeRepository", ""),
+        }
+
+    pyproject = tomllib.loads(PYPROJECT_PATH.read_text(encoding="utf-8"))
+    project_data = pyproject["project"]
+    return {
+        "name": project_data["name"],
+        "version": project_data["version"],
+        "authors": [author["name"] for author in project_data.get("authors", [])],
+        "repository": project_data.get("urls", {}).get("Source Code", ""),
+    }
+
+
+PROJECT_METADATA = load_project_metadata()
 
 # Allow autodoc to import the package from an editable source checkout.
 sys.path.insert(0, str(ROOT / "src"))
 
-project = CODEMETA["name"]
-author = CODEMETA.get("provider", {}).get("name", "")
+project = PROJECT_METADATA["name"]
+author = ", ".join(PROJECT_METADATA["authors"])
 copyright = f"{date.today().year}, {author}"
 try:
     release = metadata.version("{{ cookiecutter.project_slug | replace('_', '-') }}")
 except metadata.PackageNotFoundError:
     # Source checkouts can build docs before the package is installed.
-    release = CODEMETA["version"]
+    release = PROJECT_METADATA["version"]
 
 extensions = [
     # Import docstrings from Python modules.
@@ -43,7 +84,7 @@ html_theme_options = {
     "use_download_button": False,
     "use_fullscreen_button": False,
 }
-repository_url = CODEMETA.get("codeRepository", "")
+repository_url = PROJECT_METADATA["repository"]
 if repository_url and "REPLACE_WITH" not in repository_url:
     # Add a repository button when a public repository URL is available.
     html_theme_options["repository_url"] = repository_url

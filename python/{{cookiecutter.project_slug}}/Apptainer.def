@@ -22,18 +22,17 @@ Bootstrap: docker
 From: python:3.12-slim
 
 %labels
-    org.opencontainers.image.title {{ cookiecutter.project_name }}
-    org.opencontainers.image.version {{ cookiecutter.version }}
+    org.opencontainers.image.title {{ (cookiecutter.project_name or cookiecutter.project_slug) }}
+    org.opencontainers.image.version {{ (cookiecutter.versioning.version or "0.1.0") }}
     org.opencontainers.image.description {{ cookiecutter.project_short_description }}
-    org.opencontainers.image.vendor {{ cookiecutter.organization_name }}
-{% if cookiecutter.repository_url %}
-    org.opencontainers.image.source {{ cookiecutter.repository_url }}
+{% if cookiecutter.urls.repository %}
+    org.opencontainers.image.source {{ cookiecutter.urls.repository }}
 {% endif %}
-{% if cookiecutter.homepage_url %}
-    org.opencontainers.image.url {{ cookiecutter.homepage_url }}
+{% if cookiecutter.urls.homepage %}
+    org.opencontainers.image.url {{ cookiecutter.urls.homepage }}
 {% endif %}
-{% if cookiecutter.documentation_url %}
-    org.opencontainers.image.documentation {{ cookiecutter.documentation_url }}
+{% if cookiecutter.urls.documentation %}
+    org.opencontainers.image.documentation {{ cookiecutter.urls.documentation }}
 {% endif %}
 
 %files

@@ -7,8 +7,10 @@ authors = [
 ]
 license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14,<4.0"
 dependencies = [
+    "rsm-schema @ git+https://github.com/lumc-dcc/rsm-schema.git@0b033ce05c388310cdfa86c24eddd521f097a0b0",
+    "rs-files-templates @ git+https://github.com/LUMC-DCC/rs-files-templates.git@c87dae01f44ad9d637e84e685e2cd0eb5e0bf19e",
 ]
 
 [project.urls]
@@ -44,3 +46,26 @@ ruff = "^0.16.4"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+extend-exclude = [
+    "python",
+    "r",
+    "site",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"_cc_shared/template_hooks/context.py" = ["F821"]
+"_cc_shared/hooks/post_gen_project.py" = ["E402"]
+"_scripts/sync_shared.py" = ["E402"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.format]
+docstring-code-format = true

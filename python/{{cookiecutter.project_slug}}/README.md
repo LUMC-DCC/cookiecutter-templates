@@ -1,17 +1,17 @@
-# {{ cookiecutter.project_name }}
+# {{ (cookiecutter.project_name or cookiecutter.project_slug) }}
 
 {{ cookiecutter.project_short_description }}
 
-{% if cookiecutter.homepage_url and cookiecutter.homepage_url != cookiecutter.repository_url %}
-Homepage: {{ cookiecutter.homepage_url }}
+{% if cookiecutter.urls.homepage and cookiecutter.urls.homepage != cookiecutter.urls.repository %}
+Homepage: {{ cookiecutter.urls.homepage }}
 {% endif %}
-{% if cookiecutter.documentation_url and cookiecutter.documentation_url != cookiecutter.repository_url and cookiecutter.documentation_url != cookiecutter.homepage_url %}
-Documentation: {{ cookiecutter.documentation_url }}
+{% if cookiecutter.urls.documentation and cookiecutter.urls.documentation != cookiecutter.urls.repository and cookiecutter.urls.documentation != cookiecutter.urls.homepage %}
+Documentation: {{ cookiecutter.urls.documentation }}
 {% endif %}
-{% set effective_formatter_tool = cookiecutter.formatter_tool if cookiecutter.formatter_tool in cookiecutter._template_supported_choices.formatter_tool else cookiecutter._template_defaults.formatter_tool %}
-{% set effective_linter_tool = cookiecutter.linter_tool if cookiecutter.linter_tool in cookiecutter._template_supported_choices.linter_tool else cookiecutter._template_defaults.linter_tool %}
-{% set effective_type_checker = cookiecutter.type_checker if cookiecutter.type_checker in cookiecutter._template_supported_choices.type_checker else cookiecutter._template_defaults.type_checker %}
-{% set has_quality_checks = effective_formatter_tool != "none" or effective_linter_tool != "none" or effective_type_checker != "none" %}
+{% set effective_formatter_tool = cookiecutter.quality_tools.formatter if cookiecutter.quality_tools.formatter in cookiecutter._template_supported_choices.quality_tools.formatter else "" %}
+{% set effective_linter_tool = cookiecutter.quality_tools.linter if cookiecutter.quality_tools.linter in cookiecutter._template_supported_choices.quality_tools.linter else "" %}
+{% set effective_type_checker = cookiecutter.quality_tools.type_checker if cookiecutter.quality_tools.type_checker in cookiecutter._template_supported_choices.quality_tools.type_checker else "" %}
+{% set has_quality_checks = effective_formatter_tool or effective_linter_tool or effective_type_checker %}
 {% set has_tests = cookiecutter.test_types.entries | length > 0 %}
 {% set has_local_checks = "CHANGELOG.md" in cookiecutter.community_files.entries or has_quality_checks or has_tests %}
 
@@ -31,7 +31,7 @@ Run the package entry point inside the managed environment:
 @@PROJECT_RUN@@python -m {{ cookiecutter.project_slug }}
 ```
 
-{% if has_local_checks or cookiecutter.include_citation_cff == "yes" %}
+{% if has_local_checks or cookiecutter.include_metadata %}
 ## Development
 
 {% if has_local_checks %}
@@ -59,7 +59,7 @@ Run the checks that are configured for this project before opening a pull reques
 ```
 {% endif %}
 
-{% if cookiecutter.include_citation_cff == "yes" %}
+{% if cookiecutter.include_metadata %}
 Continuous integration also validates the project metadata.
 {% endif %}
 {% endif %}

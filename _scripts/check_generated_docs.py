@@ -15,7 +15,6 @@ from pathlib import Path
 
 from cookiecutter.main import cookiecutter
 
-
 ROOT = Path(__file__).resolve().parent.parent
 PYTHON_TEMPLATE = ROOT / "python"
 BUILD_COMMANDS = {
@@ -54,10 +53,11 @@ def render_project(builder: str, workspace: Path) -> Path:
             str(PYTHON_TEMPLATE),
             no_input=True,
             extra_context={
-                "language": "python",
                 "project_name": f"Generated {builder.title()} Docs",
                 "project_slug": project_slug,
-                "project_short_description": "Documentation build verification project.",
+                "project_short_description": (
+                    "Documentation build verification project."
+                ),
                 "documentation_builder": builder,
                 "documentation_types": {
                     "entries": [
@@ -67,10 +67,12 @@ def render_project(builder: str, workspace: Path) -> Path:
                     ]
                 },
                 "test_types": {"entries": []},
-                "formatter_tool": "none",
-                "linter_tool": "none",
-                "type_checker": "none",
-                "license": "",
+                "quality_tools": {
+                    "formatter": "",
+                    "linter": "",
+                    "type_checker": "",
+                },
+                "licensing": {"license": "", "compatibility_check": ""},
             },
             output_dir=str(workspace / "output"),
             default_config={

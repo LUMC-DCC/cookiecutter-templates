@@ -3,16 +3,14 @@
 The `documentation_builder` option controls the documentation scaffold generated
 inside a project when one or more `documentation_types` are selected.
 
-## Python defaults
+## Python options
 
 For Python, the documentation scaffold can be generated as:
 
 - `sphinx`
 - `mkdocs`
-- `none`
 
-If no documentation builder is selected explicitly, Python projects are
-generated with Sphinx.
+If no documentation builder is selected, Python projects use plain Markdown.
 
 If `documentation_types.entries` is empty, no documentation scaffold is
 generated, regardless of the selected builder.
@@ -38,10 +36,8 @@ the default theme.
 It is not used on macOS or Linux, where `Makefile` provides the equivalent
 entry point. The generated documentation page shows the exact build commands.
 
-## No builder
+## Plain Markdown
 
-The `none` builder keeps plain Markdown documentation without static-site build
-configuration.
-
-This option is useful when a project wants repository-rendered Markdown first
-and will choose a documentation builder later.
+Leaving the builder empty keeps Markdown documentation without static-site
+build configuration. This is useful when a project wants repository-rendered
+documentation first and may choose a site generator later.

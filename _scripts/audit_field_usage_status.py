@@ -10,9 +10,9 @@ import json
 import re
 from pathlib import Path
 
+from rsm_schema import schema as rsm_schema
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_CONTRACT_PATH = ROOT / "_contracts" / "template_context.json"
 DEFAULT_USAGE_PATH = ROOT / "_contracts" / "field_usage.json"
 
 CONTENT_PATTERN = re.compile(r"cookiecutter\.([A-Za-z_][A-Za-z0-9_]*)")
@@ -58,7 +58,9 @@ def find_template_references(template_dir):
 
     for path in template_dir.rglob("*"):
         for field_name in PATH_PATTERN.findall(str(path.relative_to(template_dir))):
-            references.setdefault(field_name, set()).add(str(path.relative_to(template_dir)))
+            references.setdefault(field_name, set()).add(
+                str(path.relative_to(template_dir))
+            )
 
         if not path.is_file() or path.name == "cookiecutter.json":
             continue
@@ -69,18 +71,20 @@ def find_template_references(template_dir):
             continue
 
         for field_name in CONTENT_PATTERN.findall(content):
-            references.setdefault(field_name, set()).add(str(path.relative_to(template_dir)))
+            references.setdefault(field_name, set()).add(
+                str(path.relative_to(template_dir))
+            )
 
     return references
 
 
-def audit_usage(contract, usage, root):
+def audit_usage(schema, usage, root):
     """Validate status declarations against template references.
 
     Parameters
     ----------
-    contract : dict
-        Parsed template context contract.
+    schema : dict
+        Published RSM JSON Schema.
     usage : dict
         Parsed field usage map.
     root : pathlib.Path
@@ -91,7 +95,7 @@ def audit_usage(contract, usage, root):
     list[str]
         Human-readable audit errors. An empty list means the audit passed.
     """
-    contract_fields = {field["name"] for field in contract["fields"]}
+    contract_fields = set(schema.get("properties", {}))
     field_usage = {field["name"]: field for field in usage["fields"]}
     errors = []
 
@@ -103,12 +107,14 @@ def audit_usage(contract, usage, root):
 
         references = find_template_references(template_dir)
         unknown_references = {
-            field_name for field_name in set(references) - contract_fields
+            field_name
+            for field_name in set(references) - contract_fields
             if not field_name.startswith("_")
         }
         for field_name in sorted(unknown_references):
             errors.append(
-                f"{template_name}: field `{field_name}` is referenced but not in the context contract"
+                f"{template_name}: field `{field_name}` is referenced but not in "
+                "the RSM contract"
             )
 
         for field_name in sorted(set(references) & contract_fields):
@@ -116,7 +122,8 @@ def audit_usage(contract, usage, root):
             if status not in REFERENCE_STATUSES:
                 locations = ", ".join(sorted(references[field_name])[:5])
                 errors.append(
-                    f"{template_name}: field `{field_name}` is referenced in {locations} "
+                    f"{template_name}: field `{field_name}` is referenced in "
+                    f"{locations} "
                     f"but status is `{status}`"
                 )
 
@@ -126,11 +133,10 @@ def audit_usage(contract, usage, root):
 def main():
     """Run the command-line interface."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT_PATH)
     parser.add_argument("--usage", type=Path, default=DEFAULT_USAGE_PATH)
     args = parser.parse_args()
 
-    errors = audit_usage(load_json(args.contract), load_json(args.usage), ROOT)
+    errors = audit_usage(dict(rsm_schema.raw), load_json(args.usage), ROOT)
     if errors:
         for error in errors:
             print(error)

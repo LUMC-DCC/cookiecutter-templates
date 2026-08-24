@@ -1,11 +1,10 @@
 """Resolve quality-tool options for the selected language template."""
 
-from utils.context import resolve_choice
-
+from utils.context import resolve_object_choice
 
 QUALITY_FIELDS = (
-    "formatter_tool",
-    "linter_tool",
+    "formatter",
+    "linter",
     "type_checker",
 )
 
@@ -18,14 +17,14 @@ def resolve_quality_tool(ctx, field_name):
     ctx : dict
         Rendered Cookiecutter context.
     field_name : str
-        Contract field name such as ``linter_tool``.
+        Property name such as ``linter``.
 
     Returns
     -------
     tuple[str, str]
         Requested and effective normalized tool labels.
     """
-    return resolve_choice(ctx, field_name)
+    return resolve_object_choice(ctx, "quality_tools", field_name)
 
 
 def has_pre_commit(ctx):
@@ -57,8 +56,8 @@ def has_formatter(ctx):
     bool
         Whether a formatter is effective.
     """
-    _, formatter_tool = resolve_quality_tool(ctx, "formatter_tool")
-    return formatter_tool != "none"
+    _, formatter_tool = resolve_quality_tool(ctx, "formatter")
+    return bool(formatter_tool)
 
 
 def has_linting(ctx):
@@ -74,8 +73,8 @@ def has_linting(ctx):
     bool
         Whether a linter is effective.
     """
-    _, linter_tool = resolve_quality_tool(ctx, "linter_tool")
-    return linter_tool != "none"
+    _, linter_tool = resolve_quality_tool(ctx, "linter")
+    return bool(linter_tool)
 
 
 def has_type_checking(ctx):
@@ -92,7 +91,7 @@ def has_type_checking(ctx):
         Whether a type checker is effective.
     """
     _, type_checker = resolve_quality_tool(ctx, "type_checker")
-    return type_checker != "none"
+    return bool(type_checker)
 
 
 def has_quality_checks(ctx):
@@ -130,5 +129,5 @@ def select_quality_tools(ctx, cwd):
         print(
             "[warning] "
             f"{field_name} value {requested!r} is not supported for "
-            f"{ctx['language']!r}; using {effective!r}."
+            f"{ctx['_template_name']!r}; using {effective!r}."
         )

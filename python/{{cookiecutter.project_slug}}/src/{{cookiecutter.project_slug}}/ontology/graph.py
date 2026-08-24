@@ -1,4 +1,4 @@
-"""RDF graph construction for the {{ cookiecutter.project_name }} ontology.
+"""RDF graph construction for the {{ (cookiecutter.project_name or cookiecutter.project_slug) }} ontology.
 
 This module converts validated term objects into an RDFLib graph. Keeping graph
 construction separate from serialization makes the ontology easier to validate,
@@ -38,7 +38,7 @@ def ontology_graph(terms: list[OntologyTerm] | None = None) -> Graph:
         (
             ontology_iri,
             namespaces.RDFS.label,
-            Literal("{{ cookiecutter.project_name }} ontology"),
+            Literal("{{ (cookiecutter.project_name or cookiecutter.project_slug) }} ontology"),
         )
     )
 

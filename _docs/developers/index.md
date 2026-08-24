@@ -1,110 +1,94 @@
 # For template developers
 
-This section is for people maintaining and extending this template repository.
+This section is for maintainers of the Cookiecutter composition and language
+scaffolds.
 
-Development should be contract-first and test-driven. When adding or changing a
-field, update the central contract and usage map before changing individual
-template files.
+## Decide where a change belongs
+
+| Change | Repository |
+| --- | --- |
+| Public field, nested shape, default, or controlled value | `rsm-schema` |
+| Reusable file content or metadata mapping | `rs-files-templates` |
+| CodeMeta/CFF consistency rules | `rs-metadata` |
+| Language scaffold, capability selection, generated workflow, or assembly | this repository |
+
+Do not add a local public field to make one template work. Add it to RSM when it
+describes research software generally, or keep it in local policy when it only
+describes generator capability.
 
 ## Context workflow
 
-`_contracts/template_context.json` is the source of truth for the public context.
-It generates two derived files:
+`_scripts/build_cookiecutter_context.py` reads the schema bundled with the pinned
+`rsm-schema` dependency. It turns schema defaults and top-level scalar enums into
+Cookiecutter defaults and prompts. `_config/template_policies.json` adds the
+language-specific slug constraints and supported choices stored as private hook
+metadata.
 
-- `_contracts/template_context.schema.json` for service-side validation
-- `_cc_shared/cookiecutter.json` for Cookiecutter defaults and prompts
+`_scripts/sync_shared.py` writes `_cc_shared/cookiecutter.json`, writes each
+language `cookiecutter.json`, and mirrors shared hooks and assets. None of these
+generated context files is a public contract.
 
-The shared Cookiecutter context is then synced into each language template as
-`<template>/cookiecutter.json`. Edit the contract, regenerate the derived files,
-and let tests verify that they stayed in sync.
+At generation time, the post-generation hook:
 
-## Way of working
+1. normalizes empty Cookiecutter scalar sentinels and validates `RSMMetadata`;
+2. applies language-specific slug and capability policy;
+3. asks `rs-files-templates` to render selected reusable files;
+4. assembles documentation, interface scaffolds, workflows, and other local
+   files;
+5. removes template-only helpers.
 
-1. Choose one coherent field group, such as people, licensing, or quality tooling.
-2. Update `_contracts/template_context.json` if the public interface changes.
-3. Update `_contracts/field_usage.json` to describe where the field should land.
-4. Apply the field to generated artifacts.
-5. Extend generation tests with representative context values.
-6. Run the full verification suite.
+## Development workflow
 
-Prefer small slices.
+For an RSM field change:
 
-When updating `_contracts/field_usage.json`, prefer target names that describe
-the artifact role. For example, use `docs overview page` or `citation abstract`
-instead of only naming the file that happens to contain the value. Concrete file
-paths should still be asserted in language-specific generation tests.
+1. make and test the schema change in `rsm-schema`;
+2. update its pinned commit in `pyproject.toml` and refresh `poetry.lock`;
+3. update `_contracts/field_usage.json`;
+4. implement the language-specific effects and generation tests;
+5. regenerate synchronized files and field-usage docs.
 
-Repeatable context fields should be constrained in the contract. Use
-`entry_schemas` for repeatable object fields and `item_schema` for repeatable
-string fields so service integrators can validate payloads with
-`_contracts/template_context.schema.json`.
+For a reusable file change, make and test it in `rs-files-templates`, then update
+the pinned commit here. Tests in this repository should cover selection,
+schema-valid output where useful, and interactions with the generated project.
+Do not duplicate exact prose snapshots.
 
-When a default should differ between language templates, add `template_defaults`
-to the field in `_contracts/template_context.json`. The sync script applies
-those defaults when generating each template's `cookiecutter.json`.
+Keep builder-neutral documentation under the language template's
+`docs/_shared/`. Builder folders contain navigation, configuration, and
+builder-specific entry points only. Keep `post_gen_project.py` limited to
+orchestration; put actions in `post_generation/`, content assembly in
+`renderers/`, and low-level adapters in `utils/`.
 
-When a field has language-specific validation, add `template_schemas` to its
-contract entry. Schema generation emits conditional rules for integrators, and
-the same fragments are copied into each template for hook-time validation.
+## Field usage
 
-When a field appears in machine-readable metadata, map its fullest public form
-into `codemeta.json` and the supported subset into ecosystem metadata. The
-official `rs-metadata` validator owns profile and cross-file comparison rules;
-do not duplicate those rules in template code. The repository-wide strategy is
-described in [Metadata](../users/metadata.md).
+Statuses in `_contracts/field_usage.json` are curated per template:
 
-Keep builder-neutral generated documentation in the template's `docs/_shared/`
-directory. Builder folders should contain only files that genuinely differ.
-Prefer renderer functions for context-driven prose and derive build
-configuration from generated metadata where the documentation tool supports it.
+- `planned` means the RSM field is not consumed yet.
+- `control` means it selects generated paths.
+- `partial` means some intended targets are covered.
+- `implemented` means intended targets are covered by generation tests.
+- `external` means another component consumes it.
 
-Post-generation code should read repeatable fields with the shared context
-accessors and resolve controlled selectors with the shared choice resolver. The
-rendered context is loaded in full, so adding a contract field does not require a
-second declaration in the hook loader.
+Use short target names that explain the artifact role. The generated
+[field-usage table](../contract/field-usage.md) is a reference, not a second
+maintained list.
 
-## Contract curation
-
-The status values in `_contracts/field_usage.json` are curated by maintainers.
-They are not inferred automatically, because a field can be rendered somewhere
-while still missing other important artifacts.
-
-Use these rules when changing a field status:
-
-- Keep `planned` when a field exists in the contract but is not used by that
-  template yet.
-- Use `control` when the field decides whether files or directories are kept.
-- Use `partial` when the field is rendered, but more intended targets remain.
-- Use `implemented` only when the intended targets for that template are covered
-  by tests.
-
-Generated files must be refreshed after contract or usage-map edits:
+## Regeneration and verification
 
 ```bash
-poetry run python _scripts/build_context_schema.py
+poetry lock
+poetry install --with dev,docs
 poetry run python _scripts/sync_shared.py
 poetry run python _scripts/build_field_usage_docs.py
-```
-
-## Verification
-
-Run the same checks locally that CI runs:
-
-```bash
 poetry run pre-commit run --all-files
+poetry run ruff check .
+poetry run ruff format --check .
 poetry run python _scripts/audit_field_usage_status.py
 poetry run python _scripts/audit_action_pins.py
 poetry run pytest
 poetry run python _scripts/check_generated_docs.py
 poetry run mkdocs build --strict
-git diff --exit-code
 git diff --check
 ```
 
-The audit script guards against stale status declarations by scanning each
-template for `cookiecutter.<field>` references. It verifies that referenced
-fields exist in the contract and are not still marked as `planned`.
-
-External GitHub Actions must use full commit SHAs with their release tag in an
-inline comment. Dependabot keeps those references and repository dependencies
-current; the action-pin audit enforces immutability locally and in CI.
+CI runs the same generation, audit, test, and documentation gates. Third-party
+Actions remain pinned to full commit SHAs and are updated through Dependabot.

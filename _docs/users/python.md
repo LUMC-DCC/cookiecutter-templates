@@ -136,7 +136,7 @@ external requirements and added to CodeMeta `softwareRequirements`. They are not
 added to `pyproject.toml` package dependencies because PEP 621 dependencies are
 Python package requirements.
 
-When `license_compatibility_check` is enabled for a recognized SPDX license,
+When `licensing.compatibility_check` selects automated tooling for a recognized SPDX license,
 `pyproject.toml` includes a `license` checker extra and `licensecheck`
 configuration, and generated CI runs the compatibility check in a dedicated
 workflow.

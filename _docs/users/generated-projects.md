@@ -8,8 +8,7 @@ immediately and files that the project team should review, complete, and adapt.
 After generation, review the project in this order:
 
 1. Read `README.md`.
-2. Check `CITATION.cff`, if citation metadata was included.
-3. Check `codemeta.json`.
+2. Check `CITATION.cff` and `codemeta.json`, if metadata was included.
 4. Review the selected license.
 5. Open `docs/`, if documentation types were selected.
 6. Run the commands shown in the generated project.
@@ -22,11 +21,9 @@ background and scope in `docs/overview.md`. When software functions are
 provided, the README includes collapsible `biotools-function` metadata blocks
 for tool registries and other downstream services.
 
-`CITATION.cff` contains machine-readable citation metadata when citation
-metadata is included.
-
-`codemeta.json` contains cross-language FAIR software metadata for catalogues,
-registries, archival systems, and institutional tooling.
+When minimum metadata is selected, `CITATION.cff` contains citation metadata and
+`codemeta.json` contains FAIR software metadata for catalogues, archives, and
+institutional tooling. The files are included or omitted together.
 
 Programming language entries appear in project documentation and in
 `codemeta.json`. Software function records describe operations, inputs, outputs,
@@ -51,7 +48,7 @@ Generated code is deliberately organized so reusable logic sits behind thin
 interface layers. Treat package `__init__.py` files as import boundaries rather
 than places for application logic.
 
-`LICENSE.txt` is included when a license value was provided. Recognized SPDX
+`LICENSE` is included when a license value was provided. Recognized SPDX
 identifiers are written from SPDX metadata. Unrecognized license values are
 written as custom license text.
 
@@ -98,12 +95,10 @@ small pages for resource requirements, sustainability, and security and data.
 If documentation is omitted, these sections are placed in `README.md` so the
 information remains discoverable without duplicating it when docs are present.
 
-MkDocs reads project identity, description, and repository links from
-`codemeta.json`. Sphinx reads project identity, organization, and repository
-links from CodeMeta and the version from installed package metadata. The
-documentation workflow builds these configurations in CI, while the metadata
-workflow uses `rs-metadata` to validate the LUMC profile and compare CodeMeta
-with detected package, citation, and container metadata.
+MkDocs and Sphinx prefer CodeMeta when it is present and otherwise read matching
+core values from `pyproject.toml`. The documentation workflow builds configured
+sites in CI. When metadata is included, `rs-metadata` validates the LUMC profile
+and compares supported package, citation, and container metadata.
 
 See [Metadata](metadata.md) for how package metadata, CodeMeta, CFF, README
 content, and documentation are expected to relate to each other.
@@ -116,11 +111,11 @@ release notes, governance, and security reporting.
 | File | Main context fields |
 | --- | --- |
 | `CONTRIBUTING.md` | `test_types`, `documentation_types`, quality selectors |
-| `CODE_OF_CONDUCT.md` | `code_of_conduct_contact`, `maintainers` |
+| `CODE_OF_CONDUCT.md` | `contacts.code_of_conduct`, `maintainers` |
 | `GOVERNANCE.md` | `maintainers`, `principal_investigators`, `governance_notes`, `continuity_plan`, `retirement_criteria` |
-| `SECURITY.md` | `security_contact`, security and regulatory fields, `sensitive_data_statement`, `public_risk_notes`, `dmp_reference` |
-| `SUPPORT.md` | `documentation_url`, `support_routes`, `maintenance_level` |
-| `CHANGELOG.md` | `version`, `repository_url`, `versioning_scheme`, `versioning_scheme_details`, `release_frequency`, `distribution_channels` |
+| `SECURITY.md` | `contacts.security`, `security_measures`, `regulatory_requirements`, `data_management`, `public_risk_notes` |
+| `SUPPORT.md` | `urls.documentation`, `support_routes`, `maintenance_level` |
+| `CHANGELOG.md` | `versioning`, `urls.repository`, `distribution_channels` |
 
 Review these files before sharing the repository publicly, especially private
 contact routes for community and security reports.
@@ -142,9 +137,9 @@ Each generated project includes its own commands for installation, usage,
 testing, and documentation builds.
 
 Python projects use the selected `project_manager` consistently in those
-commands and in language-specific CI. Lockfiles are created by the manager when
-the project is first set up; they are not manufactured during template
-generation.
+commands and in language-specific CI. An empty manager selection uses standard
+`pip` commands. Lockfiles are created by managers when requested; they are not
+manufactured during template generation.
 
 ## Editable content
 

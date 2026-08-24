@@ -24,7 +24,14 @@ def resolve_documentation_builder(ctx):
     tuple[str, str]
         Requested and effective documentation builders.
     """
-    return resolve_choice(ctx, "documentation_builder")
+    requested, effective = resolve_choice(
+        ctx,
+        "documentation_builder",
+        fallback="plain",
+    )
+    if not requested:
+        effective = "plain"
+    return requested, effective
 
 
 def copy_builder_files(source, docs_dir):
@@ -97,9 +104,7 @@ def select_documentation_type_pages(ctx, cwd):
     source_dir = docs_source_dir(cwd)
     documentation_types = entries(ctx, "documentation_types")
     selected = selected_documentation_types(documentation_types)
-    keep_paths = selected_optional_documentation_paths(
-        documentation_types
-    )
+    keep_paths = selected_optional_documentation_paths(documentation_types)
     if "user" not in selected:
         remove_path(source_dir / "usage.md")
     for rel_path in optional_documentation_paths() - keep_paths:
@@ -135,9 +140,9 @@ def select_documentation_builder(ctx, cwd):
     if effective != "mkdocs":
         remove_path(cwd / "mkdocs.yml")
 
-    if requested != effective:
+    if requested and requested != effective:
         print(
             "[warning] Documentation builder "
-            f"{requested!r} is not supported for {ctx['language']!r}; "
-            f"using the language default {effective!r}."
+            f"{requested!r} is not supported for {ctx['_template_name']!r}; "
+            f"using {effective!r}."
         )

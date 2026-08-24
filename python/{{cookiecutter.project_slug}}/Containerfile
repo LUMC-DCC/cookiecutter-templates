@@ -36,13 +36,12 @@ RUN python -m pip wheel --wheel-dir /wheels ".{% if install_extras %}[{{ install
 
 FROM python:3.12-slim AS runtime
 
-LABEL org.opencontainers.image.title={{ container_string(cookiecutter.project_name) }} \
-      org.opencontainers.image.version={{ container_string(cookiecutter.version) }} \
-      org.opencontainers.image.description={{ container_string(cookiecutter.project_short_description) }}{% if cookiecutter.repository_url %} \
-      org.opencontainers.image.source={{ container_string(cookiecutter.repository_url) }}{% endif %}{% if cookiecutter.homepage_url %} \
-      org.opencontainers.image.url={{ container_string(cookiecutter.homepage_url) }}{% endif %}{% if cookiecutter.documentation_url %} \
-      org.opencontainers.image.documentation={{ container_string(cookiecutter.documentation_url) }}{% endif %}{% if cookiecutter.organization_name %} \
-      org.opencontainers.image.vendor={{ container_string(cookiecutter.organization_name) }}{% endif %}
+LABEL org.opencontainers.image.title={{ container_string((cookiecutter.project_name or cookiecutter.project_slug)) }} \
+      org.opencontainers.image.version={{ container_string((cookiecutter.versioning.version or "0.1.0")) }} \
+      org.opencontainers.image.description={{ container_string(cookiecutter.project_short_description) }}{% if cookiecutter.urls.repository %} \
+      org.opencontainers.image.source={{ container_string(cookiecutter.urls.repository) }}{% endif %}{% if cookiecutter.urls.homepage %} \
+      org.opencontainers.image.url={{ container_string(cookiecutter.urls.homepage) }}{% endif %}{% if cookiecutter.urls.documentation %} \
+      org.opencontainers.image.documentation={{ container_string(cookiecutter.urls.documentation) }}{% endif %}
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1

@@ -8,7 +8,6 @@ import argparse
 import json
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_USAGE_PATH = ROOT / "_contracts" / "field_usage.json"
 DEFAULT_OUTPUT_PATH = ROOT / "_docs" / "contract" / "field-usage.md"
@@ -49,7 +48,7 @@ def build_table(usage):
         "# Field Usage",
         "",
         "This table is generated from `_contracts/field_usage.json`.",
-        "Update the contract map first, then regenerate this page.",
+        "Update the usage map first, then regenerate this page.",
         "",
         "| Field | " + " | ".join(status_headers) + " | Targets | Notes |",
         "| --- | " + " | ".join("---" for _ in status_headers) + " | --- | --- |",

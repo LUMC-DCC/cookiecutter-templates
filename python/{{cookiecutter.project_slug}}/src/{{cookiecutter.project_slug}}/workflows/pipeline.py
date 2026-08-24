@@ -1,4 +1,4 @@
-"""Workflow entry point for {{ cookiecutter.project_name }}.
+"""Workflow entry point for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 The pipeline module coordinates workflow steps in order. It should stay thin:
 call step functions, pass configuration, and return a structured result. Put
@@ -15,14 +15,14 @@ from {{ cookiecutter.project_slug }}.workflows.steps import (
 
 
 def run_workflow(
-    text: str = "{{ cookiecutter.project_name }}",
+    text: str = "{{ (cookiecutter.project_name or cookiecutter.project_slug) }}",
     config: WorkflowConfig | None = None,
 ) -> WorkflowResult:
     """Run the default text-processing workflow.
 
     Parameters
     ----------
-    text : str, default="{{ cookiecutter.project_name }}"
+    text : str, default="{{ (cookiecutter.project_name or cookiecutter.project_slug) }}"
         Text value passed into the first workflow step.
     config : WorkflowConfig | None, optional
         Runtime workflow configuration. When ``None``, default settings are

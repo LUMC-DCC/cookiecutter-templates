@@ -7,13 +7,13 @@ from utils.project_management import (
     setup_group_command,
 )
 
-
 TEXT_SUFFIXES = {
     ".md",
     ".toml",
     ".yaml",
     ".yml",
 }
+
 
 def project_manager_replacements(ctx):
     """Build replacements for manager-aware generated text.
@@ -105,12 +105,12 @@ def configure_project_manager(ctx, cwd):
         Generated project root.
     """
     requested, effective = resolve_project_manager(ctx)
-    if requested != effective:
+    if requested and requested != effective:
         print(
             "[warning] "
             f"project_manager value {requested!r} is not supported for "
-            f"{ctx['language']!r}; using {effective!r}."
+            f"{ctx['_template_name']!r}; using {effective!r}."
         )
 
-    if str(ctx.get("language", "")).strip().lower() == "python":
+    if str(ctx.get("_template_name", "")).strip().lower() == "python":
         replace_project_manager_tokens(ctx, cwd)

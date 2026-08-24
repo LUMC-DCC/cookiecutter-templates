@@ -1,14 +1,10 @@
 {
-  "language": [
-    "python",
-    "r"
-  ],
-  "project_name": "My Awesome Project",
-  "project_slug": "my_awesome_project",
-  "project_short_description": "Research software project.",
+  "project_name": "",
+  "project_slug": "project",
+  "project_short_description": "",
   "project_long_description": "",
-  "version": "0.1.0",
   "development_status": [
+    "",
     "concept",
     "wip",
     "active",
@@ -30,25 +26,28 @@
   "principal_investigators": {
     "entries": []
   },
-  "organization_name": "LUMC",
   "funding": {
     "entries": []
   },
-  "purpose": "",
-  "purpose_categories": {
-    "entries": []
+  "motivation": {
+    "categories": {
+      "entries": []
+    },
+    "purpose": "",
+    "problem_statement": "",
+    "value_proposition": ""
   },
-  "problem_statement": "",
-  "value_proposition": "",
   "audiences": {
     "entries": []
   },
   "related_software": {
     "entries": []
   },
-  "repository_url": "",
-  "homepage_url": "",
-  "documentation_url": "",
+  "urls": {
+    "repository": "",
+    "homepage": "",
+    "documentation": ""
+  },
   "registries": {
     "entries": []
   },
@@ -58,18 +57,13 @@
   "publications": {
     "entries": []
   },
-  "license": "",
-  "license_compatibility_notes": "",
-  "license_compatibility_check": [
-    "no",
-    "yes"
-  ],
-  "include_citation_cff": [
-    "yes",
-    "no"
-  ],
+  "licensing": {
+    "license": "",
+    "compatibility_check": ""
+  },
+  "include_metadata": false,
   "documentation_builder": [
-    "none",
+    "",
     "mkdocs",
     "sphinx",
     "pkgdown"
@@ -78,19 +72,16 @@
     "entries": []
   },
   "community_files": {
-    "entries": [
-      "CONTRIBUTING.md",
-      "CODE_OF_CONDUCT.md",
-      "GOVERNANCE.md",
-      "SECURITY.md",
-      "SUPPORT.md",
-      "CHANGELOG.md"
-    ]
+    "entries": []
   },
   "support_routes": {
     "entries": []
   },
-  "code_of_conduct_contact": "",
+  "contacts": {
+    "community": "",
+    "code_of_conduct": "",
+    "security": ""
+  },
   "governance_notes": "",
   "programming_languages": {
     "entries": []
@@ -99,11 +90,7 @@
     "entries": []
   },
   "interfaces": {
-    "entries": [
-      {
-        "type": "Library"
-      }
-    ]
+    "entries": []
   },
   "operating_systems": {
     "entries": []
@@ -120,36 +107,13 @@
   "test_frameworks": {
     "entries": []
   },
-  "formatter_tool": [
-    "none",
-    "ruff",
-    "black",
-    "styler",
-    "prettier",
-    "rustfmt",
-    "clang-format"
-  ],
-  "linter_tool": [
-    "none",
-    "ruff",
-    "flake8",
-    "pylint",
-    "lintr",
-    "eslint",
-    "clippy",
-    "clang-tidy"
-  ],
-  "type_checker": [
-    "none",
-    "mypy",
-    "pyright",
-    "basedpyright",
-    "pyre",
-    "tsc",
-    "rustc",
-    "Flow"
-  ],
+  "quality_tools": {
+    "formatter": "",
+    "linter": "",
+    "type_checker": ""
+  },
   "project_manager": [
+    "",
     "uv",
     "poetry",
     "pdm",
@@ -166,13 +130,12 @@
     "gradle",
     "cmake"
   ],
-  "versioning_scheme": [
-    "SemVer",
-    "CalVer",
-    "Custom"
-  ],
-  "versioning_scheme_details": "",
-  "release_frequency": "",
+  "versioning": {
+    "version": "",
+    "scheme": "",
+    "scheme_details": "",
+    "release_frequency": ""
+  },
   "distribution_channels": {
     "entries": []
   },
@@ -192,45 +155,74 @@
   },
   "public_risk_notes": "",
   "regulatory_requirements": {
-    "entries": []
+    "selected": {
+      "entries": []
+    },
+    "additional": ""
   },
-  "additional_regulatory_requirements": "",
-  "security_contact": "",
   "security_measures": {
-    "entries": []
+    "selected": {
+      "entries": []
+    },
+    "additional": ""
   },
-  "additional_security_measures": "",
-  "sensitive_data_statement": "",
-  "dmp_reference": "",
+  "data_management": {
+    "sensitive_data_statement": "",
+    "dmp_reference": ""
+  },
   "__prompts__": {
-    "language": "Project language",
-    "project_name": "Project name",
-    "project_slug": "Project slug",
-    "project_short_description": "Short description",
-    "project_long_description": "Long description",
-    "version": "Initial version",
-    "development_status": "Development status",
-    "organization_name": "Organization",
-    "purpose": "Purpose",
-    "repository_url": "Repository URL",
-    "homepage_url": "Homepage URL",
-    "documentation_url": "Documentation URL",
-    "license": "License",
-    "license_compatibility_check": "Check dependency license compatibility",
-    "include_citation_cff": "Include citation file",
-    "documentation_builder": "Documentation builder",
-    "community_files": "Community files",
-    "formatter_tool": "Formatter",
-    "linter_tool": "Linter",
-    "type_checker": "Type checker",
-    "project_manager": "Project manager",
-    "versioning_scheme": "Versioning scheme",
-    "maintenance_level": "Maintenance commitment"
+    "project_name": "Human-readable project title.",
+    "project_slug": "Machine-readable package and repository name. Consumers apply their own additional slug constraints.",
+    "project_short_description": "One-sentence description used in README and package metadata.",
+    "project_long_description": "Longer public description of the project motivation and scope.",
+    "development_status": "Current repostatus.org lifecycle status for the software.",
+    "keywords": "Public keywords used in package metadata, citation metadata, registries, and archives.",
+    "authors": "People who created the software. Name is required; entries may also include given_names, family_names, email, affiliation, orcid, roles, and url.",
+    "maintainers": "People responsible for maintenance. Name is required; entries may also include given_names, family_names, email, affiliation, orcid, roles, and url.",
+    "principal_investigators": "Principal investigators associated with the project. Name is required; entries may also include given_names, family_names, email, affiliation, orcid, roles, and url.",
+    "funding": "Public funding records. Entries may include funder, award_number, award_title, grant_url, and project_code.",
+    "motivation": "Public purpose, purpose categories, problem statement, and value proposition.",
+    "audiences": "Intended users or stakeholder groups.",
+    "related_software": "Related or upstream tools. Entries may include name, url_or_doi, and relationship.",
+    "urls": "Canonical source repository, project homepage, and published documentation URLs.",
+    "registries": "Registry entries such as PyPI, CRAN, bio.tools, WorkflowHub, or institutional catalogues. Entries may include name, url_or_id, and notes.",
+    "persistent_identifiers": "Persistent identifiers. Each entry declares its CFF identifier type and value, with an optional associated version.",
+    "publications": "Associated publications. Entries may include title, type, authors, doi, pmid, pmcid, url, citation, note, and preferred.",
+    "licensing": "License text or SPDX identifier and the selected dependency-license compatibility method.",
+    "include_metadata": "Whether the project publishes CodeMeta and Citation File Format metadata files alongside their validation workflow.",
+    "documentation_builder": "Optional documentation site generator. An empty selection means documentation is plain Markdown.",
+    "documentation_types": "SMP documentation categories the project provides. API and technical reference material are part of developer documentation.",
+    "community_files": "Standard root community files the project provides. CONTRIBUTING.md and SUPPORT.md imply the corresponding GitHub collaboration files.",
+    "support_routes": "Public support, bug-reporting, or feature-request systems and their public URLs.",
+    "contacts": "Public contact routes for general community, code-of-conduct, and private security reports.",
+    "governance_notes": "Public governance and decision-making notes.",
+    "programming_languages": "Programming languages used by the project. Entries include a name and may include version_constraint and role from the SMP.",
+    "software_functions": "Functions or operations performed by the software. Entries may include summary, operation, input, output, cmd, and note.",
+    "interfaces": "Interfaces exposed by the software. Type names the interface; specification and status describe it.",
+    "operating_systems": "Supported operating systems or platforms. Entries may include name, specification, and status from the SMP.",
+    "external_dependencies": "External software dependencies or standards. Entries may include name, version_constraint, url, license, and purpose.",
+    "external_services": "External public services, partners, or roles needed by the project. Entries may include name, provider, service_types, quantity, and cost_coverage.",
+    "test_types": "Types of tests used or desired. Supported values match the SMP testing checklist.",
+    "test_frameworks": "Testing frameworks used by the project.",
+    "quality_tools": "Optional primary formatter, linter, and static type checker.",
+    "project_manager": "Primary project and dependency manager, which determines setup, command execution, lockfile handling, and CI.",
+    "versioning": "Version value and public release policy. Empty properties leave the policy unspecified.",
+    "distribution_channels": "Controlled public distribution routes, including package registries, releases, archives, installers, and hosted services.",
+    "containerization": "Container recipes the project ships. Project managers and lockfiles are declared separately.",
+    "resource_requirements": "Public typical and worst-case memory, storage, compute, GPU, wall-clock, or scaling requirements.",
+    "maintenance_level": "Public maintenance commitment after active development winds down; leave empty when no commitment is declared.",
+    "continuity_plan": "Public continuity or handover plan.",
+    "retirement_criteria": "Public conditions under which the software may be retired.",
+    "public_risk_notes": "Public risk or mitigation notes. Sensitive security, privacy, or compliance details should not be included.",
+    "regulatory_requirements": "Controlled and additional public regulatory, quality, policy, or availability requirements.",
+    "security_measures": "Controlled and additional public security measures protecting the software and its data.",
+    "data_management": "Public sensitive-data statement and DMP reference or contact route."
   },
   "_jinja2_env_vars": {
     "lstrip_blocks": true,
     "trim_blocks": true
   },
+  "_template_name": "",
   "_template_defaults": {},
   "_template_schemas": {},
   "_template_supported_choices": {}

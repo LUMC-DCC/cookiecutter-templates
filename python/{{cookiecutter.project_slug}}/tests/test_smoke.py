@@ -6,7 +6,7 @@ from {{ cookiecutter.project_slug }}.main import main
 
 def test_package_has_version():
     """Ensure the package exposes the generated version."""
-    assert __version__ == "{{ cookiecutter.version }}"
+    assert __version__ == "{{ (cookiecutter.versioning.version or "0.1.0") }}"
 
 
 def test_main_is_callable():

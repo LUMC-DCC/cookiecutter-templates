@@ -7,7 +7,7 @@ from post_generation.documentation import (
 from post_generation.quality import has_pre_commit, has_quality_checks
 from renderers.community_files import selected_community_files
 from utils.containerization import has_container_recipe, has_container_type
-from utils.context import entries
+from utils.context import entries, object_value
 from utils.interfaces import (
     has_api_interface,
     has_cli_interface,
@@ -24,7 +24,6 @@ from utils.interfaces import (
     has_web_interface,
     has_workflow_interface,
 )
-from utils.options import is_no
 from utils.paths import remove_path
 from utils.release import has_python_distribution
 
@@ -78,7 +77,7 @@ def needs_python_project_setup(ctx):
     bool
         Whether a selected workflow installs the generated Python project.
     """
-    if ctx.get("language") != "python":
+    if ctx.get("_template_name") != "python":
         return False
 
     _, documentation_builder = resolve_documentation_builder(ctx)
@@ -86,8 +85,10 @@ def needs_python_project_setup(ctx):
         "mkdocs",
         "sphinx",
     }
-    checks_licenses = not is_no(ctx, "license_compatibility_check") and bool(
-        ctx.get("license", "").strip()
+    checks_licenses = object_value(
+        ctx, "licensing", "compatibility_check"
+    ) == "Yes - automated tooling" and bool(
+        str(object_value(ctx, "licensing", "license")).strip()
     )
     return any(
         (
@@ -101,6 +102,10 @@ def needs_python_project_setup(ctx):
 
 
 OPTIONAL_PATHS = [
+    {
+        "path": ".github/workflows/metadata.yml",
+        "should_remove": lambda ctx: not ctx.get("include_metadata", False),
+    },
     {
         "path": "docs",
         "should_remove": lambda ctx: not has_documentation(ctx),
@@ -166,8 +171,9 @@ OPTIONAL_PATHS = [
     {
         "path": ".github/workflows/license-compatibility.yml",
         "should_remove": lambda ctx: (
-            is_no(ctx, "license_compatibility_check")
-            or not ctx.get("license", "").strip()
+            object_value(ctx, "licensing", "compatibility_check")
+            != "Yes - automated tooling"
+            or not str(object_value(ctx, "licensing", "license")).strip()
         ),
     },
     {
@@ -204,10 +210,6 @@ OPTIONAL_PATHS = [
             ctx,
             "CONTRIBUTING.md",
         ),
-    },
-    {
-        "path": "LICENSE.txt",
-        "should_remove": lambda ctx: not ctx.get("license", "").strip(),
     },
     {
         "path": "Dockerfile",

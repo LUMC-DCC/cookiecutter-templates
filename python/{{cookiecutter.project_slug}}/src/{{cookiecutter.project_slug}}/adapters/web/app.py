@@ -1,4 +1,4 @@
-"""FastAPI web application for {{ cookiecutter.project_name }}.
+"""FastAPI web application for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 The web adapter serves human-facing pages. Keep page routing and rendering here,
 and keep reusable data processing in services.
@@ -19,8 +19,8 @@ def create_web_app() -> FastAPI:
     """
     # Metadata appears in the generated OpenAPI page and browser tooling.
     web = FastAPI(
-        title="{{ cookiecutter.project_name }}",
-        version="{{ cookiecutter.version }}",
+        title="{{ (cookiecutter.project_name or cookiecutter.project_slug) }}",
+        version="{{ (cookiecutter.versioning.version or "0.1.0") }}",
         description="{{ cookiecutter.project_short_description }}",
     )
 

@@ -1,4 +1,4 @@
-"""Standalone example script for {{ cookiecutter.project_name }}.
+"""Standalone example script for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 Scripts are useful for small one-off commands, tutorials, or demonstrations.
 Keep reusable behavior in package modules and let scripts act as thin wrappers.
@@ -18,14 +18,14 @@ def build_parser() -> argparse.ArgumentParser:
         Configured parser.
     """
     parser = argparse.ArgumentParser(
-        description="Run the {{ cookiecutter.project_name }} example script.",
+        description="Run the {{ (cookiecutter.project_name or cookiecutter.project_slug) }} example script.",
     )
     # The optional positional argument keeps the script usable with no input
     # while still allowing callers to pass a custom text value.
     parser.add_argument(
         "text",
         nargs="?",
-        default="{{ cookiecutter.project_name }}",
+        default="{{ (cookiecutter.project_name or cookiecutter.project_slug) }}",
         help="Text to process.",
     )
     return parser

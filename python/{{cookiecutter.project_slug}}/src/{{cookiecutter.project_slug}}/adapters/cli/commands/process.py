@@ -30,7 +30,7 @@ def run(text: str) -> str:
 
 def command(
     text: str = typer.Argument(
-        "{{ cookiecutter.project_name }}",
+        "{{ (cookiecutter.project_name or cookiecutter.project_slug) }}",
         help="Text to process.",
     ),
 ) -> None:

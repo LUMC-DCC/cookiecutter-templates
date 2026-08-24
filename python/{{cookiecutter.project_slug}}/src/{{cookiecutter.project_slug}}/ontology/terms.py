@@ -1,4 +1,4 @@
-"""Ontology term models for {{ cookiecutter.project_name }}.
+"""Ontology term models for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 Terms are kept as simple Python objects so they can be tested and reviewed
 before they are serialized as RDF. Larger projects can extend this module with
@@ -40,7 +40,7 @@ def default_terms() -> list[OntologyTerm]:
     return [
         OntologyTerm(
             identifier="example",
-            label="{{ cookiecutter.project_name }} example",
+            label="{{ (cookiecutter.project_name or cookiecutter.project_slug) }} example",
             description="{{ cookiecutter.project_short_description }}",
         )
     ]

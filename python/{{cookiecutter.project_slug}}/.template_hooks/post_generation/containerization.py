@@ -2,8 +2,8 @@
 
 import shutil
 
-from utils.context import entries
 from utils.containerization import has_container_type
+from utils.context import entries
 from utils.paths import remove_path
 
 

@@ -1,4 +1,4 @@
-"""Plug-in hook contracts for {{ cookiecutter.project_name }}.
+"""Plug-in hook contracts for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 Protocols describe the methods external plug-ins must provide. They let type
 checkers and tests validate plug-in compatibility without requiring inheritance

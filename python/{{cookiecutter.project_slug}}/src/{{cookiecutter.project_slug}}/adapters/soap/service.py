@@ -1,4 +1,4 @@
-"""SOAP service operations for {{ cookiecutter.project_name }}.
+"""SOAP service operations for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 Spyne declarations define the wire contract and generated WSDL. Operations
 delegate reusable work to the service layer so transport code stays small.

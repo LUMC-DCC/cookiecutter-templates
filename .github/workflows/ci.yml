@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Install Poetry
         run: pipx install "poetry>=2,<3"
@@ -29,7 +29,6 @@ jobs:
 
       - name: Regenerate derived files
         run: |
-          poetry run python _scripts/build_context_schema.py
           poetry run python _scripts/sync_shared.py
           poetry run python _scripts/build_field_usage_docs.py
 
@@ -47,6 +46,11 @@ jobs:
       - name: Audit GitHub Action pins
         run: |
           poetry run python _scripts/audit_action_pins.py
+
+      - name: Check repository Python quality
+        run: |
+          poetry run ruff check .
+          poetry run ruff format --check .
 
       - name: Run tests
         run: |

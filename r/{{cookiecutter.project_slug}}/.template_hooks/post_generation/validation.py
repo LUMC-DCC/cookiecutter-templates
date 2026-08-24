@@ -2,6 +2,9 @@
 
 import re
 
+from rsm_schema import RSMMetadata
+from utils.rsm import rsm_payload
+
 
 def validate_string(value, schema, field_name, template_name):
     """Validate one string against the supported contract fragment.
@@ -38,7 +41,9 @@ def validate_string(value, schema, field_name, template_name):
     valid = valid and value not in forbidden_values
 
     if not valid:
-        guidance = schema.get("description", "The value does not satisfy the template constraints.")
+        guidance = schema.get(
+            "description", "The value does not satisfy the template constraints."
+        )
         raise ValueError(
             f"Invalid {field_name!r} value {value!r} for the {template_name} "
             f"template. {guidance}"
@@ -46,7 +51,7 @@ def validate_string(value, schema, field_name, template_name):
 
 
 def validate_context(ctx):
-    """Validate all template-specific context fields.
+    """Validate RSM metadata and template-specific context fields.
 
     Parameters
     ----------
@@ -58,11 +63,14 @@ def validate_context(ctx):
     ValueError
         If any field violates its selected template constraint.
     """
+    public_context = rsm_payload(ctx, RSMMetadata.model_fields)
+    RSMMetadata.model_validate(public_context)
+
     schemas = ctx.get("_template_schemas", {})
     if not isinstance(schemas, dict):
         return
 
-    template_name = str(ctx.get("language", "selected"))
+    template_name = str(ctx.get("_template_name", "selected"))
     for field_name, schema in schemas.items():
         if isinstance(schema, dict):
             validate_string(ctx.get(field_name), schema, field_name, template_name)

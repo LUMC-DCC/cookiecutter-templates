@@ -1,6 +1,6 @@
 # Workflows
 
-This directory contains workflow material for {{ cookiecutter.project_name }}.
+This directory contains workflow material for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 ## Current workflow
 

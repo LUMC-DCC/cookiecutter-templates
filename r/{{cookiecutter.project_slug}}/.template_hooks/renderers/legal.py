@@ -16,7 +16,7 @@ def build_license_label(license_value):
     """
     value = license_value.strip()
     if "\n" in value or " " in value:
-        return "the custom terms in `LICENSE.txt`"
+        return "the custom terms in `LICENSE`"
 
     return f"`{value}`"
 
@@ -41,7 +41,7 @@ def build_legal_lines(license_value, compatibility_notes):
         label = build_license_label(license_value)
         lines.append(
             f"This project is licensed under {label}. "
-            "See `LICENSE.txt` for the full license text."
+            "See `LICENSE` for the full license text."
         )
     if compatibility_notes:
         lines.append(compatibility_notes)

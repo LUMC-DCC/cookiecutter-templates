@@ -16,12 +16,12 @@ Thank you for improving this project.
 Before starting a larger change, open an issue or discussion so maintainers can
 confirm scope and avoid duplicated work.
 
-{% set effective_documentation_builder = cookiecutter.documentation_builder if cookiecutter.documentation_builder in cookiecutter._template_supported_choices.documentation_builder else cookiecutter._template_defaults.documentation_builder %}
+{% set effective_documentation_builder = cookiecutter.documentation_builder if cookiecutter.documentation_builder and cookiecutter.documentation_builder in cookiecutter._template_supported_choices.documentation_builder else "plain" %}
 {% set should_build_docs = cookiecutter.documentation_types.entries and effective_documentation_builder in ["mkdocs", "sphinx"] %}
-{% set effective_formatter_tool = cookiecutter.formatter_tool if cookiecutter.formatter_tool in cookiecutter._template_supported_choices.formatter_tool else cookiecutter._template_defaults.formatter_tool %}
-{% set effective_linter_tool = cookiecutter.linter_tool if cookiecutter.linter_tool in cookiecutter._template_supported_choices.linter_tool else cookiecutter._template_defaults.linter_tool %}
-{% set effective_type_checker = cookiecutter.type_checker if cookiecutter.type_checker in cookiecutter._template_supported_choices.type_checker else cookiecutter._template_defaults.type_checker %}
-{% set has_quality_checks = effective_formatter_tool != "none" or effective_linter_tool != "none" or effective_type_checker != "none" %}
+{% set effective_formatter_tool = cookiecutter.quality_tools.formatter if cookiecutter.quality_tools.formatter in cookiecutter._template_supported_choices.quality_tools.formatter else "" %}
+{% set effective_linter_tool = cookiecutter.quality_tools.linter if cookiecutter.quality_tools.linter in cookiecutter._template_supported_choices.quality_tools.linter else "" %}
+{% set effective_type_checker = cookiecutter.quality_tools.type_checker if cookiecutter.quality_tools.type_checker in cookiecutter._template_supported_choices.quality_tools.type_checker else "" %}
+{% set has_quality_checks = effective_formatter_tool or effective_linter_tool or effective_type_checker %}
 {% set release_channels = namespace(values=[]) %}
 {% for channel in cookiecutter.distribution_channels.entries %}
 {% set _ = release_channels.values.append(channel | lower) %}
@@ -32,7 +32,7 @@ Use the pull request template when opening a pull request.
 
 ## Development setup
 
-{% if cookiecutter.language == "python" %}
+{% if cookiecutter._template_name == "python" %}
 This project uses `@@PROJECT_MANAGER@@` for its development environment.
 
 ```bash
@@ -46,7 +46,7 @@ Add a Python dependency with:
 ```
 
 @@PROJECT_LOCK_GUIDANCE@@
-{% elif cookiecutter.language == "r" %}
+{% elif cookiecutter._template_name == "r" %}
 Install the package dependencies with the package-management workflow used by
 this project.
 {% else %}
@@ -56,7 +56,7 @@ this project.
 
 ## Local checks
 
-{% if cookiecutter.language == "python" %}
+{% if cookiecutter._template_name == "python" %}
 | Check | Command |
 | --- | --- |
 {% if "CHANGELOG.md" in cookiecutter.community_files.entries %}
@@ -95,16 +95,16 @@ Run the test, metadata, and documentation checks configured for this project.
 
 CI runs on every push and pull request.
 
-{% if cookiecutter.language == "python" %}
+{% if cookiecutter._template_name == "python" %}
 | Stage | Runs when | What it does |
 | --- | --- | --- |
-{% if cookiecutter.include_citation_cff == "yes" %}
+{% if cookiecutter.include_metadata %}
 | Metadata | Citation metadata is included | Runs `rs-metadata validate`. |
 {% endif %}
 {% if "CHANGELOG.md" in cookiecutter.community_files.entries %}
 | Changelog | Changelog is included | Runs `python tools/check_changelog.py`. |
 {% endif %}
-{% if cookiecutter.license_compatibility_check == "yes" %}
+{% if cookiecutter.licensing.compatibility_check == "Yes - automated tooling" %}
 | License compatibility | License compatibility checking is enabled | Runs `licensecheck`. |
 {% endif %}
 {% if has_quality_checks %}

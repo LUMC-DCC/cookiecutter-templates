@@ -9,12 +9,12 @@ from html import escape
 from {{ cookiecutter.project_slug }}.services.processing import process_text
 
 
-def render_index(text: str = "{{ cookiecutter.project_name }}") -> str:
+def render_index(text: str = "{{ (cookiecutter.project_name or cookiecutter.project_slug) }}") -> str:
     """Render the application landing page.
 
     Parameters
     ----------
-    text : str, default="{{ cookiecutter.project_name }}"
+    text : str, default="{{ (cookiecutter.project_name or cookiecutter.project_slug) }}"
         Text to process for display.
 
     Returns
@@ -27,10 +27,10 @@ def render_index(text: str = "{{ cookiecutter.project_name }}") -> str:
     return (
         "<!doctype html>"
         "<html lang=\"en\">"
-        "<head><title>{{ cookiecutter.project_name }}</title></head>"
+        "<head><title>{{ (cookiecutter.project_name or cookiecutter.project_slug) }}</title></head>"
         "<body>"
         "<main>"
-        "<h1>{{ cookiecutter.project_name }}</h1>"
+        "<h1>{{ (cookiecutter.project_name or cookiecutter.project_slug) }}</h1>"
         f"<p>{escape(result.output_text)}</p>"
         "</main>"
         "</body>"

@@ -1,4 +1,4 @@
-"""Runtime configuration for {{ cookiecutter.project_name }} workflows.
+"""Runtime configuration for {{ (cookiecutter.project_name or cookiecutter.project_slug) }} workflows.
 
 The objects in this module describe settings that may change between workflow
 runs, such as labels, profiles, resource limits, or paths supplied by a workflow
@@ -21,4 +21,4 @@ class WorkflowConfig:
 
     # A visible label is useful even in tiny workflows because it gives logs and
     # reports a stable name before a full workflow engine is configured.
-    label: str = "{{ cookiecutter.project_name }} workflow"
+    label: str = "{{ (cookiecutter.project_name or cookiecutter.project_slug) }} workflow"

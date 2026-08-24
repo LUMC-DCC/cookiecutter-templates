@@ -1,4 +1,4 @@
-"""Public ontology metadata helpers for {{ cookiecutter.project_name }}.
+"""Public ontology metadata helpers for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 This module exposes small functions that callers can use to retrieve ontology
 metadata or a serialized starter ontology document.
@@ -21,7 +21,7 @@ def ontology_metadata() -> dict[str, str]:
     # Keep this payload simple and serializable so it can be consumed by
     # documentation pages, metadata export tools, or tests.
     return {
-        "name": "{{ cookiecutter.project_name }} ontology",
+        "name": "{{ (cookiecutter.project_name or cookiecutter.project_slug) }} ontology",
         "description": "{{ cookiecutter.project_short_description }}",
     }
 

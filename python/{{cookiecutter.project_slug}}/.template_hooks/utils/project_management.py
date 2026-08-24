@@ -1,9 +1,7 @@
 """Resolve project-manager choices and native commands."""
 
-from utils.context import entries, resolve_choice
-from utils.options import is_yes
+from utils.context import entries, object_value, resolve_choice, resolve_object_choice
 from utils.release import has_python_distribution
-
 
 PROJECT_MANAGER_PROFILES = {
     "uv": {
@@ -18,7 +16,7 @@ PROJECT_MANAGER_PROFILES = {
     "poetry": {
         "run_prefix": "poetry run ",
         "setup": "poetry install --all-extras",
-        "setup_group": "poetry install --extras \"{group}\"",
+        "setup_group": 'poetry install --extras "{group}"',
         "add": "poetry add <package>",
         "lock": "poetry lock",
         "lockfile": "poetry.lock",
@@ -53,8 +51,8 @@ PROJECT_MANAGER_PROFILES = {
     },
     "pip": {
         "run_prefix": "",
-        "setup": "python -m pip install -e \".[metadata,test,quality,release,docs]\"",
-        "setup_group": "python -m pip install -e \".[{group}]\"",
+        "setup": 'python -m pip install -e ".[metadata,test,quality,release,docs]"',
+        "setup_group": 'python -m pip install -e ".[{group}]"',
         "add": "Add the dependency to pyproject.toml, then install the project again.",
         "lock": "python -m pip lock -o pylock.toml -e .",
         "lockfile": "pylock.toml",
@@ -133,9 +131,11 @@ def optional_dependency_groups(ctx):
         for entry in entries(ctx, "interfaces")
         if isinstance(entry, dict)
     }
-    if is_yes(ctx, "license_compatibility_check") and str(
-        ctx.get("license", "")
-    ).strip():
+    if (
+        object_value(ctx, "licensing", "compatibility_check")
+        == "Yes - automated tooling"
+        and str(object_value(ctx, "licensing", "license")).strip()
+    ):
         groups.append("license")
     if interfaces & {"SPARQL endpoint", "Web API"}:
         groups.append("api")
@@ -151,9 +151,9 @@ def optional_dependency_groups(ctx):
     if entries(ctx, "test_types"):
         groups.append("test")
 
-    quality_fields = ("formatter_tool", "linter_tool", "type_checker")
+    quality_fields = ("formatter", "linter", "type_checker")
     if any(
-        resolve_choice(ctx, field_name)[1] != "none"
+        bool(resolve_object_choice(ctx, "quality_tools", field_name)[1])
         for field_name in quality_fields
     ):
         groups.append("quality")

@@ -1,4 +1,4 @@
-"""Input and output helpers for {{ cookiecutter.project_name }} workflows.
+"""Input and output helpers for {{ (cookiecutter.project_name or cookiecutter.project_slug) }} workflows.
 
 Small IO helpers keep file handling separate from processing logic. This makes
 workflow steps easier to test because most steps can operate on Python objects

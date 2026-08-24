@@ -190,10 +190,8 @@ def build_biotools_function_block(software_function):
     summary = software_function_summary(software_function)
     yaml_block = "\n".join(yaml_lines)
     return (
-        f"<details>\n"
-        f"<summary>{summary}</summary>\n\n"
-        f"```yaml\n{yaml_block}\n```\n\n"
-        f"</details>"
+        f"<details>\n<summary>{summary}</summary>\n\n"
+        f"```yaml\n{yaml_block}\n```\n\n</details>"
     )
 
 

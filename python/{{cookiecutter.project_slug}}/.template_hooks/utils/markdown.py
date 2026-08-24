@@ -41,9 +41,6 @@ def insert_before_first_marker(path, text, markers):
 
     prefix = "\n".join(lines[:insert_at]).rstrip()
     suffix = "\n".join(lines[insert_at:]).lstrip("\n")
-    if suffix:
-        content = f"{prefix}\n\n{text}\n\n{suffix}\n"
-    else:
-        content = f"{prefix}\n\n{text}\n"
+    content = f"{prefix}\n\n{text}\n\n{suffix}\n" if suffix else f"{prefix}\n\n{text}\n"
 
     path.write_text(content, encoding="utf-8")

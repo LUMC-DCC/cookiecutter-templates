@@ -1,4 +1,4 @@
-"""Plug-in registration for {{ cookiecutter.project_name }}.
+"""Plug-in registration for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 This module exposes the package-provided plug-in through the entry point
 declared in ``pyproject.toml``. External applications can load the entry point

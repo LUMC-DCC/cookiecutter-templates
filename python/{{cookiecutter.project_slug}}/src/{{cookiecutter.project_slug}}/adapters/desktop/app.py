@@ -1,4 +1,4 @@
-"""Desktop application entry logic for {{ cookiecutter.project_name }}.
+"""Desktop application entry logic for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 The desktop adapter builds a small graphical interface around project service
 logic. GUI code is kept separate from the view model so display text can be
@@ -10,12 +10,12 @@ import tkinter as tk
 from {{ cookiecutter.project_slug }}.adapters.desktop.view_model import build_view_model
 
 
-def create_window(text: str = "{{ cookiecutter.project_name }}") -> tk.Tk:
+def create_window(text: str = "{{ (cookiecutter.project_name or cookiecutter.project_slug) }}") -> tk.Tk:
     """Create the desktop application window.
 
     Parameters
     ----------
-    text : str, default="{{ cookiecutter.project_name }}"
+    text : str, default="{{ (cookiecutter.project_name or cookiecutter.project_slug) }}"
         Text to process.
 
     Returns

@@ -2,7 +2,6 @@
 
 from utils.context import entries
 
-
 API_INTERFACE_TYPES = {
     "SPARQL endpoint",
     "Web API",

@@ -1,4 +1,4 @@
-"""Suite command runner for {{ cookiecutter.project_name }}.
+"""Suite command runner for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 The runner provides a small public API for listing and executing suite
 commands. It keeps lookup and error handling separate from individual command

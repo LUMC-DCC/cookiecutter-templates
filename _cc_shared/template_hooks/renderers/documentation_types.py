@@ -4,19 +4,26 @@ DOCUMENTATION_TYPES = {
     "user": {
         "label": "User guide",
         "path": "usage.md",
-        "description": "installation, configuration, usage instructions, and runnable examples",
+        "description": (
+            "installation, configuration, usage instructions, and runnable examples"
+        ),
         "optional": True,
     },
     "deployment": {
         "label": "Deployment notes",
         "path": "deployment.md",
-        "description": "environment setup, deployment steps, and operational assumptions",
+        "description": (
+            "environment setup, deployment steps, and operational assumptions"
+        ),
         "optional": True,
     },
     "developer": {
         "label": "Developer guide",
         "path": "developer.md",
-        "description": "architecture, local development, tests, contribution workflow, and technical reference",
+        "description": (
+            "architecture, local development, tests, contribution workflow, and "
+            "technical reference"
+        ),
         "optional": True,
     },
 }

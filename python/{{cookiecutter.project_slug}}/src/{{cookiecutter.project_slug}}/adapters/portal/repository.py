@@ -49,7 +49,7 @@ def default_records() -> list[PortalRecord]:
     return [
         PortalRecord(
             identifier="example",
-            label="{{ cookiecutter.project_name }}",
+            label="{{ (cookiecutter.project_name or cookiecutter.project_slug) }}",
             description="{{ cookiecutter.project_short_description }}",
         )
     ]

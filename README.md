@@ -4,8 +4,13 @@
 
 Service-agnostic Cookiecutter templates for creating maintainable, FAIR
 research software repositories. The Python template is the current reference
-implementation; shared contracts and assets support additional language
+implementation; shared policy and hooks support additional language
 templates without coupling generation to a particular upstream service.
+
+The public context is defined by
+[rsm-schema](https://github.com/LUMC-DCC/rsm-schema), while reusable metadata,
+legal, and community files are rendered by
+[rs-files-templates](https://github.com/LUMC-DCC/rs-files-templates).
 
 ## Documentation
 
@@ -20,6 +25,8 @@ templates without coupling generation to a particular upstream service.
 poetry install --with docs,dev
 poetry run pre-commit install
 poetry run pre-commit run --all-files
+poetry run ruff check .
+poetry run ruff format --check .
 poetry run pytest
 poetry run python _scripts/check_generated_docs.py
 poetry run mkdocs build --strict

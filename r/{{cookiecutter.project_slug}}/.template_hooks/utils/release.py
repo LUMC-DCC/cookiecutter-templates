@@ -1,6 +1,5 @@
 """Classify distribution channels used by generated release tooling."""
 
-
 PYTHON_DISTRIBUTION_CHANNELS = {
     "conda-forge",
     "github release",

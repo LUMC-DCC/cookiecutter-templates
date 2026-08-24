@@ -8,7 +8,7 @@ updates:
       github-actions:
         patterns:
           - "*"
-{% if cookiecutter.language == "python" %}
+{% if cookiecutter._template_name == "python" %}
   - package-ecosystem: pip
     directory: /
     schedule:

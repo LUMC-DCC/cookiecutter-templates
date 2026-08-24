@@ -1,7 +1,7 @@
 # Workflow Definitions
 
 This directory contains engine-specific workflow definitions for
-{{ cookiecutter.project_name }}.
+{{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 ## Current entry points
 

@@ -1,4 +1,4 @@
-"""Validation helpers for {{ cookiecutter.project_name }} ontology terms.
+"""Validation helpers for {{ (cookiecutter.project_name or cookiecutter.project_slug) }} ontology terms.
 
 Validation returns messages instead of raising immediately so callers can show
 all detected issues at once in a report, user-facing response, or test failure.

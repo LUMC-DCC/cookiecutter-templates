@@ -1,15 +1,15 @@
 blank_issues_enabled: false
 {% set contact_link_routes = [] %}
 {% for route in cookiecutter.support_routes.entries %}
-{% if route.url is defined and route.url and route.url != cookiecutter.documentation_url %}
+{% if route.url is defined and route.url and route.url != cookiecutter.urls.documentation %}
 {% set _ = contact_link_routes.append(route) %}
 {% endif %}
 {% endfor %}
-{% if cookiecutter.documentation_url or contact_link_routes %}
+{% if cookiecutter.urls.documentation or contact_link_routes %}
 contact_links:
-{% if cookiecutter.documentation_url %}
+{% if cookiecutter.urls.documentation %}
   - name: Documentation
-    url: {{ cookiecutter.documentation_url | tojson }}
+    url: {{ cookiecutter.urls.documentation | tojson }}
     about: Check the project documentation before opening an issue.
 {% endif %}
 {% for route in contact_link_routes %}

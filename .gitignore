@@ -12,8 +12,5 @@ __pycache__/
 # Built repository documentation
 site/
 
-# Local knowledge-model working files
-misc/*
-!misc/extract_km_questions.py
-!misc/lumc_rsmp_1.0.2.km
-!misc/lumc_rsmp_1.0.2.questions.json
+# Local working files
+misc/

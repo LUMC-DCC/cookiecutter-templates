@@ -40,8 +40,8 @@ from {{ cookiecutter.project_slug }}.adapters.web.app import app as web_app
 {% endif %}
 {% else %}
 app = FastAPI(
-    title="{{ cookiecutter.project_name }}",
-    version="{{ cookiecutter.version }}",
+    title="{{ (cookiecutter.project_name or cookiecutter.project_slug) }}",
+    version="{{ (cookiecutter.versioning.version or "0.1.0") }}",
     description="{{ cookiecutter.project_short_description }}",
 )
 

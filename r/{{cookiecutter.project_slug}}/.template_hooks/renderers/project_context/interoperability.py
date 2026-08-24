@@ -348,7 +348,9 @@ def build_function_details(software_function):
         if format_edam_term_label(operation)
     ]
     if operations:
-        sections.append("**Operations**\n\n" + "\n".join(f"- {item}" for item in operations))
+        sections.append(
+            "**Operations**\n\n" + "\n".join(f"- {item}" for item in operations)
+        )
 
     inputs = [
         format_function_io_label(input_record)
@@ -367,10 +369,7 @@ def build_function_details(software_function):
         sections.append("**Outputs**\n\n" + "\n".join(f"- {item}" for item in outputs))
 
     if software_function.get("cmd"):
-        sections.append(
-            "**Command**\n\n"
-            f"```bash\n{software_function['cmd']}\n```"
-        )
+        sections.append(f"**Command**\n\n```bash\n{software_function['cmd']}\n```")
 
     if software_function.get("note"):
         sections.append("**Notes**\n\n" + software_function["note"])

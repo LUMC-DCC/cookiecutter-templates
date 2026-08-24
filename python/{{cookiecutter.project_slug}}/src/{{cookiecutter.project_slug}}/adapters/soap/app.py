@@ -1,4 +1,4 @@
-"""WSGI SOAP application for {{ cookiecutter.project_name }}.
+"""WSGI SOAP application for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 The application publishes SOAP 1.1 operations and generates a WSDL document
 from the service declarations. An ASGI wrapper is exported for Uvicorn and for

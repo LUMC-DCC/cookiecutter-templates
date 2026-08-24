@@ -12,10 +12,10 @@ from pathlib import Path
 
 sys.dont_write_bytecode = True
 
-from build_cookiecutter_context import build_context, load_contract, write_context
+from build_cookiecutter_context import build_context, load_policies, write_context
 
 ROOT = Path(__file__).resolve().parent.parent
-CONTRACT_PATH = ROOT / "_contracts" / "template_context.json"
+POLICY_PATH = ROOT / "_config" / "template_policies.json"
 SHARED_CONTEXT_PATH = ROOT / "_cc_shared" / "cookiecutter.json"
 
 TEMPLATE_DIRS = sorted(
@@ -33,20 +33,21 @@ RELATIVE_SYNC_MAP = {
     "hooks": "hooks",
     "template_hooks": "{{cookiecutter.project_slug}}/.template_hooks",
     "cookiecutter.json": "cookiecutter.json",
-    "CITATION.cff": "{{cookiecutter.project_slug}}/CITATION.cff",
-    "codemeta.json": "{{cookiecutter.project_slug}}/codemeta.json",
     ".github/ISSUE_TEMPLATE": "{{cookiecutter.project_slug}}/.github/ISSUE_TEMPLATE",
     ".github/dependabot.yml": "{{cookiecutter.project_slug}}/.github/dependabot.yml",
-    ".github/pull_request_template.md": "{{cookiecutter.project_slug}}/.github/pull_request_template.md",
-    ".github/workflows/changelog.yml": "{{cookiecutter.project_slug}}/.github/workflows/changelog.yml",
-    ".github/workflows/metadata.yml": "{{cookiecutter.project_slug}}/.github/workflows/metadata.yml",
-    "CHANGELOG.md": "{{cookiecutter.project_slug}}/CHANGELOG.md",
-    "tools/check_changelog.py": "{{cookiecutter.project_slug}}/tools/check_changelog.py",
-    "CODE_OF_CONDUCT.md": "{{cookiecutter.project_slug}}/CODE_OF_CONDUCT.md",
+    ".github/pull_request_template.md": (
+        "{{cookiecutter.project_slug}}/.github/pull_request_template.md"
+    ),
+    ".github/workflows/changelog.yml": (
+        "{{cookiecutter.project_slug}}/.github/workflows/changelog.yml"
+    ),
+    ".github/workflows/metadata.yml": (
+        "{{cookiecutter.project_slug}}/.github/workflows/metadata.yml"
+    ),
+    "tools/check_changelog.py": (
+        "{{cookiecutter.project_slug}}/tools/check_changelog.py"
+    ),
     "CONTRIBUTING.md": "{{cookiecutter.project_slug}}/CONTRIBUTING.md",
-    "GOVERNANCE.md": "{{cookiecutter.project_slug}}/GOVERNANCE.md",
-    "SECURITY.md": "{{cookiecutter.project_slug}}/SECURITY.md",
-    "SUPPORT.md": "{{cookiecutter.project_slug}}/SUPPORT.md",
 }
 
 IGNORED_SYNC_NAMES = {
@@ -78,13 +79,13 @@ def should_ignore(path: Path):
     return path.name in IGNORED_SYNC_NAMES or path.suffix in IGNORED_SYNC_SUFFIXES
 
 
-def sync_cookiecutter_context(contract, template_name: str, dst: Path):
+def sync_cookiecutter_context(policies, template_name: str, dst: Path):
     """Write one template-specific Cookiecutter context file.
 
     Parameters
     ----------
-    contract : dict
-        Parsed template context contract.
+    policies : dict
+        Parsed language-specific template policies.
     template_name : str
         Template name used to resolve template-specific defaults.
     dst : pathlib.Path
@@ -95,7 +96,10 @@ def sync_cookiecutter_context(contract, template_name: str, dst: Path):
     bool
         Whether the context file changed.
     """
-    if write_context(build_context(contract, template=template_name), dst):
+    if write_context(
+        build_context(policies=policies, template=template_name),
+        dst,
+    ):
         MODIFIED_PATHS.append(dst)
         print(f"[sync] Generated Cookiecutter context for {template_name} → {dst}")
         return True
@@ -170,10 +174,7 @@ def sync_dir(src: Path, dst: Path):
 
     dst.mkdir(parents=True, exist_ok=True)
 
-    src_entries = {
-        entry.name for entry in src.iterdir()
-        if not should_ignore(entry)
-    }
+    src_entries = {entry.name for entry in src.iterdir() if not should_ignore(entry)}
     for dst_entry in dst.iterdir():
         if dst_entry.name not in src_entries:
             remove_path(dst_entry)
@@ -227,8 +228,8 @@ def sync_path(src: Path, dst: Path):
 def main():
     """Run synchronization for every discovered language template."""
     MODIFIED_PATHS.clear()
-    contract = load_contract(CONTRACT_PATH)
-    if write_context(build_context(contract), SHARED_CONTEXT_PATH):
+    policies = load_policies(POLICY_PATH)
+    if write_context(build_context(policies=policies), SHARED_CONTEXT_PATH):
         MODIFIED_PATHS.append(SHARED_CONTEXT_PATH)
 
     seen = set()
@@ -243,7 +244,7 @@ def main():
             seen.add(key)
 
             if rel_src == "cookiecutter.json":
-                sync_cookiecutter_context(contract, template_dir.name, dst)
+                sync_cookiecutter_context(policies, template_dir.name, dst)
             else:
                 sync_path(src, dst)
 

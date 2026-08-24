@@ -1,6 +1,5 @@
 """Normalize container and environment specification selections."""
 
-
 CONTAINER_TYPE_ALIASES = {
     "docker": "docker",
     "dockerfile": "docker",

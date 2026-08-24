@@ -1,4 +1,4 @@
-"""Workflow step definitions for {{ cookiecutter.project_name }}.
+"""Workflow step definitions for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 Each function in this module should represent one meaningful workflow step.
 Steps receive typed inputs and return typed outputs, which makes them easier to

@@ -14,4 +14,4 @@ def test_module_entry_point_runs_end_to_end():
     )
 
     assert result.returncode == 0, result.stderr
-    assert "{{ cookiecutter.project_name | upper }}" in result.stdout
+    assert "{{ (cookiecutter.project_name or cookiecutter.project_slug) | upper }}" in result.stdout

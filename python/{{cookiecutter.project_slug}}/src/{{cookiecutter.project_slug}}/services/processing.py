@@ -1,4 +1,4 @@
-"""Reusable processing service for {{ cookiecutter.project_name }}.
+"""Reusable processing service for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 Service modules contain project logic behind public entry points. Keep
 framework-specific parsing, rendering, and transport details outside this layer.

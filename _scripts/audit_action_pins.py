@@ -6,7 +6,6 @@ import argparse
 import re
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parent.parent
 USES_PATTERN = re.compile(
     r"^\s*(?:-\s*)?uses:\s*[\"']?([^@\s\"']+)@([^#\s\"']+)",
@@ -77,8 +76,8 @@ def audit(root: Path) -> list[str]:
     for path in workflow_files(root):
         for action, reference in unpinned_references(path):
             failures.append(
-                f"{path.relative_to(root)}: {action}@{reference} is not pinned "
-                "to a full commit SHA"
+                f"{path.relative_to(root)}: {action}@{reference} is not pinned to "
+                "a full commit SHA"
             )
     return failures
 

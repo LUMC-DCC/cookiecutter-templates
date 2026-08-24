@@ -1,4 +1,4 @@
-"""Portal data models for {{ cookiecutter.project_name }}.
+"""Portal data models for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 Models describe the structured records shown by the portal. They are kept
 separate from routes and views so portal data can come from files, databases, or

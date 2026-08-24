@@ -1,7 +1,7 @@
 """Render release and container guidance for generated projects."""
 
-from utils.context import entries
 from utils.containerization import selected_container_types
+from utils.context import entries, object_value
 from utils.release import (
     has_python_distribution,
     normalize_distribution_channel,
@@ -126,10 +126,10 @@ def build_release_page(ctx):
     str
         Complete Markdown release page.
     """
-    version = ctx.get("version", "")
-    scheme = ctx.get("versioning_scheme", "") or "project-defined"
-    scheme_details = ctx.get("versioning_scheme_details", "")
-    frequency = ctx.get("release_frequency", "") or "as needed"
+    version = object_value(ctx, "versioning", "version") or "0.1.0"
+    scheme = object_value(ctx, "versioning", "scheme")
+    scheme_details = object_value(ctx, "versioning", "scheme_details")
+    frequency = object_value(ctx, "versioning", "release_frequency")
     channels = [
         str(channel).strip()
         for channel in entries(ctx, "distribution_channels")
@@ -139,24 +139,23 @@ def build_release_page(ctx):
         normalize_distribution_channel(channel) for channel in channels
     }
 
+    version_guidance = (
+        "`pyproject.toml` is the source of truth for the project version."
+    )
+    if ctx.get("include_metadata", False):
+        version_guidance += " The metadata workflow validates the software metadata."
+
     lines = [
         "# Releases",
         "",
-        (
-            "`pyproject.toml` is the source of truth for the project version. "
-            "The metadata workflow validates the project's software metadata."
-        ),
+        version_guidance,
         "",
         "| Policy | Value |",
         "| --- | --- |",
         f"| Current version | `{version}` |",
-        f"| Versioning scheme | {scheme} |",
-        *(
-            [f"| Versioning details | {scheme_details} |"]
-            if scheme_details
-            else []
-        ),
-        f"| Expected cadence | {frequency} |",
+        *([f"| Versioning scheme | {scheme} |"] if scheme else []),
+        *([f"| Versioning details | {scheme_details} |"] if scheme_details else []),
+        *([f"| Expected cadence | {frequency} |"] if frequency else []),
     ]
     if channels:
         lines.extend(["", "## Distribution channels", ""])
@@ -195,7 +194,10 @@ def build_release_page(ctx):
             "- **PyPI:** configure a trusted publisher for the GitHub `pypi` "
             "environment before the first tagged release."
         )
-    if "github releases" in normalized_channels or "github release" in normalized_channels:
+    if (
+        "github releases" in normalized_channels
+        or "github release" in normalized_channels
+    ):
         setup_notes.append(
             "- **GitHub Releases:** tagged releases are created with source and "
             "Python distribution artifacts."

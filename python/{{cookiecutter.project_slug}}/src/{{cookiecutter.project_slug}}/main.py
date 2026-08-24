@@ -7,12 +7,12 @@ larger runtime interfaces in dedicated modules.
 from {{ cookiecutter.project_slug }}.services.processing import process_text
 
 
-def main(text: str = "{{ cookiecutter.project_name }}") -> None:
+def main(text: str = "{{ (cookiecutter.project_name or cookiecutter.project_slug) }}") -> None:
     """Run the package entry point.
 
     Parameters
     ----------
-    text : str, default="{{ cookiecutter.project_name }}"
+    text : str, default="{{ (cookiecutter.project_name or cookiecutter.project_slug) }}"
         Text to process.
     """
     # Delegate to the service layer so the entry point stays small and

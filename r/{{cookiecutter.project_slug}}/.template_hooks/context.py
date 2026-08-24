@@ -11,4 +11,4 @@ def load_context():
     dict
         Rendered context values.
     """
-    return json.loads({{ cookiecutter | tojson | tojson }})
+    return json.loads({{cookiecutter | tojson | tojson}})

@@ -50,18 +50,13 @@ def build_sustainability_section(
     subsection_level = level + 1
     if maintenance_level:
         details.append(
-            f"{'#' * subsection_level} Maintenance commitment\n\n"
-            f"{maintenance_level}"
+            f"{'#' * subsection_level} Maintenance commitment\n\n{maintenance_level}"
         )
     if continuity_plan:
-        details.append(
-            f"{'#' * subsection_level} Continuity\n\n{continuity_plan}"
-        )
+        details.append(f"{'#' * subsection_level} Continuity\n\n{continuity_plan}")
     if retirement_criteria:
         criteria = "\n".join(f"- {criterion}" for criterion in retirement_criteria)
-        details.append(
-            f"{'#' * subsection_level} Retirement criteria\n\n{criteria}"
-        )
+        details.append(f"{'#' * subsection_level} Retirement criteria\n\n{criteria}")
     if not details:
         return ""
 
@@ -114,13 +109,10 @@ def build_security_and_data_section(
             content = "\n\n".join(
                 part for part in (content, additional_security_measures) if part
             )
-        details.append(
-            f"{'#' * subsection_level} Security measures\n\n{content}"
-        )
+        details.append(f"{'#' * subsection_level} Security measures\n\n{content}")
     if sensitive_data_statement:
         details.append(
-            f"{'#' * subsection_level} Sensitive data\n\n"
-            f"{sensitive_data_statement}"
+            f"{'#' * subsection_level} Sensitive data\n\n{sensitive_data_statement}"
         )
     if public_risk_notes:
         details.append(
@@ -134,4 +126,3 @@ def build_security_and_data_section(
         return ""
 
     return f"{'#' * level} Security and data\n\n" + "\n\n".join(details)
-

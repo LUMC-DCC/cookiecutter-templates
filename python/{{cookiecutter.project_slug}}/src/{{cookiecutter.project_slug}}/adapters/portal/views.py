@@ -31,7 +31,7 @@ def render_index(summary: dict[str, object]) -> str:
     return (
         "<!doctype html>"
         "<html lang=\"en\">"
-        "<head><title>{{ cookiecutter.project_name }} portal</title></head>"
+        "<head><title>{{ (cookiecutter.project_name or cookiecutter.project_slug) }} portal</title></head>"
         "<body>"
         "<main>"
         f"<h1>{escape(str(summary['title']))}</h1>"

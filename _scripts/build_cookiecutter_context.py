@@ -1,236 +1,213 @@
-"""Build Cookiecutter contexts from the public contract.
+"""Build Cookiecutter contexts from the published RSM schema.
 
-The contract is the maintained source of truth. This script renders
-Cookiecutter-compatible JSON files, optionally applying template-specific
-defaults for fields whose preferred default differs by language.
+The installed ``rsm-schema`` package owns public fields, defaults, choices, and
+descriptions. This module adds only language-specific generation policy and
+Cookiecutter's private rendering settings.
 """
 
-import argparse
-import json
-from pathlib import Path
+from __future__ import annotations
 
+import argparse
+import copy
+import json
+from collections.abc import Mapping
+from pathlib import Path
+from typing import Any
+
+from rsm_schema import schema as rsm_schema
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_CONTRACT_PATH = ROOT / "_contracts" / "template_context.json"
+DEFAULT_POLICY_PATH = ROOT / "_config" / "template_policies.json"
 DEFAULT_OUTPUT_PATH = ROOT / "_cc_shared" / "cookiecutter.json"
 
 
-def resolve_default(field, template=None):
-    """Resolve the default value for one field.
-
-    Parameters
-    ----------
-    field : dict
-        Field definition from the context contract.
-    template : str, optional
-        Template name, such as ``python`` or ``r``.
+def load_rsm_schema() -> dict[str, Any]:
+    """Return a mutable copy of the bundled RSM JSON Schema.
 
     Returns
     -------
-    object
-        Template-specific default when available, otherwise the field default.
+    dict[str, Any]
+        Published RSM schema bundled with the installed package.
     """
-    if template:
-        template_defaults = field.get("template_defaults", {})
-        if template in template_defaults:
-            return template_defaults[template]
-
-    return field.get("default")
+    return copy.deepcopy(dict(rsm_schema.raw))
 
 
-def resolve_supported_choices(field, template=None):
-    """Resolve supported choices for one template.
+def load_policies(path: Path = DEFAULT_POLICY_PATH) -> dict[str, Any]:
+    """Load language-specific template policies.
 
     Parameters
     ----------
-    field : dict
-        Field definition from the context contract.
-    template : str, optional
-        Template name used to resolve language-specific supported choices.
+    path
+        Policy JSON path.
 
     Returns
     -------
-    list
-        Template-specific supported choices when available, otherwise global choices.
-    """
-    if template:
-        template_supported_choices = field.get("template_supported_choices", {})
-        if template in template_supported_choices:
-            return list(template_supported_choices[template])
-
-    if "choices" in field:
-        return list(field["choices"])
-
-    return list(field.get("item_schema", {}).get("enum", []))
-
-
-def order_choices(field, template=None):
-    """Return Cookiecutter choices with the default first.
-
-    Parameters
-    ----------
-    field : dict
-        Choice field definition from the context contract.
-    template : str, optional
-        Template name used to resolve language-specific defaults.
-
-    Returns
-    -------
-    list
-        Ordered choice values.
-    """
-    choices = list(field["choices"])
-    default = resolve_default(field, template)
-
-    if default is None:
-        return choices
-    if default not in choices:
-        raise ValueError(
-            f"Default {default!r} is not a valid choice for {field['name']!r}"
-        )
-
-    return [default, *[choice for choice in choices if choice != default]]
-
-
-def build_template_metadata(contract, template=None):
-    """Build private metadata consumed by post-generation hooks.
-
-    Parameters
-    ----------
-    contract : dict
-        Parsed contract document.
-    template : str, optional
-        Template name used to resolve language-specific metadata.
-
-    Returns
-    -------
-    dict
-        Private Cookiecutter metadata.
-    """
-    metadata = {
-        "_template_defaults": {},
-        "_template_schemas": {},
-        "_template_supported_choices": {},
-    }
-
-    if not template:
-        return metadata
-
-    for field in contract["fields"]:
-        name = field["name"]
-
-        if "template_defaults" in field:
-            metadata["_template_defaults"][name] = resolve_default(field, template)
-
-        if template in field.get("template_schemas", {}):
-            metadata["_template_schemas"][name] = field["template_schemas"][template]
-
-        if "template_supported_choices" in field:
-            metadata["_template_supported_choices"][name] = resolve_supported_choices(
-                field,
-                template,
-            )
-
-    return metadata
-
-
-def build_context(contract, template=None):
-    """Render Cookiecutter defaults from a template context contract.
-
-    Parameters
-    ----------
-    contract : dict
-        Parsed contract document from ``_contracts/template_context.json``.
-    template : str, optional
-        Template name used to apply language-specific defaults.
-
-    Returns
-    -------
-    dict
-        Cookiecutter context, including ``__prompts__`` when prompts exist.
-    """
-    context = {}
-    prompts = {}
-
-    for field in contract["fields"]:
-        name = field["name"]
-        field_type = field["type"]
-
-        if field_type == "choice":
-            context[name] = order_choices(field, template)
-        elif field_type == "string":
-            context[name] = resolve_default(field, template) or ""
-        elif field_type in {"object_array", "string_array"}:
-            context[name] = {"entries": resolve_default(field, template) or []}
-        else:
-            raise ValueError(f"Unsupported context field type: {field_type}")
-
-        if field.get("prompt"):
-            prompts[name] = field["prompt"]
-
-    if prompts:
-        context["__prompts__"] = prompts
-
-    # Apply whitespace control consistently across every text template.
-    context["_jinja2_env_vars"] = {
-        "lstrip_blocks": True,
-        "trim_blocks": True,
-    }
-    context.update(build_template_metadata(contract, template))
-
-    return context
-
-
-def load_contract(path):
-    """Load a context contract from disk.
-
-    Parameters
-    ----------
-    path : pathlib.Path
-        JSON contract path.
-
-    Returns
-    -------
-    dict
-        Parsed contract data.
+    dict[str, Any]
+        Policies keyed by template name.
     """
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def write_context(context, path):
-    """Write a generated Cookiecutter context file.
+def field_default(field: Mapping[str, Any]) -> Any:
+    """Derive a Cookiecutter-compatible value for one RSM field.
 
     Parameters
     ----------
-    context : dict
+    field
+        JSON Schema property definition.
+
+    Returns
+    -------
+    Any
+        Schema default, empty scalar, or empty container.
+    """
+    field_type = field.get("type")
+    if field_type == "object":
+        result = copy.deepcopy(field.get("default", {}))
+        for name, child in field.get("properties", {}).items():
+            result.setdefault(name, field_default(child))
+        return result
+    if "default" in field:
+        return copy.deepcopy(field["default"])
+    if field_type == "string":
+        return ""
+    if field_type == "boolean":
+        return False
+    if field_type == "array":
+        return []
+    return None
+
+
+def choice_value(field: Mapping[str, Any], default: Any) -> Any:
+    """Render scalar enum fields as Cookiecutter choices.
+
+    Parameters
+    ----------
+    field
+        JSON Schema property definition.
+    default
+        Effective field default.
+
+    Returns
+    -------
+    Any
+        Ordered choice list for scalar enums, otherwise ``default``.
+    """
+    choices = field.get("enum")
+    if field.get("type") != "string" or not isinstance(choices, list):
+        return default
+
+    ordered = list(choices)
+    if default not in ordered:
+        return [default, *ordered]
+    return [default, *[choice for choice in ordered if choice != default]]
+
+
+def template_metadata(
+    policies: Mapping[str, Any],
+    template: str | None,
+) -> dict[str, Any]:
+    """Build private metadata consumed by post-generation hooks.
+
+    Parameters
+    ----------
+    policies
+        Language policies keyed by template name.
+    template
+        Selected language template.
+
+    Returns
+    -------
+    dict[str, Any]
+        Private Cookiecutter metadata.
+    """
+    policy = policies.get(template, {}) if template else {}
+    return {
+        "_template_name": template or "",
+        "_template_defaults": copy.deepcopy(policy.get("defaults", {})),
+        "_template_schemas": copy.deepcopy(policy.get("field_schemas", {})),
+        "_template_supported_choices": copy.deepcopy(
+            policy.get("supported_choices", {})
+        ),
+    }
+
+
+def build_context(
+    schema: Mapping[str, Any] | None = None,
+    *,
+    policies: Mapping[str, Any] | None = None,
+    template: str | None = None,
+) -> dict[str, Any]:
+    """Build a Cookiecutter context from RSM fields and template policy.
+
+    Parameters
+    ----------
+    schema
+        RSM JSON Schema. The installed schema is used when omitted.
+    policies
+        Language policies. The maintained policy file is used when omitted.
+    template
+        Template name, such as ``python`` or ``r``.
+
+    Returns
+    -------
+    dict[str, Any]
+        Cookiecutter context with private template metadata.
+    """
+    schema_document = dict(schema or load_rsm_schema())
+    policy_document = dict(policies or load_policies())
+    template_policy = policy_document.get(template, {}) if template else {}
+    overrides = template_policy.get("defaults", {})
+    properties = schema_document.get("properties", {})
+    context: dict[str, Any] = {}
+    prompts: dict[str, str] = {}
+
+    for name, field in properties.items():
+        default = copy.deepcopy(overrides.get(name, field_default(field)))
+        context[name] = choice_value(field, default)
+        if description := field.get("description"):
+            prompts[name] = description
+
+    context["__prompts__"] = prompts
+    context["_jinja2_env_vars"] = {
+        "lstrip_blocks": True,
+        "trim_blocks": True,
+    }
+    context.update(template_metadata(policy_document, template))
+    return context
+
+
+def write_context(context: Mapping[str, Any], path: Path) -> bool:
+    """Write a generated context only when its content changes.
+
+    Parameters
+    ----------
+    context
         Cookiecutter context data.
-    path : pathlib.Path
+    path
         Destination JSON path.
 
     Returns
     -------
     bool
-        Whether the file content changed.
+        Whether the destination changed.
     """
     content = json.dumps(context, indent=2, ensure_ascii=False) + "\n"
-
     if path.exists() and path.read_text(encoding="utf-8") == content:
         return False
-
     path.write_text(content, encoding="utf-8")
     return True
 
 
-def main():
+def main() -> None:
     """Run the command-line interface."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT_PATH)
+    parser.add_argument("--policies", type=Path, default=DEFAULT_POLICY_PATH)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
     parser.add_argument("--template")
     args = parser.parse_args()
-
     write_context(
-        build_context(load_contract(args.contract), template=args.template),
+        build_context(policies=load_policies(args.policies), template=args.template),
         args.output,
     )
 

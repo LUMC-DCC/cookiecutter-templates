@@ -17,7 +17,7 @@ from renderers.project_context.interoperability import (
     build_programming_languages_section,
     build_software_functions_section,
 )
-from utils.context import entries
+from utils.context import entries, object_entries, object_value
 
 
 def build_project_context_sections(
@@ -45,15 +45,21 @@ def build_project_context_sections(
         Combined Markdown sections.
     """
     sections = [
-        build_purpose_section(ctx.get("purpose", "")),
-        build_purpose_categories_section(entries(ctx, "purpose_categories")),
+        build_purpose_section(object_value(ctx, "motivation", "purpose")),
+        build_purpose_categories_section(
+            object_entries(ctx, "motivation", "categories")
+        ),
         build_audience_section(entries(ctx, "audiences")),
         build_related_software_section(entries(ctx, "related_software")),
     ]
     if include_motivation_details:
         sections[2:2] = [
-            build_problem_statement_section(ctx.get("problem_statement", "")),
-            build_value_proposition_section(ctx.get("value_proposition", "")),
+            build_problem_statement_section(
+                object_value(ctx, "motivation", "problem_statement")
+            ),
+            build_value_proposition_section(
+                object_value(ctx, "motivation", "value_proposition")
+            ),
         ]
     if include_interoperability:
         sections.extend(

@@ -1,4 +1,4 @@
-"""Typer command-line application for {{ cookiecutter.project_name }}.
+"""Typer command-line application for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 The CLI adapter translates command-line input into calls to reusable project
 services. Command modules stay small so they are easy to test separately from

@@ -1,4 +1,4 @@
-"""Namespace IRIs used by the {{ cookiecutter.project_name }} ontology.
+"""Namespace IRIs used by the {{ (cookiecutter.project_name or cookiecutter.project_slug) }} ontology.
 
 Namespaces keep RDF identifiers consistent across terms, predicates, and
 serialized ontology documents. Replace ``BASE_IRI`` with a stable project IRI

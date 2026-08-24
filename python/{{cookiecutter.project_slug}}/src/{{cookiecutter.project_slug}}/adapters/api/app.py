@@ -1,4 +1,4 @@
-"""FastAPI application adapter for {{ cookiecutter.project_name }}.
+"""FastAPI application adapter for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 This module assembles API routes into a FastAPI application. Route modules
 handle HTTP-specific concerns, while shared processing logic stays in the
@@ -35,8 +35,8 @@ def create_app() -> FastAPI:
     # Application metadata is pulled from the generated project metadata so the
     # OpenAPI schema starts with useful names, versions, and descriptions.
     api = FastAPI(
-        title="{{ cookiecutter.project_name }}",
-        version="{{ cookiecutter.version }}",
+        title="{{ (cookiecutter.project_name or cookiecutter.project_slug) }}",
+        version="{{ (cookiecutter.versioning.version or "0.1.0") }}",
         description="{{ cookiecutter.project_short_description }}",
     )
 

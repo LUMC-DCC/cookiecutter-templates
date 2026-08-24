@@ -25,7 +25,7 @@ from renderers.release import (
     build_container_deployment_section,
     build_release_page,
 )
-from utils.context import entries
+from utils.context import entries, object_entries, object_value
 from utils.markdown import append_sections, insert_before_first_marker
 
 
@@ -352,12 +352,12 @@ def update_policy_references(ctx, cwd):
             "security-and-data",
             "Security and data",
             build_security_and_data_section(
-                ctx.get("security_contact", ""),
-                entries(ctx, "security_measures"),
-                ctx.get("additional_security_measures", ""),
-                ctx.get("sensitive_data_statement", ""),
+                object_value(ctx, "contacts", "security"),
+                object_entries(ctx, "security_measures", "selected"),
+                object_value(ctx, "security_measures", "additional"),
+                object_value(ctx, "data_management", "sensitive_data_statement"),
                 ctx.get("public_risk_notes", ""),
-                ctx.get("dmp_reference", ""),
+                object_value(ctx, "data_management", "dmp_reference"),
                 level=1,
             ),
         ),
@@ -401,11 +401,20 @@ def update_legal(ctx, cwd):
     if not has_documentation(ctx):
         return
 
+    compatibility_method = object_value(ctx, "licensing", "compatibility_check")
+    compatibility_note = {
+        "Yes - automated tooling": (
+            "Dependency license compatibility is checked automatically in CI."
+        ),
+        "Yes - manual check": (
+            "Dependency license compatibility is reviewed manually."
+        ),
+    }.get(compatibility_method, "")
     content = build_legal_page_content(
-        ctx.get("license", ""),
-        ctx.get("license_compatibility_notes", ""),
-        entries(ctx, "regulatory_requirements"),
-        ctx.get("additional_regulatory_requirements", ""),
+        object_value(ctx, "licensing", "license"),
+        compatibility_note,
+        object_entries(ctx, "regulatory_requirements", "selected"),
+        object_value(ctx, "regulatory_requirements", "additional"),
     )
     for legal_path in legal_candidates(cwd):
         if legal_path.exists():
@@ -450,7 +459,7 @@ def update_readme(ctx, cwd):
         entries(ctx, "operating_systems")
     )
     legal_section = build_legal_section(
-        ctx.get("license", ""),
+        object_value(ctx, "licensing", "license"),
         "",
     )
     function_blocks = build_biotools_function_blocks(entries(ctx, "software_functions"))
@@ -468,12 +477,12 @@ def update_readme(ctx, cwd):
                     entries(ctx, "retirement_criteria"),
                 ),
                 build_security_and_data_section(
-                    ctx.get("security_contact", ""),
-                    entries(ctx, "security_measures"),
-                    ctx.get("additional_security_measures", ""),
-                    ctx.get("sensitive_data_statement", ""),
+                    object_value(ctx, "contacts", "security"),
+                    object_entries(ctx, "security_measures", "selected"),
+                    object_value(ctx, "security_measures", "additional"),
+                    object_value(ctx, "data_management", "sensitive_data_statement"),
                     ctx.get("public_risk_notes", ""),
-                    ctx.get("dmp_reference", ""),
+                    object_value(ctx, "data_management", "dmp_reference"),
                 ),
             )
             if section

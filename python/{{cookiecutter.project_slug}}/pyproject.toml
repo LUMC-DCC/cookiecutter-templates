@@ -22,7 +22,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = {{ toml_string(cookiecutter.project_slug | replace('_', '-')) }}
-version = {{ toml_string(cookiecutter.version) }}
+version = {{ toml_string((cookiecutter.versioning.version or "0.1.0")) }}
 description = {{ toml_string(cookiecutter.project_short_description) }}
 readme = "README.md"
 requires-python = {{ toml_string(python_runtime.version_constraint) }}
@@ -48,10 +48,10 @@ maintainers = [
 {% set include_plugin_adapter = "Plug-in" in interface_types.values %}
 {% set include_rdf_support = "Ontology" in interface_types.values or "SPARQL endpoint" in interface_types.values %}
 {% set include_web_adapter = "Bioinformatics portal" in interface_types.values or "Database portal" in interface_types.values or "Web application" in interface_types.values or "Workbench" in interface_types.values %}
-{% set effective_formatter_tool = cookiecutter.formatter_tool if cookiecutter.formatter_tool in cookiecutter._template_supported_choices.formatter_tool else cookiecutter._template_defaults.formatter_tool %}
-{% set effective_linter_tool = cookiecutter.linter_tool if cookiecutter.linter_tool in cookiecutter._template_supported_choices.linter_tool else cookiecutter._template_defaults.linter_tool %}
-{% set effective_type_checker = cookiecutter.type_checker if cookiecutter.type_checker in cookiecutter._template_supported_choices.type_checker else cookiecutter._template_defaults.type_checker %}
-{% set effective_project_manager = cookiecutter.project_manager if cookiecutter.project_manager in cookiecutter._template_supported_choices.project_manager else cookiecutter._template_defaults.project_manager %}
+{% set effective_formatter_tool = cookiecutter.quality_tools.formatter if cookiecutter.quality_tools.formatter in cookiecutter._template_supported_choices.quality_tools.formatter else "" %}
+{% set effective_linter_tool = cookiecutter.quality_tools.linter if cookiecutter.quality_tools.linter in cookiecutter._template_supported_choices.quality_tools.linter else "" %}
+{% set effective_type_checker = cookiecutter.quality_tools.type_checker if cookiecutter.quality_tools.type_checker in cookiecutter._template_supported_choices.quality_tools.type_checker else "" %}
+{% set effective_project_manager = cookiecutter.project_manager if cookiecutter.project_manager and cookiecutter.project_manager in cookiecutter._template_supported_choices.project_manager else "pip" %}
 {% set include_ruff_tooling = effective_formatter_tool == "ruff" or effective_linter_tool == "ruff" %}
 {% set include_mypy_tooling = effective_type_checker == "mypy" %}
 {% set has_quality_checks = include_ruff_tooling or include_mypy_tooling %}
@@ -87,7 +87,7 @@ keywords = {{ cookiecutter.keywords.entries | tojson }}
 {% if "windows" in normalized_os and "Operating System :: Microsoft :: Windows" not in os_classifiers %}
 {% set _ = os_classifiers.append("Operating System :: Microsoft :: Windows") %}
 {% endif %}
-{% if ("os independent" in normalized_os or "any" == normalized_os) and "Operating System :: OS Independent" not in os_classifiers %}
+{% if ("platform independent" == normalized_os or "os independent" in normalized_os or "any" == normalized_os) and "Operating System :: OS Independent" not in os_classifiers %}
 {% set _ = os_classifiers.append("Operating System :: OS Independent") %}
 {% endif %}
 {% endif %}
@@ -95,10 +95,10 @@ keywords = {{ cookiecutter.keywords.entries | tojson }}
 {% if os_classifiers %}
 classifiers = {{ os_classifiers | tojson }}
 {% endif %}
-{% set effective_documentation_builder = cookiecutter.documentation_builder if cookiecutter.documentation_builder in cookiecutter._template_supported_choices.documentation_builder else cookiecutter._template_defaults.documentation_builder %}
+{% set effective_documentation_builder = cookiecutter.documentation_builder if cookiecutter.documentation_builder and cookiecutter.documentation_builder in cookiecutter._template_supported_choices.documentation_builder else "plain" %}
 
 [project.optional-dependencies]
-{% if cookiecutter.license_compatibility_check == "yes" and cookiecutter.license | trim %}
+{% if cookiecutter.licensing.compatibility_check == "Yes - automated tooling" and cookiecutter.licensing.license | trim %}
 license = [
   "licensecheck",
 ]
@@ -185,25 +185,25 @@ example = {{ toml_string(cookiecutter.project_slug ~ ".adapters.plugin.registry:
 {% set _ = funding_urls.append(funding.grant_url) %}
 {% endif %}
 {% endfor %}
-{% if cookiecutter.repository_url or cookiecutter.homepage_url or cookiecutter.documentation_url or support_urls or funding_urls or "pypi" in release_channels.values %}
+{% if cookiecutter.urls.repository or cookiecutter.urls.homepage or cookiecutter.urls.documentation or support_urls or funding_urls or "pypi" in release_channels.values %}
 [project.urls]
-{% if cookiecutter.repository_url %}
-"Source Code" = {{ toml_string(cookiecutter.repository_url) }}
+{% if cookiecutter.urls.repository %}
+"Source Code" = {{ toml_string(cookiecutter.urls.repository) }}
 {% endif %}
-{% if cookiecutter.homepage_url %}
-Homepage = {{ toml_string(cookiecutter.homepage_url) }}
+{% if cookiecutter.urls.homepage %}
+Homepage = {{ toml_string(cookiecutter.urls.homepage) }}
 {% endif %}
-{% if cookiecutter.documentation_url %}
-Documentation = {{ toml_string(cookiecutter.documentation_url) }}
+{% if cookiecutter.urls.documentation %}
+Documentation = {{ toml_string(cookiecutter.urls.documentation) }}
 {% endif %}
 {% if support_urls %}
 "Issue Tracker" = {{ toml_string(support_urls[0]) }}
 {% endif %}
-{% if "CHANGELOG.md" in cookiecutter.community_files.entries and cookiecutter.repository_url.startswith("https://github.com/") %}
-Changelog = {{ toml_string(cookiecutter.repository_url.rstrip("/") ~ "/blob/HEAD/CHANGELOG.md") }}
+{% if "CHANGELOG.md" in cookiecutter.community_files.entries and cookiecutter.urls.repository.startswith("https://github.com/") %}
+Changelog = {{ toml_string(cookiecutter.urls.repository.rstrip("/") ~ "/blob/HEAD/CHANGELOG.md") }}
 {% endif %}
-{% if "github releases" in release_channels.values and cookiecutter.repository_url.startswith("https://github.com/") %}
-"Release Notes" = {{ toml_string(cookiecutter.repository_url.rstrip("/") ~ "/releases") }}
+{% if "github releases" in release_channels.values and cookiecutter.urls.repository.startswith("https://github.com/") %}
+"Release Notes" = {{ toml_string(cookiecutter.urls.repository.rstrip("/") ~ "/releases") }}
 {% endif %}
 {% if "pypi" in release_channels.values %}
 Download = {{ toml_string("https://pypi.org/project/" ~ cookiecutter.project_slug | replace("_", "-") ~ "/#files") }}
@@ -218,13 +218,15 @@ Funding = {{ toml_string(funding_urls[0]) }}
 allow-direct-references = true
 {% endif %}
 
+{% if cookiecutter.test_types.entries %}
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-{% if cookiecutter.license_compatibility_check == "yes" and cookiecutter.license | trim %}
+{% endif %}
+{% if cookiecutter.licensing.compatibility_check == "Yes - automated tooling" and cookiecutter.licensing.license | trim %}
 
 [tool.licensecheck]
-license = {{ toml_string(cookiecutter.license) }}
+license = {{ toml_string(cookiecutter.licensing.license) }}
 format = "simple"
 zero = true
 {% endif %}
@@ -260,7 +262,7 @@ module = [
 ignore_missing_imports = true
 {% endif %}
 {% set project_manager_extras = [] %}
-{% if cookiecutter.license_compatibility_check == "yes" and cookiecutter.license | trim %}
+{% if cookiecutter.licensing.compatibility_check == "Yes - automated tooling" and cookiecutter.licensing.license | trim %}
 {% set _ = project_manager_extras.append("license") %}
 {% endif %}
 {% if include_api_adapter %}

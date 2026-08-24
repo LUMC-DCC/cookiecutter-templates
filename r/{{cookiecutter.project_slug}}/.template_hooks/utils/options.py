@@ -16,8 +16,17 @@ def is_yes(ctx, value):
     bool
         Whether the value is truthy for template options.
     """
-    return ctx.get(value, "").strip().lower() in (
-        "yes", "y", "true", "1", "on", "enabled", "include"
+    raw_value = ctx.get(value, "")
+    if isinstance(raw_value, bool):
+        return raw_value
+    return str(raw_value).strip().lower() in (
+        "yes",
+        "y",
+        "true",
+        "1",
+        "on",
+        "enabled",
+        "include",
     )
 
 
@@ -36,6 +45,7 @@ def is_no(ctx, value):
     bool
         Whether the value is falsey for template options.
     """
-    return ctx.get(value, "").strip().lower() in (
-        "no", "n", "false", "0", "none", ""
-    )
+    raw_value = ctx.get(value, "")
+    if isinstance(raw_value, bool):
+        return not raw_value
+    return str(raw_value).strip().lower() in ("no", "n", "false", "0", "none", "")

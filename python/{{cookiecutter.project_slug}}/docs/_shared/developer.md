@@ -9,15 +9,15 @@
 {% set has_portal = "Bioinformatics portal" in interface_types.values or "Database portal" in interface_types.values %}
 {% set has_web = "Web application" in interface_types.values or "Workbench" in interface_types.values %}
 {% set has_adapter = has_processing_api or has_soap or "SPARQL endpoint" in interface_types.values or "Command-line tool" in interface_types.values or has_web or has_portal or "Desktop application" in interface_types.values or "Plug-in" in interface_types.values or "Suite" in interface_types.values %}
-{% set effective_formatter_tool = cookiecutter.formatter_tool if cookiecutter.formatter_tool in cookiecutter._template_supported_choices.formatter_tool else cookiecutter._template_defaults.formatter_tool %}
-{% set effective_linter_tool = cookiecutter.linter_tool if cookiecutter.linter_tool in cookiecutter._template_supported_choices.linter_tool else cookiecutter._template_defaults.linter_tool %}
-{% set effective_type_checker = cookiecutter.type_checker if cookiecutter.type_checker in cookiecutter._template_supported_choices.type_checker else cookiecutter._template_defaults.type_checker %}
-{% set has_quality_checks = effective_formatter_tool != "none" or effective_linter_tool != "none" or effective_type_checker != "none" %}
+{% set effective_formatter_tool = cookiecutter.quality_tools.formatter if cookiecutter.quality_tools.formatter in cookiecutter._template_supported_choices.quality_tools.formatter else "" %}
+{% set effective_linter_tool = cookiecutter.quality_tools.linter if cookiecutter.quality_tools.linter in cookiecutter._template_supported_choices.quality_tools.linter else "" %}
+{% set effective_type_checker = cookiecutter.quality_tools.type_checker if cookiecutter.quality_tools.type_checker in cookiecutter._template_supported_choices.quality_tools.type_checker else "" %}
+{% set has_quality_checks = effective_formatter_tool or effective_linter_tool or effective_type_checker %}
 # Developer guide
 
 ## Architecture
 
-{{ cookiecutter.project_name }} uses a small layered Python package.
+{{ (cookiecutter.project_name or cookiecutter.project_slug) }} uses a small layered Python package.
 
 Core project logic lives in `src/{{ cookiecutter.project_slug }}/services/`.
 {% if has_adapter %}

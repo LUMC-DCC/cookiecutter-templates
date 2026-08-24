@@ -1,4 +1,4 @@
-"""FastAPI portal application for {{ cookiecutter.project_name }}.
+"""FastAPI portal application for {{ (cookiecutter.project_name or cookiecutter.project_slug) }}.
 
 The portal adapter exposes browsable project records and summaries. It is kept
 separate from the generic web app so portal-specific models, routes, and data
@@ -21,8 +21,8 @@ def create_portal_app() -> FastAPI:
     # Portal metadata is intentionally explicit because portals are often
     # indexed, linked, or embedded by external research infrastructure.
     portal = FastAPI(
-        title="{{ cookiecutter.project_name }} portal",
-        version="{{ cookiecutter.version }}",
+        title="{{ (cookiecutter.project_name or cookiecutter.project_slug) }} portal",
+        version="{{ (cookiecutter.versioning.version or "0.1.0") }}",
         description="{{ cookiecutter.project_short_description }}",
     )
 
