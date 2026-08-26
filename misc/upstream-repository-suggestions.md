@@ -2,8 +2,8 @@
 
 Reviewed against the pinned releases:
 
-- `rsm-schema` at `5bdcbcbc4383d352a1385065265f970e9fd361ea`
-- `rs-files-templates` at `cb90caa88ca839f4828dada5945e70ab54730564`
+- `rsm-schema` at `5727be9bb76deaf43dff4bbc168bda4b217c63ab`
+- `rs-files-templates` at `2486fd3a4d4c2bc67f5809cea6fdc02218561897`
 
 ## rs-files-templates
 
@@ -15,17 +15,12 @@ Reviewed against the pinned releases:
    endpoint and a resolution result that distinguishes SPDX identifiers from
    custom terms. This would remove the need for callers to modify a module
    constant and repeat a network lookup.
-3. Tighten Jinja whitespace handling in the package renderer and templates so
-   conditional sections do not introduce leading or repeated blank lines.
-4. Extend `ContributingModel` with optional capability rows for vulnerability
+3. Extend `ContributingModel` with optional capability rows for vulnerability
    scanning and license compatibility, plus local pre-commit and license checks
    when a consumer provides those commands. The current model covers metadata,
    manager, quality, test, documentation, and distribution stages but cannot
    describe every generated verification path.
-5. Consider reusable models for GitHub issue forms and the pull-request
-   template. They should move upstream only if their inputs and prose can remain
-   language-neutral and repository-host-neutral.
-6. Publish a machine-readable inventory of supported file models, or expose it
+4. Publish a machine-readable inventory of supported file models, or expose it
    from the package API. Consumers could then check complete integration
    without discovering private package resources.
 
@@ -45,6 +40,10 @@ for concrete models and acceptance criteria for additional reusable files.
    from secrets and must never carry secret values. The current
    `external_services` records describe resources and providers, so they should
    not be repurposed as runtime endpoints.
+3. Update the top-level `software_functions` description to name `operations`,
+   `topics`, `inputs`, and `outputs`. Its referenced definition is current, but
+   the prompt-facing description still lists the old singular property names
+   and a removed `summary` property.
 
 Contribution workflow, branching, and pull-request policy should remain
 generator policy unless they become portable research-software metadata used by

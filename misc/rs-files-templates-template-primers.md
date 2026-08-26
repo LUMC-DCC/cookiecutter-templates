@@ -1,7 +1,8 @@
 # Primers for additional rs-files-templates files
 
-These GitHub-facing files are reusable across language templates and are good
-candidates for `rs-files-templates`. Keep language package code, language test
+These remaining GitHub-facing files are reusable across language templates and
+are good candidates for `rs-files-templates`. Pull request and issue templates
+are already package-owned. Keep language package code, language test
 implementations, documentation-builder configuration, container recipes, and
 language environment setup in the repository generator.
 
@@ -14,51 +15,6 @@ For every model below:
   conditional sections, and a trailing newline;
 - export the model from `rs_files_templates.models` and document it in the API
   inventory.
-
-## Pull request template
-
-- **Output:** `.github/pull_request_template.md`
-- **Suggested model:** `PullRequestTemplateModel`
-- **RSM fields:** `documentation_types`, `include_metadata`, `test_types`
-- **Content:** summary prompts, Conventional Commit title reminder, focused
-  review checklist, conditional metadata/docs/tests checks, CI status, secrets
-  and sensitive-data check, and commands run or skipped.
-- **Source to migrate:** `_cc_shared/.github/pull_request_template.md`
-- **Important behavior:** omit checklist items for artifacts the project does
-  not generate. The consumer decides whether the file itself is selected by
-  `community_files`.
-
-## Bug report issue form
-
-- **Output:** `.github/ISSUE_TEMPLATE/bug_report.yml`
-- **Suggested model:** `BugReportIssueFormModel`
-- **RSM fields:** none required for the initial static form.
-- **Content:** existing-issue confirmation, summary, expected behavior, minimal
-  reproduction, environment, additional context, and a public-data warning.
-- **Source to migrate:** `_cc_shared/.github/ISSUE_TEMPLATE/bug_report.yml`
-- **Validation:** parse as YAML and require unique body `id` values and all
-  required GitHub issue-form top-level keys.
-
-## Feature request issue form
-
-- **Output:** `.github/ISSUE_TEMPLATE/feature_request.yml`
-- **Suggested model:** `FeatureRequestIssueFormModel`
-- **RSM fields:** none required for the initial static form.
-- **Content:** existing-request confirmation, problem or need, proposed
-  solution, alternatives, expected impact, and a public-data warning.
-- **Source to migrate:** `_cc_shared/.github/ISSUE_TEMPLATE/feature_request.yml`
-- **Validation:** apply the same structural checks as the bug report form.
-
-## Issue template configuration
-
-- **Output:** `.github/ISSUE_TEMPLATE/config.yml`
-- **Suggested model:** `IssueTemplateConfigModel`
-- **RSM fields:** `support_routes`, `urls`
-- **Content:** disable blank issues, add the documentation URL when present,
-  and add distinct public support routes as contact links.
-- **Source to migrate:** `_cc_shared/.github/ISSUE_TEMPLATE/config.yml`
-- **Important behavior:** remove duplicate documentation routes and omit
-  `contact_links` entirely when no valid URLs are available.
 
 ## Dependabot configuration
 
@@ -127,10 +83,9 @@ For every model below:
 
 ## Suggested migration order
 
-1. Pull request and issue templates.
-2. Metadata and changelog workflow bundle.
-3. Dependabot configuration.
-4. Security workflow after the language-to-CodeQL mapping is agreed.
+1. Metadata and changelog workflow bundle.
+2. Dependabot configuration.
+3. Security workflow after the language-to-CodeQL mapping is agreed.
 
 After each upstream release, replace the matching sync-map entries or local
 templates here with package rendering and keep one generation-level integration
